@@ -2,6 +2,7 @@
 
 import torch
 from torch.autograd import Function
+from torch import nn
 
 
 class SignFunction(Function):
@@ -49,3 +50,11 @@ class SignFunction(Function):
             torch.Tensor: the input gradient (= the clamped output gradient)
         """
         return torch.clamp(output_grad, -1, 1)
+
+
+class Sign(nn.Module):
+    def __init__(self):
+        super(Sign, self).__init__()
+
+    def forward(self, x):
+        return SignFunction.apply(x)
