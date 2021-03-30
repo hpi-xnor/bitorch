@@ -1,0 +1,10 @@
+build-job:
+  stage: build
+  script:
+    - pip install -r requirements.txt
+    - pip install -r requirements-dev.txt
+
+test-job1:
+  stage: test
+  script:
+    - pytest .
