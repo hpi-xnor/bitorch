@@ -7,4 +7,10 @@ build-job:
 test-job1:
   stage: test
   script:
+    - flake8 --config=setup.cfg
+    - mypy --config-file mypy.ini
+
+test-job2:
+  stage: test
+  script:
     - pytest .
