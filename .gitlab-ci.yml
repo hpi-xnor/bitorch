@@ -4,16 +4,17 @@ default:
 build-job:
   stage: build
   script:
+    - python --version
     - pip install -r requirements.txt
     - pip install -r requirements-dev.txt
 
 test-codestyle:
   stage: test
   script:
-    - flake8 --config=setup.cfg
-    - mypy --config-file mypy.ini
+    - python -m flake8 --config=setup.cfg
+    - python -m mypy --config-file mypy.ini
 
 test-units:
   stage: test
   script:
-    - pytest .
+    - pythom -m pytest .
