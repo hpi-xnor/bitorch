@@ -9,7 +9,7 @@ class SignFunction(Function):
     """Sign Function for input binarization."""
 
     @staticmethod
-    def _sign(tensor):
+    def _sign(tensor: torch.Tensor) -> torch.Tensor:
         """Apply the sign method on the input tensor.
 
         Note: this function will assign 1 as the sign of 0.
@@ -20,12 +20,13 @@ class SignFunction(Function):
         Returns:
             torch.Tensor: the sign tensor
         """
+
         sign_tensor = torch.sign(tensor)
         sign_tensor[sign_tensor == 0] = 1
         return sign_tensor
 
     @staticmethod
-    def forward(ctx, input_tensor):
+    def forward(ctx: any, input_tensor: torch.Tensor, threshold: float = 1.0) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
 
         Args:
@@ -34,10 +35,11 @@ class SignFunction(Function):
         Returns:
             tensor: binarized input tensor
         """
+        ctx.save_for_backward(input_tensor, torch.tensor(threshold))
         return SignFunction._sign(input_tensor)
 
     @staticmethod
-    def backward(ctx, output_grad):
+    def backward(ctx: any, output_grad: torch.Tensor) -> torch.Tensor:
         """Apply straight through estimator.
 
         This passes the output gradient as input gradient after clamping the gradient values to the range [-1, 1]
@@ -49,12 +51,16 @@ class SignFunction(Function):
         Returns:
             torch.Tensor: the input gradient (= the clamped output gradient)
         """
-        return torch.clamp(output_grad, -1, 1)
+        input_tensor, threshold = ctx.saved_tensors
+        # produces zeros where preactivation inputs exceeded threshold, ones otherwise
+        input_grad = (torch.abs(input_tensor) < threshold)
+        return input_grad * output_grad, None
+        # return torch.clamp(input_tensor * output_grad, -1, 1)
 
 
 class Sign(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Sign, self).__init__()
 
-    def forward(self, x):
-        return SignFunction.apply(x)
+    def forward(self, x: torch.Tensor, t: float) -> torch.Tensor:
+        return SignFunction.apply(x, t)
