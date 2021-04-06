@@ -1,5 +1,4 @@
-default:
-  image: python:3.8
+image: python:3.8
 
 build-job:
   stage: build
@@ -17,4 +16,4 @@ test-codestyle:
 test-units:
   stage: test
   script:
-    - pythom -m pytest .
+    - python -m pytest .
