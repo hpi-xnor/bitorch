@@ -1,19 +1,29 @@
 image: python:3.8
 
-build-job:
-  stage: build
-  script:
+
+before_script:
     - python --version
     - pip install -r requirements.txt
     - pip install -r requirements-dev.txt
+    - flake8 --version
+    - mypy --version
+    - pytest --version
 
 test-codestyle:
   stage: test
   script:
-    - python -m flake8 --config=setup.cfg
-    - python -m mypy --config-file mypy.ini
+    - pwd
+    - ls -l
+    - export PYTHONPATH="$PYTHONPATH:."
+    - python -c "import sys;print(sys.path)"
+    - flake8 --config=setup.cfg
+    - mypy --config-file mypy.ini
 
 test-units:
   stage: test
   script:
+    - pwd
+    - ls -l
+    - export PYTHONPATH="$PYTHONPATH:."
+    - python -c "import sys;print(sys.path)"
     - python -m pytest .
