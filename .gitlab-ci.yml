@@ -1,16 +1,19 @@
+default:
+  image: python:3.8
+
 build-job:
   stage: build
   script:
     - pip install -r requirements.txt
     - pip install -r requirements-dev.txt
 
-test-job1:
+test-codestyle:
   stage: test
   script:
     - flake8 --config=setup.cfg
     - mypy --config-file mypy.ini
 
-test-job2:
+test-units:
   stage: test
   script:
     - pytest .
