@@ -32,6 +32,4 @@ def test_sign_function(input_values: list, expected_output: list, threshold: flo
     preactivation_input = x.clone().detach().requires_grad_(False)
     preactivation_input[abs(preactivation_input) >= threshold] = 0
     # preactivation_input = torch.clamp(preactivation_input, min=-1., max=1.)
-    print(computed_gradient)
-    print(preactivation_input)
     assert torch.equal(computed_gradient, preactivation_input)
