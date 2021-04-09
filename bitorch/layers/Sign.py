@@ -1,8 +1,10 @@
 """Sign Function Implementation"""
 
+from typing import Tuple
 import torch
 from torch.autograd import Function
 from torch import nn
+import typing
 
 
 class SignFunction(Function):
@@ -26,7 +28,11 @@ class SignFunction(Function):
         return sign_tensor
 
     @staticmethod
-    def forward(ctx: any, input_tensor: torch.Tensor, threshold: float = 1.0) -> torch.Tensor:
+    @typing.no_type_check
+    def forward(
+            ctx: torch.autograd.function.BackwardCFunction,
+            input_tensor: torch.Tensor,
+            threshold: float = 1.0) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
 
         Args:
@@ -39,7 +45,10 @@ class SignFunction(Function):
         return SignFunction._sign(input_tensor)
 
     @staticmethod
-    def backward(ctx: any, output_grad: torch.Tensor) -> torch.Tensor:
+    @typing.no_type_check
+    def backward(
+            ctx: torch.autograd.function.BackwardCFunction,
+            output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:
         """Apply straight through estimator.
 
         This passes the output gradient as input gradient after clamping the gradient values to the range [-1, 1]
@@ -55,7 +64,6 @@ class SignFunction(Function):
         # produces zeros where preactivation inputs exceeded threshold, ones otherwise
         input_grad = (torch.abs(input_tensor) < threshold)
         return input_grad * output_grad, None
-        # return torch.clamp(input_tensor * output_grad, -1, 1)
 
 
 class Sign(nn.Module):
