@@ -67,6 +67,8 @@ class SignFunction(Function):
 
 
 class Sign(nn.Module):
+    """Module for applying the sign function with straight through estimator in backward pass"""
+
     def __init__(self) -> None:
         super(Sign, self).__init__()
 
