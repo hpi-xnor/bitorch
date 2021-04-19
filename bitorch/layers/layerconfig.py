@@ -38,7 +38,11 @@ class Quantizations():
 
     @staticmethod
     def default_quantization() -> torch.nn.Module:
-        """Returns the default quantization method"""
+        """Returns the default quantization method.
+
+        Returns:
+            torch.nn.Module: the default quantization module
+        """
         return Quantizations.sign()
 
     """
@@ -46,8 +50,15 @@ class Quantizations():
     """
 
     @staticmethod
-    def sign(grad_cancelation_threshold=1.0) -> torch.nn.Module:
-        """Sign quantization function"""
+    def sign(grad_cancelation_threshold: float = 1.0) -> torch.nn.Module:
+        """Sign quantization function.
+
+        Args:
+            grad_cancelation_threshold (float): the threshold for gradient cancelation
+
+        Returns:
+            torch.nn.Module: sign Module
+        """
         return Sign(grad_cancelation_threshold)
 
 
@@ -85,7 +96,11 @@ class Activations():
 
     @staticmethod
     def default_activation() -> torch.nn.Module:
-        """Returns the default activation method"""
+        """Returns the default activation method.
+
+        Returns:
+            torch.nn.Module: default activation module
+        """
         return Activations.relu()
 
     """
@@ -93,7 +108,12 @@ class Activations():
     """
 
     @staticmethod
-    def relu():
+    def relu() -> torch.nn.Module:
+        """Rectified linear unit activation function.
+
+        Returns:
+            torch.nn.Module: relu Module
+        """
         return torch.nn.ReLU()
 
 
@@ -126,10 +146,10 @@ class LayerConfig():
             return Activations.default_activation()
         return Activations.from_name(activation_name)
 
-    def default_activation(self):
+    def default_activation(self) -> torch.nn.Module:
         return Activations.default_activation()
 
-    def default_quantization(self):
+    def default_quantization(self) -> torch.nn.Module:
         return Quantizations.default_quantization()
 
 
