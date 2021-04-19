@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from . import layerconfig
+from bitorch.layers import layerconfig
 
 
 class QActivation(nn.Module):
