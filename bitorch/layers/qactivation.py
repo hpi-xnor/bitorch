@@ -5,9 +5,10 @@ from . import layerconfig
 
 
 class QActivation(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, activation: str = None) -> None:
         super(QActivation, self).__init__()
-        self.quantization = layerconfig.config.quantization
+        self.activation = layerconfig.config.get_activation_function(activation)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
-        return self.quantization(input_tensor)
+        # grad cancel on every quantization function? always ste?
+        return self.activation(input_tensor)
