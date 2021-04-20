@@ -23,12 +23,4 @@ class QDense(Linear):
             torch.Tensors: forwarded tensor
         """
 
-        # x = self.quantize(x)
-        # if not hasattr(self.weight, 'org'):
-        #     self.weight.org = self.weight.data.clone()
-        # self.weight.data = self.quantize(self.weight.org)
-        x = linear(x, self.quantize(self.weight), self.bias)
-        # if self.bias is not None:
-        #     self.bias.org = self.bias.data.clone()
-        #     x += self.bias.view(1, -1).expand_as(x)
-        return x
+        return linear(x, self.quantize(self.weight), self.bias)
