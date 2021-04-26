@@ -1,4 +1,4 @@
-"""Module containting the quantized dense layer"""
+"""Module containting the quantized Linear layer"""
 
 import torch
 from torch.nn import Linear
