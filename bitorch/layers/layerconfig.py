@@ -20,9 +20,9 @@ class Quantizations():
         return (
             function_name not in ["valid_function_name", "from_name"] and
             function_name in Quantizations.__dict__.keys() and
-            callable(Quantizations.__dict__[function_name]))
+            callable(getattr(Quantizations, function_name)))
 
-    @staticmethod
+    @ staticmethod
     def from_name(function_name: str) -> torch.nn.Module:
         """Returns the module that belongs to the function_name. This module raises an error, if the function name
         does not exist.
@@ -30,13 +30,17 @@ class Quantizations():
         Args:
             function_name (str): name of member function
 
+        Raises:
+            ValueError: Thrown if given function_name does not name a valid quantization function.
+
         Returns:
             torch.nn.Module: Quantization Module
         """
-        assert Quantizations.valid_function_name(function_name)
-        return Quantizations.__dict__[function_name]
+        if not Quantizations.valid_function_name(function_name):
+            raise ValueError(f"Quantization function name {function_name} is not valid!")
+        return getattr(Quantizations, function_name)()
 
-    @staticmethod
+    @ staticmethod
     def default_quantization() -> torch.nn.Module:
         """Returns the default quantization method.
 
@@ -49,7 +53,7 @@ class Quantizations():
     Quantization functions
     """
 
-    @staticmethod
+    @ staticmethod
     def sign(grad_cancelation_threshold: float = 1.0) -> torch.nn.Module:
         """Sign quantization function.
 
@@ -61,7 +65,7 @@ class Quantizations():
         """
         return Sign(grad_cancelation_threshold)
 
-    @staticmethod
+    @ staticmethod
     def relu() -> torch.nn.Module:
         """Rectified linear unit activation function.
 

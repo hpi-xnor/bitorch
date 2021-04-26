@@ -8,6 +8,6 @@ activation = QActivation()
 
 
 def test_qactivation():
-    assert type(activation.activation) == type(layerconfig.config.default_activation())
-    with pytest.raises(AssertionError):
+    assert isinstance(activation.activation, type(layerconfig.config.default_activation()))
+    with pytest.raises(ValueError):
         QActivation("iNvAlIdNaMe")
