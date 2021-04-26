@@ -7,14 +7,14 @@ from torch.nn.functional import linear
 from . import layerconfig
 
 
-class QDense(Linear):
+class QLinear(Linear):
     def __init__(self, *kargs, quantization: str = None, **kwargs):  # type: ignore
         """Applys the given quantization function on weights before applying the linear operation.
 
         Args:
             quantization (str, optional): Name of quantization function. Defaults to None.
         """
-        super(QDense, self).__init__(*kargs, **kwargs)
+        super(QLinear, self).__init__(*kargs, **kwargs)
         self.quantize = layerconfig.config.get_quantization_function(quantization)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
