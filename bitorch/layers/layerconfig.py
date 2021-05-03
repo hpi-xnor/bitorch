@@ -118,8 +118,8 @@ class LayerConfig():
     def default_quantization(self) -> torch.nn.Module:
         return Quantizations.default_quantization()
 
-    def get_padding_value(self):
-        return -1
+    def get_padding_value(self) -> float:
+        return -1.
 
 
 # config object, global referencable
