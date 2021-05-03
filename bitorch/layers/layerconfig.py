@@ -4,6 +4,21 @@ from .sign import Sign
 import torch
 
 
+class Round(torch.nn.Module):
+    """Module that just rounds the input tensor when forwarded"""
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Rounds the input tensor
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: rounded input tensor
+        """
+        return torch.round(x)
+
+
 class Quantizations():
     """Class for storing quantization functions"""
 
@@ -74,6 +89,15 @@ class Quantizations():
         """
         return torch.nn.ReLU()
 
+    @ staticmethod
+    def round() -> torch.nn.Module:
+        """round activation function.
+
+        Returns:
+            torch.nn.Module: Round Module
+        """
+        return Round()
+
 
 class LayerConfig():
     """Class to provide layer configurations."""
@@ -93,6 +117,9 @@ class LayerConfig():
 
     def default_quantization(self) -> torch.nn.Module:
         return Quantizations.default_quantization()
+
+    def get_padding_value(self):
+        return -1
 
 
 # config object, global referencable

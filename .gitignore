@@ -141,3 +141,7 @@ cython_debug/
 .idea/
 .vscode/
 .mypy_cache
+
+# downloaded dataset files
+train/
+test/
