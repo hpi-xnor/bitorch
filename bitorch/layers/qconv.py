@@ -39,7 +39,7 @@ def make_q_convolution(BaseClass, forward_fn):
             """
             return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.pad_value)
 
-        def _conv_forward(self, input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
+        def forward(self, input: Tensor) -> Tensor:
             """forward the input tensor through the quantized convolution layer.
 
             Args:
@@ -52,8 +52,8 @@ def make_q_convolution(BaseClass, forward_fn):
             """
             return forward_fn(
                 input=self._apply_padding(input),
-                weight=self.quantize(weight),
-                bias=bias,
+                weight=self.quantize(self.weight),
+                bias=self.bias,
                 stride=self.stride,
                 padding=0,
                 dilation=self.dilation,

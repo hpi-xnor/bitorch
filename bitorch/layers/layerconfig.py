@@ -7,6 +7,10 @@ import torch
 class Round(torch.nn.Module):
     """Module that just rounds the input tensor when forwarded"""
 
+    def __init__(self, bits):
+        super(Round, self).__init__()
+        self.bits = bits
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Rounds the input tensor
 
@@ -90,13 +94,13 @@ class Quantizations():
         return torch.nn.ReLU()
 
     @ staticmethod
-    def round() -> torch.nn.Module:
+    def round(bits: int = 2) -> torch.nn.Module:
         """round activation function.
 
         Returns:
             torch.nn.Module: Round Module
         """
-        return Round()
+        return Round(bits)
 
 
 class LayerConfig():

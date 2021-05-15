@@ -1,5 +1,5 @@
 from bitorch.layers.qlinear import QLinear
-from bitorch.layers.qconvolution import QConv2d
+from bitorch.layers.qconv import QConv2d
 from bitorch.layers.qactivation import QActivation
 from torch import nn, Tensor
 
