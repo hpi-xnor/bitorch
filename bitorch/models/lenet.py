@@ -41,7 +41,7 @@ class LeNet(nn.Module):
 
                 nn.Flatten(),
 
-                QActivation(activation="round"),
+                QActivation(activation="sign"),
                 QLinear(self.num_channels_conv * 4 * 4, self.num_fc, quantization="sign"),
                 nn.BatchNorm1d(self.num_fc),
 
