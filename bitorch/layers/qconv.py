@@ -1,12 +1,13 @@
 """Module containing the quantized convolution layer"""
 
+from typing import Type
 from torch import Tensor
 from torch.nn.modules.conv import Conv1d, Conv2d, Conv3d
 from . import layerconfig
 from torch.nn.functional import pad, conv1d, conv2d, conv3d
 
 
-def make_q_convolution(BaseClass, forward_fn):
+def make_q_convolution(BaseClass: Type, forward_fn: any) -> Type:
     """Creates a quantized version of the given convolution base class.
 
     Args:
@@ -16,7 +17,7 @@ def make_q_convolution(BaseClass, forward_fn):
     Returns:
         Class: the quantized version of the base class
     """
-    class QConv(BaseClass):
+    class QConv(BaseClass):  # type: ignore
         def __init__(self, *args, quantization: str = None, pad_value: float = None, **kwargs) -> None:  # type: ignore
             """initialization function for padding and quantization.
 
@@ -50,7 +51,7 @@ def make_q_convolution(BaseClass, forward_fn):
             Returns:
                 Tensor: the convoluted output tensor, computed with padded input and quantized weights.
             """
-            return forward_fn(
+            return forward_fn(  # type: ignore
                 input=self._apply_padding(input),
                 weight=self.quantize(self.weight),
                 bias=self.bias,

@@ -1,26 +1,8 @@
 """Config class for quantization layers. This file should be imported before the other layers."""
 
-from .sign import Sign
+from bitorch.activations.sign import Sign
+from bitorch.activations.round import Round
 import torch
-
-
-class Round(torch.nn.Module):
-    """Module that just rounds the input tensor when forwarded"""
-
-    def __init__(self, bits):
-        super(Round, self).__init__()
-        self.bits = bits
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Rounds the input tensor
-
-        Args:
-            x (torch.Tensor): input tensor
-
-        Returns:
-            torch.Tensor: rounded input tensor
-        """
-        return torch.round(x)
 
 
 class Quantizations():
@@ -94,7 +76,7 @@ class Quantizations():
         return torch.nn.ReLU()
 
     @ staticmethod
-    def round(bits: int = 2) -> torch.nn.Module:
+    def round(bits: int = 1) -> torch.nn.Module:
         """round activation function.
 
         Returns:
