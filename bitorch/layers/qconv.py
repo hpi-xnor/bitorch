@@ -1,13 +1,13 @@
 """Module containing the quantized convolution layer"""
 
-from typing import Type
+from typing import Callable, Type
 from torch import Tensor
 from torch.nn.modules.conv import Conv1d, Conv2d, Conv3d
 from . import layerconfig
 from torch.nn.functional import pad, conv1d, conv2d, conv3d
 
 
-def make_q_convolution(BaseClass: Type, forward_fn: any) -> Type:
+def make_q_convolution(BaseClass: Type, forward_fn: Callable) -> Type:
     """Creates a quantized version of the given convolution base class.
 
     Args:
