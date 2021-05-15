@@ -1,5 +1,5 @@
 from bitorch.layers.qlinear import QLinear
-from bitorch.layers.qconvolution import QConvolution2d
+from bitorch.layers.qconvolution import QConv2d
 from bitorch.layers.qactivation import QActivation
 from torch import nn, Tensor
 
@@ -31,7 +31,7 @@ class LeNet(nn.Module):
                 nn.BatchNorm2d(self.num_channels_conv),
 
                 QActivation(),
-                QConvolution2d(
+                QConv2d(
                     self.num_channels_conv,
                     self.num_channels_conv,
                     kernel_size=5),

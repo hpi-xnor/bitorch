@@ -6,139 +6,158 @@ from . import layerconfig
 from torch.nn.functional import pad, conv1d, conv2d, conv3d
 
 
-class QConvolution1d(Conv1d):
-    """Quantized 1d concolution class"""
+# class QConvolution1d(Conv1d):
+#     """Quantized 1d concolution class"""
 
-    def __init__(self, *args, quantization: str = None, padding_value: float = None, **kwargs) -> None:  # type: ignore
-        """initialization function for padding and quantization.
+#     def __init__(self, *args, quantization: str = None, padding_value: float = None, **kwargs) -> None:  # type: ignore
+#         """initialization function for padding and quantization.
 
-        Args:
-            quantization (str, optional): name of quantization function. Defaults to None.
-            padding_value (float, optional): value used for padding the input sequence. Defaults to None.
-        """
-        super(QConvolution1d, self).__init__(*args, **kwargs)
-        self.quantize = layerconfig.config.get_quantization_function(quantization)
-        self.padding_value = padding_value or layerconfig.config.get_padding_value()
+#         Args:
+#             quantization (str, optional): name of quantization function. Defaults to None.
+#             padding_value (float, optional): value used for padding the input sequence. Defaults to None.
+#         """
+#         super(QConvolution1d, self).__init__(*args, **kwargs)
+#         self.quantize = layerconfig.config.get_quantization_function(quantization)
+#         self.padding_value = padding_value or layerconfig.config.get_padding_value()
 
-    def _apply_padding(self, x: Tensor) -> Tensor:
-        """pads the input tensor with the given padding value
+#     def _apply_padding(self, x: Tensor) -> Tensor:
+#         """pads the input tensor with the given padding value
 
-        Args:
-            x (Tensor): input tensor
+#         Args:
+#             x (Tensor): input tensor
 
-        Returns:
-            Tensor: the padded tensor
-        """
-        return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.padding_value)
+#         Returns:
+#             Tensor: the padded tensor
+#         """
+#         return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.padding_value)
 
-    def _conv_forward(self, input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
-        """forward the input tensor through the quantized 1d convolution layer.
+#     def _conv_forward(self, input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
+#         """forward the input tensor through the quantized 1d convolution layer.
 
-        Args:
-            input (Tensor): input tensor
-            weight (Tensor): weight tensor
-            bias (Tensor, optional): bias tensor. Defaults to None.
+#         Args:
+#             input (Tensor): input tensor
+#             weight (Tensor): weight tensor
+#             bias (Tensor, optional): bias tensor. Defaults to None.
 
-        Returns:
-            Tensor: the convoluted output tensor, computed with padded input and quantized weights.
-        """
-        return conv1d(
-            input=self._apply_padding(input),
-            weight=self.quantize(weight),
-            bias=bias,
-            stride=self.stride,
-            padding=0,
-            dilation=self.dilation,
-            groups=self.groups)
-
-
-class QConvolution2d(Conv2d):
-    """Quantized 2d concolution class"""
-
-    def __init__(self, *args, quantization: str = None, padding_value: float = None, **kwargs) -> None:  # type: ignore
-        """initialization function for padding and quantization.
-
-        Args:
-            quantization (str, optional): name of quantization function. Defaults to None.
-            padding_value (float, optional): value used for padding the input sequence. Defaults to None.
-        """
-        super(QConvolution2d, self).__init__(*args, **kwargs)
-        self.quantize = layerconfig.config.get_quantization_function(quantization)
-        self.padding_value = padding_value or layerconfig.config.get_padding_value()
-
-    def _apply_padding(self, x: Tensor) -> Tensor:
-        """pads the input tensor with the given padding value
-
-        Args:
-            x (Tensor): input tensor
-
-        Returns:
-            Tensor: the padded tensor
-        """
-        return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.padding_value)
-
-    def _conv_forward(self, input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
-        """forward the input tensor through the quantized 2d convolution layer.
-
-        Args:
-            input (Tensor): input tensor
-            weight (Tensor): weight tensor
-            bias (Tensor, optional): bias tensor. Defaults to None.
-
-        Returns:
-            Tensor: the convoluted output tensor, computed with padded input and quantized weights.
-        """
-        return conv2d(
-            input=self._apply_padding(input),
-            weight=self.quantize(weight),
-            bias=bias,
-            stride=self.stride,
-            padding=0,
-            dilation=self.dilation,
-            groups=self.groups)
+#         Returns:
+#             Tensor: the convoluted output tensor, computed with padded input and quantized weights.
+#         """
+#         return conv1d(
+#             input=self._apply_padding(input),
+#             weight=self.quantize(weight),
+#             bias=bias,
+#             stride=self.stride,
+#             padding=0,
+#             dilation=self.dilation,
+#             groups=self.groups)
 
 
-class QConvolution3d(Conv3d):
-    """Quantized 3d concolution class"""
+# class QConvolution2d(Conv2d):
+#     """Quantized 2d concolution class"""
 
-    def __init__(self, *args, quantization: str = None, padding_value: float = None, **kwargs) -> None:  # type: ignore
-        """initialization function for padding and quantization.
+#     def __init__(self, *args, quantization: str = None, padding_value: float = None, **kwargs) -> None:  # type: ignore
+#         """initialization function for padding and quantization.
 
-        Args:
-            quantization (str, optional): name of quantization function. Defaults to None.
-            padding_value (float, optional): value used for padding the input sequence. Defaults to None.
-        """
-        super(QConvolution3d, self).__init__(*args, **kwargs)
-        self.quantize = layerconfig.config.get_quantization_function(quantization)
-        self.padding_value = padding_value or layerconfig.config.get_padding_value()
+#         Args:
+#             quantization (str, optional): name of quantization function. Defaults to None.
+#             padding_value (float, optional): value used for padding the input sequence. Defaults to None.
+#         """
+#         super(QConvolution2d, self).__init__(*args, **kwargs)
+#         self.quantize = layerconfig.config.get_quantization_function(quantization)
+#         self.padding_value = padding_value or layerconfig.config.get_padding_value()
 
-    def _apply_padding(self, x: Tensor) -> Tensor:
-        """pads the input tensor with the given padding value
+#     def _apply_padding(self, x: Tensor) -> Tensor:
+#         """pads the input tensor with the given padding value
 
-        Args:
-            x (Tensor): input tensor
+#         Args:
+#             x (Tensor): input tensor
 
-        Returns:
-            Tensor: the padded tensor
-        """
-        return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.padding_value)
+#         Returns:
+#             Tensor: the padded tensor
+#         """
+#         return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.padding_value)
 
-    def _conv_forward(self, input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
-        """forward the input tensor through the quantized 3d convolution layer.
+#     def _conv_forward(self, input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
+#         """forward the input tensor through the quantized 2d convolution layer.
 
-        Args:
-            input (Tensor): input tensor
-            weight (Tensor): weight tensor
-            bias (Tensor, optional): bias tensor. Defaults to None.
+#         Args:
+#             input (Tensor): input tensor
+#             weight (Tensor): weight tensor
+#             bias (Tensor, optional): bias tensor. Defaults to None.
 
-        Returns:
-            Tensor: the convoluted output tensor, computed with padded input and quantized weights.
-        """
-        return conv3d(
-            input=self._apply_padding(input),
-            weight=self.quantize(weight),
-            bias=bias,
-            stride=self.stride,
-            padding=0,
-            dilation=self.dilation,
-            groups=self.groups)
+#         Returns:
+#             Tensor: the convoluted output tensor, computed with padded input and quantized weights.
+#         """
+#         return conv2d(
+#             input=self._apply_padding(input),
+#             weight=self.quantize(weight),
+#             bias=bias,
+#             stride=self.stride,
+#             padding=0,
+#             dilation=self.dilation,
+#             groups=self.groups)
+
+
+# class QConvolution3d(Conv3d):
+#     """Quantized 3d concolution class"""
+
+
+def make_q_convolution(BaseClass, forward_fn):
+    """Creates a quantized version of the given convolution base class.
+
+    Args:
+        BaseClass (QConv-Subclass): The base class to create a quantized version from.
+        forward_fn (function): the convolution function used for this class.
+
+    Returns:
+        Class: the quantized version of the base class
+    """
+    class QConv(BaseClass):
+        def __init__(self, *args, quantization: str = None, pad_value: float = None, **kwargs) -> None:  # type: ignore
+            """initialization function for padding and quantization.
+
+            Args:
+                quantization (str, optional): name of quantization function. Defaults to None.
+                padding_value (float, optional): value used for padding the input sequence. Defaults to None.
+            """
+            super(QConv, self).__init__(*args, **kwargs)
+            self.quantize = layerconfig.config.get_quantization_function(quantization)
+            self.pad_value = pad_value or layerconfig.config.get_padding_value()
+
+        def _apply_padding(self, x: Tensor) -> Tensor:
+            """pads the input tensor with the given padding value
+
+            Args:
+                x (Tensor): input tensor
+
+            Returns:
+                Tensor: the padded tensor
+            """
+            return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.pad_value)
+
+        def _conv_forward(self, input: Tensor, weight: Tensor, bias: Tensor = None) -> Tensor:
+            """forward the input tensor through the quantized convolution layer.
+
+            Args:
+                input (Tensor): input tensor
+                weight (Tensor): weight tensor
+                bias (Tensor, optional): bias tensor. Defaults to None.
+
+            Returns:
+                Tensor: the convoluted output tensor, computed with padded input and quantized weights.
+            """
+            return forward_fn(
+                input=self._apply_padding(input),
+                weight=self.quantize(weight),
+                bias=bias,
+                stride=self.stride,
+                padding=0,
+                dilation=self.dilation,
+                groups=self.groups)
+
+    return QConv
+
+
+QConv1d = make_q_convolution(Conv1d, conv1d)
+QConv2d = make_q_convolution(Conv2d, conv2d)
+QConv3d = make_q_convolution(Conv3d, conv3d)
