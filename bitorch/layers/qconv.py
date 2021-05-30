@@ -1,68 +1,46 @@
 """Module containing the quantized convolution layer"""
 
-from typing import Callable, Type
+from typing import Type
 from torch import Tensor
-from torch.nn.modules.conv import Conv1d, Conv2d, Conv3d
-from . import layerconfig
-from torch.nn.functional import pad, conv1d, conv2d, conv3d
+from bitorch.layers.qactivation import QActivation
+from bitorch.layers.qconv_noact import QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
 
 
-def make_q_convolution(BaseClass: Type, forward_fn: Callable) -> Type:
-    """Creates a quantized version of the given convolution base class.
+def make_q_convolution(BaseClass: Type) -> Type:
+    """creates a version with preactivation function of given baseclass
 
     Args:
-        BaseClass (QConv-Subclass): The base class to create a quantized version from.
-        forward_fn (function): the convolution function used for this class.
+        BaseClass (QConv-Subclass): The base class to add an activation layer to.
 
     Returns:
-        Class: the quantized version of the base class
+        Class: the activated version of the base class
     """
     class QConv(BaseClass):  # type: ignore
-        def __init__(self, *args, quantization: str = None, pad_value: float = None, **kwargs) -> None:  # type: ignore
-            """initialization function for padding and quantization.
+        def __init__(self, *args, activation: str = None, quantization: str = None, **kwargs) -> None:  # type: ignore
+            """initialization function for activation and quantization.
 
             Args:
+                activation (str, optional): name of activation function to apply on inputs before forwarding
+                    through the qconvolution layer. Defaults to None.
                 quantization (str, optional): name of quantization function. Defaults to None.
-                padding_value (float, optional): value used for padding the input sequence. Defaults to None.
             """
-            super(QConv, self).__init__(*args, **kwargs)
-            self.quantize = layerconfig.config.get_quantization_function(quantization)
-            self.pad_value = pad_value or layerconfig.config.get_padding_value()
+            super(QConv, self).__init__(*args, quantization=quantization, **kwargs)
+            self.activation = QActivation(activation)
 
-        def _apply_padding(self, x: Tensor) -> Tensor:
-            """pads the input tensor with the given padding value
+        def forward(self, input_tensor: Tensor) -> Tensor:
+            """forward the input tensor through the activation and quantized convolution layer.
 
             Args:
-                x (Tensor): input tensor
+                input_tensor (Tensor): input tensor
 
             Returns:
-                Tensor: the padded tensor
+                Tensor: the activated and convoluted output tensor.
             """
-            return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.pad_value)
-
-        def forward(self, input: Tensor) -> Tensor:
-            """forward the input tensor through the quantized convolution layer.
-
-            Args:
-                input (Tensor): input tensor
-                weight (Tensor): weight tensor
-                bias (Tensor, optional): bias tensor. Defaults to None.
-
-            Returns:
-                Tensor: the convoluted output tensor, computed with padded input and quantized weights.
-            """
-            return forward_fn(  # type: ignore
-                input=self._apply_padding(input),
-                weight=self.quantize(self.weight),
-                bias=self.bias,
-                stride=self.stride,
-                padding=0,
-                dilation=self.dilation,
-                groups=self.groups)
+            return super(QConv, self).forward(self.activation(input_tensor))
 
     return QConv
 
 
-QConv1d = make_q_convolution(Conv1d, conv1d)
-QConv2d = make_q_convolution(Conv2d, conv2d)
-QConv3d = make_q_convolution(Conv3d, conv3d)
+QConv1d = make_q_convolution(QConv1d_NoAct)
+QConv2d = make_q_convolution(QConv2d_NoAct)
+QConv3d = make_q_convolution(QConv3d_NoAct)

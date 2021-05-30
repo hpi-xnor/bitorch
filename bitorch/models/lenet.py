@@ -1,6 +1,4 @@
-from bitorch.layers.qlinear import QLinear
-from bitorch.layers.qconv import QConv2d
-from bitorch.layers.qactivation import QActivation
+from bitorch.layers import QLinear, QConv2d, QActivation
 from torch import nn, Tensor
 
 
@@ -30,12 +28,13 @@ class LeNet(nn.Module):
                 nn.MaxPool2d(2, 2),
                 nn.BatchNorm2d(self.num_channels_conv),
 
-                QActivation(),
                 QConv2d(
                     self.num_channels_conv,
                     self.num_channels_conv,
-                    kernel_size=5),
-
+                    kernel_size=5,
+                    activation="sign",
+                    quantization="round"),
+                QActivation(),
                 nn.BatchNorm2d(self.num_channels_conv),
                 nn.MaxPool2d(2, 2),
 
@@ -44,8 +43,9 @@ class LeNet(nn.Module):
                 QActivation(activation="sign"),
                 QLinear(self.num_channels_conv * 4 * 4, self.num_fc, quantization="sign"),
                 nn.BatchNorm1d(self.num_fc),
+                self.activation_function(),
 
-                QLinear(self.num_fc, self.num_output, quantization="sign"),
+                nn.Linear(self.num_fc, self.num_output),
             )
         elif mode == "full_precision":
             self.model = nn.Sequential(

@@ -1,112 +1,175 @@
 import torch
-import matplotlib
 
 
-class Debug_Layer(torch.nn.Module):
+class _Debug_Layer(torch.nn.Module):
     def __init__(self,
-                 print_debug: bool = False,
-                 graphic_debug: bool = False,
-                 figure: matplotlib.figure.Figure = None,
-                 images: list = None,
-                 debug_interval: int = 100) -> None:
-        """flags and objects.
+                 active: bool = True,
+                 debug_interval: int = 100,
+                 num_outputs: int = 10) -> None:
+        """inits values.
 
         Args:
-            module (torch.nn.Module): the module to be wrapped in this class and of which the weights shall be debugged
-            print_debug (bool, optional): Toggles stdout debugging of weights. Defaults to False.
-            graphic_debug (bool, optional): Toggles graphic debbuging in given subplot. Defaults to False.
-            figure (matplotlib.figure.Figure, optional): the figure to redraw after updating the images.
-                Only needed if graphic debug is set to True. Defaults to None.
-            images (List[plt], optional): list of images to output the filters into.
-                only needed if graphic_debug is set to True. Defaults to None.
-            debug_interval (int, optional): interval at which debug shall be outputed. Defaults to 100
-
-        Raises:
-            ValueError: Raised if graphic output is enabled but no images were passed.
+            active (bool, optional): flag to toggle debug output. Defaults to True.
+            debug_interval (int, optional): interval at which debug output shall be prompted. Defaults to 100.
+            num_outputs (int, optional): number of weights/inputs that shall be debugged. Defaults to 10.
         """
-        super(Debug_Layer, self).__init__()
-        self._print_debug = print_debug
-        self._graphic_debug = graphic_debug
-        self._figure = figure
-        self._images = images
+        super(_Debug_Layer, self).__init__()
+        self._active = active
         self._debug_interval = debug_interval
-        if graphic_debug and (images is None or figure is None):
-            raise ValueError("graphic debug is activated but no images or figure were passed!")
-        if self._images is not None:
-            self._num_filters = len(self._images)
+        self._num_outputs = num_outputs
 
         self._forward_counter = 0
 
-    def _debug_tensor(self, debug_tensor):
+    def _debug(self, x: torch.Tensor) -> None:
+        pass
+
+    def _debug_tensor(self, debug_tensor: torch.Tensor) -> None:
         """outputs debug information for given tensor
+
+        Args:
+            debug_tensor (torch.Tensor): tensor to be debugged
+        """
+        if self._active and self._forward_counter % self._debug_interval == 0:
+            self._debug(debug_tensor)
+
+        self._forward_counter += 1
+
+
+class _Print_Debug_Layer(_Debug_Layer):
+    def _debug(self, debug_tensor: torch.Tensor) -> None:
+        """prints the first num_outputs entries in tensor debug_tensor
+
+        Args:
+            debug_tensor (torch.Tensor): tensor to be debugged
+        """
+        print(debug_tensor if len(debug_tensor) < self._num_outputs else debug_tensor[:self._num_outputs])
+
+
+class _Graphical_Debug_Layer(_Debug_Layer):
+
+    def __init__(self,
+                 figure: object = None,
+                 images: list = None,
+                 active: bool = True,
+                 debug_interval: int = 100,
+                 num_outputs: int = 10) -> None:
+        """Debugs the given layer by drawing weights/inputs in given matplotlib plot images.
+
+        Args:
+            figure (object): figure to draw in
+            images (list): list of images to update with given data
+            active (bool, optional): flag to toggle debug output. Defaults to True.
+            debug_interval (int, optional): interval at which debug output shall be prompted. Defaults to 100.
+            num_outputs (int, optional): number of weights/inputs that shall be debugged. Defaults to 10.
+
+        Raises:
+            ValueError: raised if number of images does not match desired number of outputs.
+        """
+        super(_Graphical_Debug_Layer, self).__init__(active, debug_interval, num_outputs)
+        self.set_figure(figure)
+        self.set_images(images)
+
+    def set_figure(self, figure: object = None) -> None:
+        """setter for figure object
+
+        Args:
+            figure (object): the figure object
+        """
+        self._figure = figure
+
+    def set_images(self, images: list = None) -> None:
+        """setter for images list
+
+        Args:
+            images (list): list of image objects to output the graphical information to
+
+        Raises:
+            ValueError: raised if number of images does not match desired number of outputs.
+        """
+        self._images = images
+        if self._images is not None and len(self._images) != self._num_outputs:
+            raise ValueError(
+                f"number of given images ({len(self._images)}) must match "
+                f"number of desired outputs ({self._num_outputs})!")
+
+    def _debug(self, debug_tensor: torch.Tensor) -> None:
+        """draws graphical debug information about given debug tensor into figure
 
         Args:
             debug_tensor (torch.Tensor): tensor to be debugged
 
         Raises:
-            ValueError: raised if graphic output flag is set but no figure or images are present
+            ValueError: raised if either no figure or no images were given
         """
-        if self._forward_counter % self._debug_interval == 0:
-            debug_tensor = debug_tensor.clone()
-            debug_tensor.detach_()
-            if self._print_debug:
-                print(debug_tensor)
-            if self._graphic_debug:
-                if self._figure is None or self._images is None:
-                    raise ValueError("no subplot given to debug into!")
-                dimensionality = len(debug_tensor.shape)
-                filters = []
-                if dimensionality == 2:
-                    filters.append(debug_tensor)
-                elif dimensionality == 3 or dimensionality == 4:
-                    for i in range(debug_tensor.shape[0]):
-                        for j in range(debug_tensor.shape[1]):
-                            filters.append(debug_tensor[i, j])
-                elif dimensionality == 5:
-                    for i in range(debug_tensor.shape[0]):
-                        for j in range(debug_tensor.shape[1]):
-                            for k in range(debug_tensor.shape[2]):
-                                filters.append(debug_tensor[i, j, k])
-                for image, fltr in zip(self._images, filters):
-                    fltr -= torch.min(fltr)
-                    fltr /= torch.max(fltr)
-                    image.set_data(fltr)
-                if isinstance(self._figure, list):
-                    self._figure[0].canvas.draw()
-                else:
-                    self._figure.canvas.draw()
-
-        self._forward_counter += 1
+        debug_tensor = debug_tensor.clone().detach()
+        if self._figure is None or self._images is None:
+            raise ValueError("no subplot given to debug into!")
+        dimensionality = len(debug_tensor.shape)
+        filters = []
+        # depending of dimensionality select the filters to be drawn to the images
+        if dimensionality == 2:
+            filters.append(debug_tensor)
+        elif dimensionality == 3 or dimensionality == 4:
+            for i in range(debug_tensor.shape[0]):
+                for j in range(debug_tensor.shape[1]):
+                    filters.append(debug_tensor[i, j])
+        elif dimensionality == 5:
+            for i in range(debug_tensor.shape[0]):
+                for j in range(debug_tensor.shape[1]):
+                    for k in range(debug_tensor.shape[2]):
+                        filters.append(debug_tensor[i, j, k])
+        # normalize all filters
+        for image, fltr in zip(self._images, filters):
+            fltr -= torch.min(fltr)
+            fltr /= torch.max(fltr)
+            image.set_data(fltr)
+        self._figure.canvas.draw()
 
 
-class Debug_Weight_Layer(Debug_Layer):
+"""
+Classes above are internal, use classes below for debugging
+"""
 
-    def __init__(self,
-                 module: torch.nn.Module,
-                 print_debug: bool = False,
-                 graphic_debug: bool = False,
-                 figure: matplotlib.figure.Figure = None,
-                 images: list = None,
-                 debug_interval: int = 100) -> None:
-        """Initializes debug module, flags and objects.
+
+class Input_Print_Debug_Layer(_Print_Debug_Layer):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """forwards the given tensor without modification, debug output if activated
 
         Args:
-            module (torch.nn.Module): the module to be wrapped in this class and of which the weights shall be debugged
-            print_debug (bool, optional): Toggles stdout debugging of weights. Defaults to False.
-            graphic_debug (bool, optional): Toggles graphic debbuging in given subplot. Defaults to False.
-            figure (matplotlib.figure.Figure, optional): the figure to redraw after updating the images.
-                Only needed if graphic debug is set to True. Defaults to None.
-            images (List[plt], optional): list of images to output the filters into.
-                only needed if graphic_debug is set to True. Defaults to None.
-            debug_interval (int, optional): interval at which debug shall be outputed. Defaults to 100
+            x (torch.Tensor): tensor to be debugged
 
-        Raises:
-            ValueError: Raised if graphic output is enabled but no images were passed.
+        Returns:
+            torch.Tensor: input tensor x
         """
-        super(Debug_Weight_Layer, self).__init__(print_debug, graphic_debug, figure, images, debug_interval)
+        self._debug_tensor(x)
+        return x
+
+
+class Input_Graphical_Debug_Layer(_Graphical_Debug_Layer):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """forwards the given tensor without modification, debug output if activated
+
+        Args:
+            x (torch.Tensor): tensor to be debugged
+
+        Returns:
+            torch.Tensor: input tensor x
+        """
+        self._debug_tensor(x)
+        return x
+
+
+class Weight_Print_Debug_Layer(_Print_Debug_Layer):
+    def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
+        """stores given module
+
+        Args:
+            module (torch.nn.Module): module the weights of which shall be debugged
+        """
+        super(Weight_Print_Debug_Layer, self).__init__(*args, **kwargs)
         self._debug_module = module
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the input tensor through the debug model and outputs debug information about the given modules weights.
 
         Args:
@@ -117,18 +180,26 @@ class Debug_Weight_Layer(Debug_Layer):
         """
         x = self._debug_module(x)
 
-        weight = self._debug_module.weight.clone()
+        weight = self._debug_module.weight.clone()  # type: ignore
         # check if given module is a quantized module
         if hasattr(self._debug_module, 'quantize'):
-            weight = self._debug_module.quantize(weight)
+            weight = self._debug_module.quantize(weight)  # type: ignore
         self._debug_tensor(weight)
 
         return x
 
 
-class Debug_Input_Layer(Debug_Layer):
+class Weight_Graphical_Debug_Layer(_Graphical_Debug_Layer):
+    def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
+        """stores given module
 
-    def forward(self, x: torch.Tensor):
+        Args:
+            module (torch.nn.Module): module the weights of which shall be debugged
+        """
+        super(Weight_Graphical_Debug_Layer, self).__init__(*args, **kwargs)
+        self._debug_module = module
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the input tensor through the debug model and outputs debug information about the given modules weights.
 
         Args:
@@ -137,46 +208,12 @@ class Debug_Input_Layer(Debug_Layer):
         Returns:
             torch.Tensor: the input tensor
         """
-        self._debug_tensor(x)
-        # if self._forward_counter % self._debug_interval == 0:
-        #     x_values = x.clone()
-        #     x_values.detach_()
-        #     if self._print_debug:
-        #         print(x_values)
-        #     if self._graphic_debug:
-        #         if self._figure is None or self._images is None:
-        #             raise ValueError("no subplot given to debug into!")
-        #         dimensionality = len(x.shape)
-        #         filters = []
-        #         if dimensionality == 2:
-        #             filters.append(x_values[1])
-        #         elif dimensionality == 3 or dimensionality == 4:
-        #             for i in range(x_values.shape[0]):
-        #                 if len(filters) >= self._num_features:
-        #                     break
-        #                 for j in range(x_values.shape[1]):
-        #                     if len(filters) >= self._num_features:
-        #                         break
-        #                     filters.append(x_values[i, j])
-        #         elif dimensionality == 5:
-        #             for i in range(x_values.shape[0]):
-        #                 if len(filters) >= self._num_features:
-        #                     break
-        #                 for j in range(x_values.shape[1]):
-        #                     if len(filters) >= self._num_features:
-        #                         break
-        #                     for k in range(x_values.shape[2]):
-        #                         if len(filters) >= self._num_features:
-        #                             break
-        #                         filters.append(x_values[i, j, k])
-        #         for image, fltr in zip(self._images, filters):
-        #             fltr -= torch.min(fltr)
-        #             fltr /= torch.max(fltr)
-        #             image.set_data(fltr)
-        #         if isinstance(self._figure, list):
-        #             self._figure[0].canvas.draw()
-        #         else:
-        #             self._figure.canvas.draw()
+        x = self._debug_module(x)
 
-        # self._forward_counter += 1
+        weight = self._debug_module.weight.clone()  # type: ignore
+        # check if given module is a quantized module
+        if hasattr(self._debug_module, 'quantize'):
+            weight = self._debug_module.quantize(weight)  # type: ignore
+        self._debug_tensor(weight)
+
         return x
