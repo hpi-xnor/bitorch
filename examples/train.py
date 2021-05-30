@@ -61,6 +61,7 @@ def train_model(
         accuracy = correct / (len(test_data) * batch_size)
 
         logging.info(
-            f"Epoch {epoch + 1} train loss: {epoch_loss}, test lo# type: ignoress: {test_loss}, test accuracy: {accuracy}")
+            f"Epoch {epoch + 1} train loss: {epoch_loss}, test lo# type: ignoress: {test_loss}, "
+            f"test accuracy: {accuracy}")
 
     return model

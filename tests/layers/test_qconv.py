@@ -1,13 +1,13 @@
-from bitorch.layers.qconv import QConv1d, QConv2d, QConv3d
+from bitorch.layers.qconv_noact import QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
 from torch.nn.functional import conv1d, conv2d, conv3d
 import pytest
 import torch
 import numpy as np
 
 TEST_INPUT_DATA = [
-    (QConv1d, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
-    (QConv2d, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
-    (QConv3d, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
+    (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
+    (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
+    (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
 ] * 10
 
 
