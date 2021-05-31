@@ -33,7 +33,7 @@ class LeNet(nn.Module):
                     self.num_channels_conv,
                     kernel_size=5,
                     activation="sign",
-                    quantization="round"),
+                    quantization="sign"),
                 QActivation(),
                 nn.BatchNorm2d(self.num_channels_conv),
                 nn.MaxPool2d(2, 2),
