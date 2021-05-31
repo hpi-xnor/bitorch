@@ -4,6 +4,7 @@ from torch.nn import Module
 from torch.nn.modules.loss import _Loss
 from torch.optim import Adam
 import logging
+from math import floor
 
 
 def train_model(
@@ -18,6 +19,9 @@ def train_model(
     model.to('cuda' if gpu else 'cpu')
 
     optimizer = Adam(params=model.parameters(), lr=lr)
+
+    total_number_of_batches = epochs * len(train_data)
+    current_number_of_batches = 0
 
     for epoch in range(epochs):
         epoch_loss = 0.0
@@ -34,9 +38,12 @@ def train_model(
             optimizer.step()
 
             epoch_loss += loss.item()
+            current_number_of_batches += 1
 
             if idx % log_interval == 0 and idx > 0:
-                logging.info(f"    Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}")
+                progress = floor((current_number_of_batches / total_number_of_batches) * 100000.0) / 1000.0
+                logging.info(
+                    f"    (Progress: {progress}%) Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}")
         epoch_loss /= len(train_data)
 
         model.eval()
