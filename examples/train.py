@@ -16,7 +16,7 @@ def train_model(
         lr: float = 0.001,
         log_interval: int = 100,
         gpu: bool = False) -> Module:
-    model.to('cuda' if gpu else 'cpu')
+    model = model.to('cuda' if gpu else 'cpu')
 
     optimizer = Adam(params=model.parameters(), lr=lr)
 
@@ -29,8 +29,8 @@ def train_model(
         model.train()
         for idx, (x_train, y_train) in enumerate(train_data):
             optimizer.zero_grad()
-            x_train.to('cuda' if gpu else 'cpu')
-            y_train.to('cuda' if gpu else 'cpu')
+            x_train = x_train.to('cuda' if gpu else 'cpu')
+            y_train = y_train.to('cuda' if gpu else 'cpu')
 
             y_hat = model(x_train)
             loss = criterion(y_hat, y_train)
@@ -52,8 +52,8 @@ def train_model(
         # now validate model with test dataset
         with torch.no_grad():
             for idx, (x_test, y_test) in enumerate(test_data):
-                x_test.to('cuda' if gpu else 'cpu')
-                y_test.to('cuda' if gpu else 'cpu')
+                x_test = x_test.to('cuda' if gpu else 'cpu')
+                y_test = y_test.to('cuda' if gpu else 'cpu')
 
                 y_hat = model(x_test)
                 test_loss += criterion(y_hat, y_test).item()
@@ -68,7 +68,7 @@ def train_model(
         accuracy = correct / (len(test_data) * batch_size)
 
         logging.info(
-            f"Epoch {epoch + 1} train loss: {epoch_loss}, test lo# type: ignoress: {test_loss}, "
+            f"Epoch {epoch + 1} train loss: {epoch_loss}, test loss: {test_loss}, "
             f"test accuracy: {accuracy}")
 
     return model
