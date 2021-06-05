@@ -27,7 +27,8 @@ def main(args: argparse.Namespace) -> None:
                             level=logging.DEBUG, force=True)
 
     logging.info("starting model training...")
-    model = create_resnet(args.resnet_version, args.resnet_num_layers, classes=10, image_channels=1)
+    model = create_resnet(args.resnet_version, args.resnet_num_layers,
+                          classes=10, initial_layers="mnist", image_channels=1)
     train_model(model, train_loader, test_loader, CrossEntropyLoss(), epochs=args.epochs,
                 lr=args.lr, log_interval=args.log_interval, gpu=args.cuda)
     logging.info("model training finished!")

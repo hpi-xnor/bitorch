@@ -249,7 +249,7 @@ resnet_block_versions = [{'basic_block': BasicBlockV1, 'bottle_neck': Bottleneck
                          {'basic_block': BasicBlockV2, 'bottle_neck': BottleneckV2}]
 
 
-def create_resnet(version, num_layers, classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def create_resnet(version, num_layers, classes: int = 1000, initial_layers: str = "imagenet", image_channels: int = 3):
 
     if num_layers not in resnet_spec:
         raise ValueError(f"No resnet spec for {num_layers} available!")
@@ -259,7 +259,7 @@ def create_resnet(version, num_layers, classes: int = 1000, inital_layers: str =
     block_type, layers, channels = resnet_spec[num_layers]
     resnet = resnet_net_versions[version - 1]
     block = resnet_block_versions[version - 1][block_type]
-    return resnet(block, layers, channels, classes, inital_layers, image_channels)
+    return resnet(block, layers, channels, classes, initial_layers, image_channels)
 
 
 def resnet18_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
