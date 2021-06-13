@@ -1,20 +1,18 @@
 import torch
+from .layerconfig import config
 
 
 class _Debug(torch.nn.Module):
     def __init__(self,
-                 active: bool = True,
                  debug_interval: int = 100,
                  num_outputs: int = 10) -> None:
         """inits values.
 
         Args:
-            active (bool, optional): flag to toggle debug output. Defaults to True.
             debug_interval (int, optional): interval at which debug output shall be prompted. Defaults to 100.
             num_outputs (int, optional): number of weights/inputs that shall be debugged. Defaults to 10.
         """
         super(_Debug, self).__init__()
-        self._active = active
         self._debug_interval = debug_interval
         self._num_outputs = num_outputs
 
@@ -29,7 +27,7 @@ class _Debug(torch.nn.Module):
         Args:
             debug_tensor (torch.Tensor): tensor to be debugged
         """
-        if self._active and self._forward_counter % self._debug_interval == 0:
+        if config.debug_activated() and self._forward_counter % self._debug_interval == 0:
             self._debug(debug_tensor)
 
         self._forward_counter += 1
@@ -50,7 +48,6 @@ class _GraphicalDebug(_Debug):
     def __init__(self,
                  figure: object = None,
                  images: list = None,
-                 active: bool = True,
                  debug_interval: int = 100,
                  num_outputs: int = 10) -> None:
         """Debugs the given layer by drawing weights/inputs in given matplotlib plot images.
@@ -58,14 +55,13 @@ class _GraphicalDebug(_Debug):
         Args:
             figure (object): figure to draw in
             images (list): list of images to update with given data
-            active (bool, optional): flag to toggle debug output. Defaults to True.
             debug_interval (int, optional): interval at which debug output shall be prompted. Defaults to 100.
             num_outputs (int, optional): number of weights/inputs that shall be debugged. Defaults to 10.
 
         Raises:
             ValueError: raised if number of images does not match desired number of outputs.
         """
-        super(_GraphicalDebug, self).__init__(active, debug_interval, num_outputs)
+        super(_GraphicalDebug, self).__init__(debug_interval, num_outputs)
         self.set_figure(figure)
         self.set_images(images)
 
