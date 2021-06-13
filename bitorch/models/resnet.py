@@ -1,5 +1,4 @@
 from bitorch.layers.qconv_noact import QConv2d_NoAct
-from bitorch.layers.debug_layers import Input_Print_Debug_Layer, Shape_Print_Debug_Layer
 import torch
 from torch import nn
 from torch.nn import Module
@@ -312,7 +311,7 @@ class ResNet(Module):
         Args:
             block (Module): the block of which the layer shall consist
             layers (list): the number of blocks each layer shall consist of
-            channels (int): the channels 
+            channels (int): the channels
 
         Returns:
             nn.Sequential: [description]
