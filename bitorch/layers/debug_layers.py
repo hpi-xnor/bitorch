@@ -1,7 +1,7 @@
 import torch
 
 
-class _Debug_Layer(torch.nn.Module):
+class _Debug(torch.nn.Module):
     def __init__(self,
                  active: bool = True,
                  debug_interval: int = 100,
@@ -13,7 +13,7 @@ class _Debug_Layer(torch.nn.Module):
             debug_interval (int, optional): interval at which debug output shall be prompted. Defaults to 100.
             num_outputs (int, optional): number of weights/inputs that shall be debugged. Defaults to 10.
         """
-        super(_Debug_Layer, self).__init__()
+        super(_Debug, self).__init__()
         self._active = active
         self._debug_interval = debug_interval
         self._num_outputs = num_outputs
@@ -35,7 +35,7 @@ class _Debug_Layer(torch.nn.Module):
         self._forward_counter += 1
 
 
-class _Print_Debug_Layer(_Debug_Layer):
+class _PrintDebug(_Debug):
     def _debug(self, debug_tensor: torch.Tensor) -> None:
         """prints the first num_outputs entries in tensor debug_tensor
 
@@ -45,7 +45,7 @@ class _Print_Debug_Layer(_Debug_Layer):
         print(debug_tensor if len(debug_tensor) < self._num_outputs else debug_tensor[:self._num_outputs])
 
 
-class _Graphical_Debug_Layer(_Debug_Layer):
+class _GraphicalDebug(_Debug):
 
     def __init__(self,
                  figure: object = None,
@@ -65,7 +65,7 @@ class _Graphical_Debug_Layer(_Debug_Layer):
         Raises:
             ValueError: raised if number of images does not match desired number of outputs.
         """
-        super(_Graphical_Debug_Layer, self).__init__(active, debug_interval, num_outputs)
+        super(_GraphicalDebug, self).__init__(active, debug_interval, num_outputs)
         self.set_figure(figure)
         self.set_images(images)
 
@@ -131,7 +131,7 @@ Classes above are internal, use classes below for debugging
 """
 
 
-class Input_Print_Debug_Layer(_Print_Debug_Layer):
+class InputPrintDebug(_PrintDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the given tensor without modification, debug output if activated
 
@@ -145,7 +145,7 @@ class Input_Print_Debug_Layer(_Print_Debug_Layer):
         return x
 
 
-class Input_Graphical_Debug_Layer(_Graphical_Debug_Layer):
+class InputGraphicalDebug(_GraphicalDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the given tensor without modification, debug output if activated
 
@@ -159,14 +159,14 @@ class Input_Graphical_Debug_Layer(_Graphical_Debug_Layer):
         return x
 
 
-class Weight_Print_Debug_Layer(_Print_Debug_Layer):
+class WeightPrintDebug(_PrintDebug):
     def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
         """stores given module
 
         Args:
             module (torch.nn.Module): module the weights of which shall be debugged
         """
-        super(Weight_Print_Debug_Layer, self).__init__(*args, **kwargs)
+        super(WeightPrintDebug, self).__init__(*args, **kwargs)
         self._debug_module = module
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -189,14 +189,14 @@ class Weight_Print_Debug_Layer(_Print_Debug_Layer):
         return x
 
 
-class Weight_Graphical_Debug_Layer(_Graphical_Debug_Layer):
+class WeightGraphicalDebug(_GraphicalDebug):
     def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
         """stores given module
 
         Args:
             module (torch.nn.Module): module the weights of which shall be debugged
         """
-        super(Weight_Graphical_Debug_Layer, self).__init__(*args, **kwargs)
+        super(WeightGraphicalDebug, self).__init__(*args, **kwargs)
         self._debug_module = module
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
