@@ -1,7 +1,8 @@
 import pytest
 from bitorch.layers.qlinear import QLinear
 from torch.nn import Linear
-from bitorch.layers.layerconfig import Quantization
+from bitorch.layers.layerconfig import QuantizationCollection
+from bitorch.quantizations import Sign
 import torch
 from torch.nn import Parameter
 
@@ -16,10 +17,11 @@ TEST_INPUT_DATA = [
 
 
 @pytest.mark.parametrize("input_values", TEST_INPUT_DATA)
-def test_qlinear(input_values):
+@pytest.mark.parametrize("quantization", ["sign", Sign()])
+def test_qlinear(input_values, quantization):
     layer = QLinear(2, 2, bias=False, weight_quantization="sign")
     full_precision_layer = Linear(2, 2, bias=False)
-    assert isinstance(layer.quantize, type(Quantization.sign()))
+    assert isinstance(layer.quantize, type(QuantizationCollection.sign()))
 
     test_weights = [[0.3, -1.4], [-0.3, 2.6]]
 

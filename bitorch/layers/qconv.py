@@ -1,6 +1,7 @@
 """Module containing the quantized convolution layer"""
 
-from typing import Type
+from bitorch.quantizations import Quantization
+from typing import Type, Union
 from torch import Tensor
 from bitorch.layers.qactivation import QActivation
 from bitorch.layers.qconv_noact import QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
@@ -18,15 +19,16 @@ def make_q_convolution(BaseClass: Type) -> Type:
     class QConv(BaseClass):  # type: ignore
         def __init__(self,  # type: ignore
                      *args,  # type: ignore
-                     input_quantization: str = None,
-                     weight_quantization: str = None,
+                     input_quantization: Union[str, Quantization] = None,
+                     weight_quantization: Union[str, Quantization] = None,
                      **kwargs) -> None:  # type: ignore
             """initialization function for quantization of inputs and weights.
 
             Args:
-                input_quantization (str, optional): name of quantization function to apply on inputs before forwarding
-                    through the qconvolution layer. Defaults to None.
-                weight_quantization (str, optional): name of quantization function for weights. Defaults to None.
+                input_quantization (Union[str, Quantization], optional): quantization module or name of quantization
+                    function to apply on inputs before forwarding through the qconvolution layer. Defaults to None.
+                weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
+                    function for weights. Defaults to None.
             """
             super(QConv, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
             self.activation = QActivation(input_quantization)

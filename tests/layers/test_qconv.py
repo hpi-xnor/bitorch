@@ -1,5 +1,6 @@
 from bitorch.layers.qconv_noact import QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
 from torch.nn.functional import conv1d, conv2d, conv3d
+from bitorch.quantizations import Sign
 import pytest
 import torch
 import numpy as np
@@ -8,6 +9,10 @@ TEST_INPUT_DATA = [
     (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
     (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
     (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
+    (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(0.5), "padding": 1}),
+    (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(1.0), "padding": 1}),
+    (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {
+     "kernel_size": 3, "weight_quantization": Sign(2.0), "padding": 1}),
 ] * 10
 
 

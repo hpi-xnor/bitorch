@@ -1,10 +1,9 @@
 """Sign Function Implementation"""
 
+from .quantization import Quantization
 from typing import Tuple
 import torch
 from torch.autograd import Function
-from torch import nn
-import typing
 
 
 class SignFunction(Function):
@@ -28,9 +27,8 @@ class SignFunction(Function):
         return sign_tensor
 
     @staticmethod
-    @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,
+            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor,
             threshold: float = 1.0) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
@@ -45,9 +43,8 @@ class SignFunction(Function):
         return SignFunction._sign(input_tensor)
 
     @staticmethod
-    @typing.no_type_check
     def backward(
-            ctx: torch.autograd.function.BackwardCFunction,
+            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:
         """Apply straight through estimator.
 
@@ -66,7 +63,7 @@ class SignFunction(Function):
         return input_grad * output_grad, None
 
 
-class Sign(nn.Module):
+class Sign(Quantization):
     """Module for applying the sign function with straight through estimator in backward pass"""
 
     def __init__(self, gradient_cancelation_threshold: float = 1.0) -> None:
@@ -78,7 +75,7 @@ class Sign(nn.Module):
         super(Sign, self).__init__()
         self.gradient_cancelation_threshold = gradient_cancelation_threshold
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.
 
         Args:

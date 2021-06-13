@@ -1,4 +1,4 @@
-from bitorch.activations.sign import Sign
+from bitorch.quantizations import Sign
 import torch
 import pytest
 

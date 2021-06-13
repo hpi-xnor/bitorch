@@ -1,20 +1,22 @@
 """Module containting the quantized linear layer"""
 
-from typing import Optional
+from typing import Union
 import torch
 from torch.nn import Linear
 from torch.nn.functional import linear
 
+from bitorch.quantizations import Quantization
 from . import layerconfig
 
 
 class QLinear(Linear):
-    def __init__(self, *args, weight_quantization: Optional[str] = None, **kwargs):  # type: ignore
+    def __init__(self, *args, weight_quantization: Union[str, Quantization] = None, **kwargs):  # type: ignore
         """Applys the given quantization function on weights before applying the linear operation.
 
         Args:
             *args (Argument list): positional arguments for linear layer
-            weight_quantization (str, optional): Name of quantization function. Defaults to None.
+            weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
+                function. Defaults to None.
             **kwargs (keyword Argument list): keyword arguments for linear layer
         """
         super(QLinear, self).__init__(*args, **kwargs)

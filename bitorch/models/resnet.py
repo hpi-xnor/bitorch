@@ -323,6 +323,14 @@ class ResNet(Module):
         return nn.Sequential(*feature_layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """forwards the input tensor through the resnet modules
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: forwarded tensor
+        """
         x = self.features(x)
         x = self.output_layer(x)
         return x
@@ -346,11 +354,9 @@ class ResNetV1(ResNet):
         feature_layers.append(nn.BatchNorm2d(image_channels))
         feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0]))
-        # feature_layers.append(Input_Print_Debug_Layer(name="before feature layers"))
 
         feature_layers.append(self.make_feature_layers(block, layers, channels))
 
-        # feature_layers.append(Input_Print_Debug_Layer(name="after feature layers"))
         feature_layers.append(nn.ReLU())
         feature_layers.append(nn.AdaptiveAvgPool2d(1))
         feature_layers.append(nn.Flatten())

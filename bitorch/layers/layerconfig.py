@@ -1,11 +1,12 @@
 """Config class for quantization layers. This file should be imported before the other layers."""
 
-from bitorch.activations.sign import Sign
-from bitorch.activations.round import Round
+from bitorch.quantizations.quantization import Quantization
+from bitorch.quantizations import Sign
+from bitorch.quantizations import Round
 import torch
 
 
-class Quantization():
+class QuantizationCollection():
     """Class for storing quantization functions"""
 
     @staticmethod
@@ -20,8 +21,8 @@ class Quantization():
         """
         return (
             function_name not in ["valid_function_name", "from_name"] and
-            function_name in Quantization.__dict__.keys() and
-            callable(getattr(Quantization, function_name)))
+            function_name in QuantizationCollection.__dict__.keys() and
+            callable(getattr(QuantizationCollection, function_name)))
 
     @ staticmethod
     def from_name(function_name: str) -> torch.nn.Module:
@@ -37,9 +38,9 @@ class Quantization():
         Returns:
             torch.nn.Module: Quantization Module
         """
-        if not Quantization.valid_function_name(function_name):
+        if not QuantizationCollection.valid_function_name(function_name):
             raise ValueError(f"Quantization function name {function_name} is not valid!")
-        return getattr(Quantization, function_name)()
+        return getattr(QuantizationCollection, function_name)()
 
     @ staticmethod
     def default_quantization() -> torch.nn.Module:
@@ -48,7 +49,7 @@ class Quantization():
         Returns:
             torch.nn.Module: the default quantization module
         """
-        return Quantization.sign()
+        return QuantizationCollection.sign()
 
     """
     Quantization functions
@@ -67,15 +68,6 @@ class Quantization():
         return Sign(grad_cancelation_threshold)
 
     @ staticmethod
-    def relu() -> torch.nn.Module:
-        """Rectified linear unit activation function.
-
-        Returns:
-            torch.nn.Module: relu Module
-        """
-        return torch.nn.ReLU()
-
-    @ staticmethod
     def round(bits: int = 1) -> torch.nn.Module:
         """round activation function.
 
@@ -89,18 +81,24 @@ class LayerConfig():
     """Class to provide layer configurations."""
     _debug_activated = True
 
-    def get_quantization_function(self, quantization_name: str = None) -> torch.nn.Module:
+    def get_quantization_function(self, quantization: str = None) -> torch.nn.Module:
         """Returns the quanitization module specified in quantization_name.
 
         Args:
-            quantization_name (str, optional): name of quantization function. Defaults to None.
+            quantization (Union[str, Quantization], optional): quantization module or name of quantization function.
+                Defaults to None.
 
         Returns:
             torch.nn.Module: Quantization module
         """
-        if quantization_name is None:
-            return Quantization.default_quantization()
-        return Quantization.from_name(quantization_name)
+        if quantization is None:
+            return QuantizationCollection.default_quantization()
+        elif isinstance(quantization, Quantization):
+            return quantization
+        elif isinstance(quantization, str):
+            return QuantizationCollection.from_name(quantization)
+        else:
+            raise ValueError(f"Invalid quantization: {quantization}")
 
     def default_quantization(self) -> torch.nn.Module:
         """default quantization function. used if none is passed to qlayers
@@ -108,7 +106,7 @@ class LayerConfig():
         Returns:
             torch.nn.Module: default quantization module
         """
-        return Quantization.default_quantization()
+        return QuantizationCollection.default_quantization()
 
     def get_padding_value(self) -> float:
         """default padding value used in qconvolution layers (neccessary because 0 padding does not make much sense in a

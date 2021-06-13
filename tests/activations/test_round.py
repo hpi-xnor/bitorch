@@ -1,4 +1,4 @@
-from bitorch.activations.round import Round
+from bitorch.quantizations import Round
 import torch
 import pytest
 
