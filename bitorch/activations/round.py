@@ -59,17 +59,13 @@ class Round(nn.Module):
         super(Round, self).__init__()
         self.bits = bits
 
-    def forward(self, x: torch.Tensor, bits: int = None) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the round function.
 
         Args:
             x (torch.Tensor): tensor to be forwarded.
-            bits (int, optional): number of bits to quantize into. Defaults to None. If omitted, bits from constructor
-                will be used.
 
         Returns:
             torch.Tensor: quantized tensor x
         """
-        if bits is None:
-            return RoundFunction.apply(x, self.bits)
-        return RoundFunction.apply(x, bits)
+        return RoundFunction.apply(x, self.bits)
