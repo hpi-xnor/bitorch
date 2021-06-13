@@ -5,9 +5,9 @@ import torch
 import numpy as np
 
 TEST_INPUT_DATA = [
-    (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
-    (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
-    (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "quantization": "sign", "padding": 1}),
+    (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
+    (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
+    (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
 ] * 10
 
 
