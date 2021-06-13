@@ -119,7 +119,7 @@ class LayerConfig():
         """
         return -1.
 
-    def debug_activated(self):
+    def debug_activated(self) -> bool:
         """function to get the current debug activation status. Debug layers won't output if this function returns False.
 
         Returns:
@@ -127,7 +127,7 @@ class LayerConfig():
         """
         return self._debug_activated
 
-    def activate_debug(self, debug):
+    def activate_debug(self, debug: bool) -> None:
         """setter method for debug mode.
 
         Args:
