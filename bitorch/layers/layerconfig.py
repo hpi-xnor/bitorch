@@ -1,5 +1,6 @@
 """Config class for quantization layers. This file should be imported before the other layers."""
 
+from typing import Union
 from bitorch.quantizations.quantization import Quantization
 from bitorch.quantizations import Sign
 from bitorch.quantizations import Round
@@ -81,7 +82,7 @@ class LayerConfig():
     """Class to provide layer configurations."""
     _debug_activated = True
 
-    def get_quantization_function(self, quantization: str = None) -> torch.nn.Module:
+    def get_quantization_function(self, quantization: Union[str, Quantization] = None) -> torch.nn.Module:
         """Returns the quanitization module specified in quantization_name.
 
         Args:

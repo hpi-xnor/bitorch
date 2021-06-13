@@ -1,3 +1,4 @@
+from typing import List
 from bitorch.layers.qconv_noact import QConv2d_NoAct
 import torch
 from torch import nn
@@ -28,7 +29,7 @@ class BasicBlockV1(Module):
 
         self.shall_downsample = self.in_channels != self.out_channels
 
-        self.downsample = self._build_downsampling() if self.shall_downsample else None
+        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
         self.body = self._build_body()
         self.activation = nn.ReLU()
 
@@ -95,7 +96,7 @@ class BottleneckV1(Module):
 
         self.shall_downsample = self.in_channels != self.out_channels
 
-        self.downsample = self._build_downsampling() if self.shall_downsample else None
+        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
         self.body = self._build_body()
         self.activation = nn.ReLU()
 
@@ -167,11 +168,11 @@ class BasicBlockV2(Module):
 
         self.shall_downsample = self.in_channels != self.out_channels
 
-        self.downsample = self._build_downsampling() if self.shall_downsample else None
+        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
         self.body = self._build_body()
         self.bn = nn.BatchNorm2d(self.in_channels)
 
-    def _build_downsampling(self) -> QConv2d:
+    def _build_downsampling(self) -> nn.Module:
         """builds the downsampling layers for rediual tensor processing
 
         Returns:
@@ -225,12 +226,12 @@ class BottleneckV2(Module):
 
         self.shall_downsample = self.in_channels != self.out_channels
 
-        self.downsample = self._build_downsampling() if self.shall_downsample else None
+        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
         self.body = self._build_body()
         self.bn = nn.BatchNorm2d(self.in_channels)
         self.activation = nn.ReLU()
 
-    def _build_downsampling(self) -> QConv2d_NoAct:
+    def _build_downsampling(self) -> nn.Module:
         """builds the downsampling layers for rediual tensor processing
 
         Returns:
@@ -299,24 +300,24 @@ class ResNet(Module):
         Returns:
             nn.Sequential: the model containing the building blocks
         """
-        layer_list = []
+        layer_list: List[nn.Module] = []
         layer_list.append(block(in_channels, out_channels, stride))
         for _ in range(layers - 1):
             layer_list.append(block(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, block: Module, layers: list, channels: int) -> nn.Sequential:
+    def make_feature_layers(self, block: Module, layers: list, channels: list) -> nn.Sequential:
         """builds the given layers with the specified block.
 
         Args:
             block (Module): the block of which the layer shall consist
             layers (list): the number of blocks each layer shall consist of
-            channels (int): the channels
+            channels (list): the channels
 
         Returns:
             nn.Sequential: [description]
         """
-        feature_layers = []
+        feature_layers: List[nn.Module] = []
         for idx, num_layer in enumerate(layers):
             stride = 1 if idx == 0 else 2
             feature_layers.append(self.make_layer(block, num_layer, channels[idx], channels[idx + 1], stride))
@@ -370,7 +371,7 @@ class ResNetV1(ResNet):
             raise ValueError(
                 f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
 
-        feature_layers = []
+        feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
         feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0]))
@@ -418,7 +419,7 @@ class ResNetV2(ResNet):
             raise ValueError(
                 f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
 
-        feature_layers = []
+        feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
         feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
 

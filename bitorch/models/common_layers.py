@@ -1,9 +1,9 @@
+from typing import List
 from torch import nn
-from bitorch.layers import Shape_Print_Debug_Layer
 
 
 def make_initial_layers(variant: str, input_channels: int, output_channels: int) -> nn.Module:
-    initial_layers = []
+    initial_layers: List[nn.Module] = []
     if variant == "imagenet":
         initial_layers.append(nn.Conv2d(input_channels, output_channels,
                               kernel_size=7, stride=2, padding=3, bias=False))
