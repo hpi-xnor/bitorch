@@ -2,7 +2,6 @@ from bitorch.activations.sign import Sign
 import torch
 import pytest
 
-sign = Sign()
 
 TEST_INPUT_DATA = [
     ([1, 2, 3, 4, 5, 6], [1] * 6),
@@ -21,8 +20,8 @@ TEST_INPUT_DATA = [
 def test_sign_function(input_values: list, expected_output: list, threshold: float) -> None:
     x = torch.tensor(input_values).float().requires_grad_(True)
     x_exp = torch.tensor(expected_output).float().requires_grad_(True)
-
-    y = sign(x, threshold)
+    sign = Sign(threshold)
+    y = sign(x)
     assert torch.equal(y, x_exp)
 
     # now test gradient cancellation
