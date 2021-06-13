@@ -2,7 +2,7 @@ import argparse
 import logging
 import sys
 
-from torchvision.datasets import MNIST
+from torchvision.datasets import CIFAR10
 from torch.utils.data import DataLoader
 from torchvision.transforms import ToTensor
 from torch.nn import CrossEntropyLoss
@@ -15,8 +15,8 @@ from bitorch.models.resnet import create_resnet
 
 
 def main(args: argparse.Namespace) -> None:
-    train_dataset = MNIST(root='./train', train=True, transform=ToTensor(), download=True)
-    test_dataset = MNIST(root='./test', train=False, transform=ToTensor(), download=True)
+    train_dataset = CIFAR10(root='./train', train=True, transform=ToTensor(), download=True)
+    test_dataset = CIFAR10(root='./test', train=False, transform=ToTensor(), download=True)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
 
@@ -28,7 +28,7 @@ def main(args: argparse.Namespace) -> None:
 
     logging.info("starting model training...")
     model = create_resnet(args.resnet_version, args.resnet_num_layers,
-                          classes=10, initial_layers="mnist", image_channels=1)
+                          classes=10, initial_layers="mnist", image_channels=3)
     train_model(model, train_loader, test_loader, CrossEntropyLoss(), epochs=args.epochs,
                 lr=args.lr, log_interval=args.log_interval, gpu=args.cuda)
     logging.info("model training finished!")
