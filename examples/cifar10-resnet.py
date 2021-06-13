@@ -17,8 +17,8 @@ from bitorch.models.resnet import create_resnet
 def main(args: argparse.Namespace) -> None:
     train_dataset = CIFAR10(root='./train', train=True, transform=ToTensor(), download=True)
     test_dataset = CIFAR10(root='./test', train=False, transform=ToTensor(), download=True)
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=8)
+    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=8)
 
     if args.logging is None:
         logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG, force=True)
