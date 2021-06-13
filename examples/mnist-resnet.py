@@ -2,9 +2,9 @@ import argparse
 import logging
 import sys
 
-from torchvision.datasets import mnist
+from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader
-from torchvision.transforms import ToTensor
+from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 from torch.nn import CrossEntropyLoss
 
 from train import train_model
@@ -15,11 +15,11 @@ from bitorch.models.resnet import create_resnet
 
 
 def main(args: argparse.Namespace) -> None:
-
-    train_dataset = mnist.MNIST(root='./train', train=True, transform=ToTensor(), download=True)
-    test_dataset = mnist.MNIST(root='./test', train=False, transform=ToTensor(), download=True)
+    train_dataset = MNIST(root='./train', train=True, transform=ToTensor(), download=True)
+    test_dataset = MNIST(root='./test', train=False, transform=ToTensor(), download=True)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size)
+
     if args.logging is None:
         logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG, force=True)
     else:
