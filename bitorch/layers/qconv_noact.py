@@ -17,16 +17,20 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
     Returns:
         Class: the quantized version of the base class
     """
-    class QConv(BaseClass):  # type: ignore
-        def __init__(self, *args, quantization: str = None, pad_value: float = None, **kwargs) -> None:  # type: ignore
+    class QConv_NoAct(BaseClass):  # type: ignore
+        def __init__(self,  # type: ignore
+                     *args,  # type: ignore
+                     weight_quantization: str = None,
+                     pad_value: float = None,
+                     **kwargs) -> None:  # type: ignore
             """initialization function for padding and quantization.
 
             Args:
-                quantization (str, optional): name of quantization function. Defaults to None.
+                weight_quantization (str, optional): name of quantization function. Defaults to None.
                 padding_value (float, optional): value used for padding the input sequence. Defaults to None.
             """
-            super(QConv, self).__init__(*args, **kwargs)
-            self.quantize = layerconfig.config.get_quantization_function(quantization)
+            super(QConv_NoAct, self).__init__(*args, **kwargs)
+            self.quantize = layerconfig.config.get_quantization_function(weight_quantization)
             self.pad_value = pad_value or layerconfig.config.get_padding_value()
 
         def _apply_padding(self, x: Tensor) -> Tensor:
@@ -58,7 +62,7 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
                 dilation=self.dilation,
                 groups=self.groups)
 
-    return QConv
+    return QConv_NoAct
 
 
 QConv1d_NoAct = make_q_convolution_noact(Conv1d, conv1d)

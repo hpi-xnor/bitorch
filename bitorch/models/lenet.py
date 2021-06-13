@@ -32,16 +32,15 @@ class LeNet(nn.Module):
                     self.num_channels_conv,
                     self.num_channels_conv,
                     kernel_size=5,
-                    activation="sign",
-                    quantization="sign"),
-                QActivation(),
+                    input_quantization="sign",
+                    weight_quantization="round"),
                 nn.BatchNorm2d(self.num_channels_conv),
                 nn.MaxPool2d(2, 2),
 
                 nn.Flatten(),
 
                 QActivation(activation="sign"),
-                QLinear(self.num_channels_conv * 4 * 4, self.num_fc, quantization="sign"),
+                QLinear(self.num_channels_conv * 4 * 4, self.num_fc, weight_quantization="sign"),
                 nn.BatchNorm1d(self.num_fc),
                 self.activation_function(),
 

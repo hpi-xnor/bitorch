@@ -16,16 +16,20 @@ def make_q_convolution(BaseClass: Type) -> Type:
         Class: the activated version of the base class
     """
     class QConv(BaseClass):  # type: ignore
-        def __init__(self, *args, activation: str = None, quantization: str = None, **kwargs) -> None:  # type: ignore
-            """initialization function for activation and quantization.
+        def __init__(self,  # type: ignore
+                     *args,  # type: ignore
+                     input_quantization: str = None,
+                     weight_quantization: str = None,
+                     **kwargs) -> None:  # type: ignore
+            """initialization function for quantization of inputs and weights.
 
             Args:
-                activation (str, optional): name of activation function to apply on inputs before forwarding
+                input_quantization (str, optional): name of quantization function to apply on inputs before forwarding
                     through the qconvolution layer. Defaults to None.
-                quantization (str, optional): name of quantization function. Defaults to None.
+                weight_quantization (str, optional): name of quantization function for weights. Defaults to None.
             """
-            super(QConv, self).__init__(*args, quantization=quantization, **kwargs)
-            self.activation = QActivation(activation)
+            super(QConv, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
+            self.activation = QActivation(input_quantization)
 
         def forward(self, input_tensor: Tensor) -> Tensor:
             """forward the input tensor through the activation and quantized convolution layer.
