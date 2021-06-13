@@ -337,6 +337,11 @@ class ResNet(Module):
 
 
 class ResNetV1(ResNet):
+    """ResNet V1 model from
+    `"Deep Residual Learning for Image Recognition"
+    <http://arxiv.org/abs/1512.03385>`_ paper.
+    """
+
     def __init__(
             self,
             block: Module,
@@ -344,7 +349,22 @@ class ResNetV1(ResNet):
             channels: list,
             classes: int,
             initial_layers: str = "imagenet",
-            image_channels: int = 3):
+            image_channels: int = 3) -> None:
+        """Creates ResNetV1 model.
+
+        Args:
+            block (Module): Block to be used for building the layers.
+            layers (list): layer sizes
+            channels (list): channel num used for input/output channel size of layers. there must always be one more
+                channels than there are layers.
+            classes (int): number of output classes
+            initial_layers (str, optional): name of set for initial layers. refer to common_layers.py.
+                Defaults to "imagenet".
+            image_channels (int, optional): input channels of images. Defaults to 3.
+
+        Raises:
+            ValueError: raised if the number of channels does not match number of layer + 1
+        """
         super(ResNetV1, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
@@ -365,6 +385,11 @@ class ResNetV1(ResNet):
 
 
 class ResNetV2(ResNet):
+    """ResNet V2 model from
+    `"Identity Mappings in Deep Residual Networks"
+    <https://arxiv.org/abs/1603.05027>`_ paper.
+    """
+
     def __init__(
             self,
             block: Module,
@@ -372,7 +397,22 @@ class ResNetV2(ResNet):
             channels: list,
             classes: int = 1000,
             initial_layers: str = "imagenet",
-            image_channels: int = 3):
+            image_channels: int = 3) -> None:
+        """Creates ResNetV2 model.
+
+        Args:
+            block (Module): Block to be used for building the layers.
+            layers (list): layer sizes
+            channels (list): channel num used for input/output channel size of layers. there must always be one more
+                channels than there are layers.
+            classes (int): number of output classes
+            initial_layers (str, optional): name of set for initial layers. refer to common_layers.py.
+                Defaults to "imagenet".
+            image_channels (int, optional): input channels of images. Defaults to 3.
+
+        Raises:
+            ValueError: raised if the number of channels does not match number of layer + 1
+        """
         super(ResNetV2, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
@@ -406,8 +446,27 @@ resnet_block_versions = [{'basic_block': BasicBlockV1, 'bottle_neck': Bottleneck
                          {'basic_block': BasicBlockV2, 'bottle_neck': BottleneckV2}]
 
 
-def create_resnet(version, num_layers, classes: int = 1000, initial_layers: str = "imagenet", image_channels: int = 3):
+def create_resnet(version: int,
+                  num_layers: int,
+                  classes: int = 1000,
+                  initial_layers: str = "imagenet",
+                  image_channels: int = 3) -> Module:
+    """Creates a resnet complying to given version and layer number.
 
+    Args:
+        version (int): version of resnet to be used. availavle versions are 1 or 2
+        num_layers (int): number of layers to be build.
+        classes (int, optional): number of output classes. Defaults to 1000.
+        initial_layers (str, optional): name of set of initial layers to be used. Defaults to "imagenet".
+        image_channels (int, optional): number of channels of input images. Defaults to 3.
+
+    Raises:
+        ValueError: raised if no resnet specification for given num_layers is listed in the resnet_spec dict above
+        ValueError: raised if invalid resnet version was passed
+
+    Returns:
+        Module: resnet model
+    """
     if num_layers not in resnet_spec:
         raise ValueError(f"No resnet spec for {num_layers} available!")
     if version not in [1, 2]:
@@ -419,7 +478,7 @@ def create_resnet(version, num_layers, classes: int = 1000, initial_layers: str 
     return resnet(block, layers, channels, classes, initial_layers, image_channels)
 
 
-def resnet18_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet18_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-18 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -434,7 +493,7 @@ def resnet18_v1(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     return create_resnet(1, 18, classes, inital_layers, image_channels)
 
 
-def resnet34_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet34_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -449,7 +508,7 @@ def resnet34_v1(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     return create_resnet(1, 34, classes, inital_layers, image_channels)
 
 
-def resnet50_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet50_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-50 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -464,7 +523,7 @@ def resnet50_v1(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     return create_resnet(1, 50, classes, inital_layers, image_channels)
 
 
-def resnet152_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet152_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-152 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -479,7 +538,7 @@ def resnet152_v1(classes: int = 1000, inital_layers: str = "imagenet", image_cha
     return create_resnet(1, 152, classes, inital_layers, image_channels)
 
 
-def resnet18_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet18_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-18 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -494,7 +553,7 @@ def resnet18_v2(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     return create_resnet(2, 18, classes, inital_layers, image_channels)
 
 
-def resnet34_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet34_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-34 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -509,7 +568,7 @@ def resnet34_v2(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     return create_resnet(2, 34, classes, inital_layers, image_channels)
 
 
-def resnet50_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet50_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-50 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -524,7 +583,7 @@ def resnet50_v2(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     return create_resnet(2, 50, classes, inital_layers, image_channels)
 
 
-def resnet152_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3):
+def resnet152_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
     """ResNet-152 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 

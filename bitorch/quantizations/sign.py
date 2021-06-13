@@ -3,6 +3,7 @@
 from .quantization import Quantization
 from typing import Tuple
 import torch
+import typing
 from torch.autograd import Function
 
 
@@ -27,6 +28,7 @@ class SignFunction(Function):
         return sign_tensor
 
     @staticmethod
+    @typing.no_type_check
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor,
@@ -43,6 +45,7 @@ class SignFunction(Function):
         return SignFunction._sign(input_tensor)
 
     @staticmethod
+    @typing.no_type_check
     def backward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:

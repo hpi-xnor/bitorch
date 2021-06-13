@@ -1,5 +1,6 @@
 """Round Function Implementation"""
 
+import typing
 import torch
 from typing import Tuple
 
@@ -11,6 +12,7 @@ class RoundFunction(Function):
     """Round Function for input quantization. Uses STE for backward pass"""
 
     @staticmethod
+    @typing.no_type_check
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor,
@@ -28,6 +30,7 @@ class RoundFunction(Function):
         return torch.round(torch.clamp(input_tensor, 0, 1) * max_value) / max_value
 
     @staticmethod
+    @typing.no_type_check
     def backward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:
