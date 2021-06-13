@@ -5,7 +5,7 @@ from bitorch.activations.round import Round
 import torch
 
 
-class Quantizations():
+class Quantization():
     """Class for storing quantization functions"""
 
     @staticmethod
@@ -16,12 +16,12 @@ class Quantizations():
             function_name (str): name of quanitzation function
 
         Returns:
-            bool: True, if function is valid member function of Quantizations class, False otherwise
+            bool: True, if function is valid member function of Quantization class, False otherwise
         """
         return (
             function_name not in ["valid_function_name", "from_name"] and
-            function_name in Quantizations.__dict__.keys() and
-            callable(getattr(Quantizations, function_name)))
+            function_name in Quantization.__dict__.keys() and
+            callable(getattr(Quantization, function_name)))
 
     @ staticmethod
     def from_name(function_name: str) -> torch.nn.Module:
@@ -37,9 +37,9 @@ class Quantizations():
         Returns:
             torch.nn.Module: Quantization Module
         """
-        if not Quantizations.valid_function_name(function_name):
+        if not Quantization.valid_function_name(function_name):
             raise ValueError(f"Quantization function name {function_name} is not valid!")
-        return getattr(Quantizations, function_name)()
+        return getattr(Quantization, function_name)()
 
     @ staticmethod
     def default_quantization() -> torch.nn.Module:
@@ -48,7 +48,7 @@ class Quantizations():
         Returns:
             torch.nn.Module: the default quantization module
         """
-        return Quantizations.sign()
+        return Quantization.sign()
 
     """
     Quantization functions
@@ -98,16 +98,15 @@ class LayerConfig():
             torch.nn.Module: Quantization module
         """
         if quantization_name is None:
-            return Quantizations.default_quantization()
-        return Quantizations.from_name(quantization_name)
+            return Quantization.default_quantization()
+        return Quantization.from_name(quantization_name)
 
     def default_quantization(self) -> torch.nn.Module:
-        return Quantizations.default_quantization()
+        return Quantization.default_quantization()
 
     def get_padding_value(self) -> float:
         return -1.
 
 
 # config object, global referencable
-global config
 config = LayerConfig()
