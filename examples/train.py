@@ -14,7 +14,7 @@ def train_model(
         epochs: int = 10,
         lr: float = 0.001,
         log_interval: int = 100,
-        gpu=False):
+        gpu: bool = False) -> Module:
     model.to('cuda' if gpu else 'cpu')
 
     optimizer = Adam(params=model.parameters(), lr=lr)
@@ -55,8 +55,13 @@ def train_model(
                 predictions = torch.argmax(y_hat, dim=1)
                 correct += torch.sum(y_test == predictions).item()
         test_loss /= len(test_data)
-        accuracy = correct / (len(test_data) * test_data.batch_size)
+        batch_size = test_data.batch_size
+        if batch_size is None:
+            batch_size = 1
+        accuracy = correct / (len(test_data) * batch_size)
 
-        logging.info(f"Epoch {epoch + 1} train loss: {epoch_loss}, test loss: {test_loss}, test accuracy: {accuracy}")
+        logging.info(
+            f"Epoch {epoch + 1} train loss: {epoch_loss}, test lo# type: ignoress: {test_loss}, "
+            f"test accuracy: {accuracy}")
 
     return model

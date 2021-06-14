@@ -17,7 +17,7 @@ TEST_INPUT_DATA = [
 
 @pytest.mark.parametrize("input_values", TEST_INPUT_DATA)
 def test_qlinear(input_values):
-    layer = QLinear(2, 2, bias=False, quantization="sign")
+    layer = QLinear(2, 2, bias=False, weight_quantization="sign")
     full_precision_layer = Linear(2, 2, bias=False)
     assert isinstance(layer.quantize, type(Quantization.sign()))
 

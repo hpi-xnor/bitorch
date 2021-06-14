@@ -9,16 +9,16 @@ from . import layerconfig
 
 
 class QLinear(Linear):
-    def __init__(self, *args, quantization: Optional[str] = None, **kwargs):  # type: ignore
+    def __init__(self, *args, weight_quantization: Optional[str] = None, **kwargs):  # type: ignore
         """Applys the given quantization function on weights before applying the linear operation.
 
         Args:
             *args (Argument list): positional arguments for linear layer
-            quantization (str, optional): Name of quantization function. Defaults to None.
+            weight_quantization (str, optional): Name of quantization function. Defaults to None.
             **kwargs (keyword Argument list): keyword arguments for linear layer
         """
         super(QLinear, self).__init__(*args, **kwargs)
-        self.quantize = layerconfig.config.get_quantization_function(quantization)
+        self.quantize = layerconfig.config.get_quantization_function(weight_quantization)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards x through the binary linear layer.
