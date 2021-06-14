@@ -69,8 +69,22 @@ class SignFunction(Function):
 class Sign(nn.Module):
     """Module for applying the sign function with straight through estimator in backward pass"""
 
-    def __init__(self) -> None:
-        super(Sign, self).__init__()
+    def __init__(self, gradient_cancelation_threshold: float = 1.0) -> None:
+        """Initializes gradient cancelation threshold.
 
-    def forward(self, x: torch.Tensor, t: float) -> torch.Tensor:
-        return SignFunction.apply(x, t)
+        Args:
+            gradient_cancelation_threshold (float, optional): threshold after which gradient is 0. Defaults to 1.0.
+        """
+        super(Sign, self).__init__()
+        self.gradient_cancelation_threshold = gradient_cancelation_threshold
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forwards the tensor through the sign function.
+
+        Args:
+            x (torch.Tensor): tensor to be forwarded.
+
+        Returns:
+            torch.Tensor: sign of tensor x
+        """
+        return SignFunction.apply(x, self.gradient_cancelation_threshold)
