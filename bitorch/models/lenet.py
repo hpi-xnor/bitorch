@@ -1,28 +1,28 @@
+import argparse
 from bitorch.layers import QLinear, QConv2d, QActivation
-from torch import nn, Tensor
+from torch import nn
+from .base import Model
 
 
-class LeNet(nn.Module):
+class LeNet(Model):
     """LeNet model, both in quantized and full precision version"""
 
     num_channels_conv = 64
     activation_function = nn.Tanh
     num_fc = 1000
     num_output = 10
+    name = "lenet"
 
-    def __init__(self, mode: str = "quantized") -> None:
+    def __init__(self, bits: int = 1) -> None:
         """builds the model, depending on mode in either quantized or full_precision mode
 
         Args:
-            mode (str, optional): build mode for lenet model, either 'quantized' or 'full_precision'.
-                Defaults to "quantized".
-
-        Raises:
-            ValueError: Thrown if unsupported mode was passed.
+            bits (int, optional): if bits < 32, quantized version of lenet is used, else full precision.
+                Default is 1.
         """
         super(LeNet, self).__init__()
-        if mode == "quantized":
-            self.model = nn.Sequential(
+        if bits < 32:
+            self._model = nn.Sequential(
                 nn.Conv2d(1, self.num_channels_conv, kernel_size=5),
                 self.activation_function(),
                 nn.MaxPool2d(2, 2),
@@ -46,8 +46,8 @@ class LeNet(nn.Module):
 
                 nn.Linear(self.num_fc, self.num_output),
             )
-        elif mode == "full_precision":
-            self.model = nn.Sequential(
+        else:
+            self._model = nn.Sequential(
                 nn.Conv2d(1, self.num_channels_conv, kernel_size=5),
                 nn.BatchNorm2d(self.num_channels_conv),
                 self.activation_function(),
@@ -66,17 +66,8 @@ class LeNet(nn.Module):
 
                 nn.Linear(self.num_fc, self.num_output),
             )
-        else:
-            raise ValueError(
-                f"mode {mode} not supported for lenet, please choose from either 'quantized' or 'full_precision'")
 
-    def forward(self, x: Tensor) -> Tensor:
-        """Forwards the input tensor through lenet
-
-        Args:
-            x (Tensor): input tensor
-
-        Returns:
-            Tensor: forwarded tensor
-        """
-        return self.model(x)
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        parser.add_argument("--bits", type=int, choices=[1, 32], required=True,
+                            help="number of bits to be used by lenet")
