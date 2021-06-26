@@ -8,12 +8,12 @@ models_by_name = {}
 current_dir = Path(__file__).resolve().parent
 for file in current_dir.iterdir():
     # grep all python files
-    if file.suffix == ".py":
+    if file.suffix == ".py" and file.stem != "__init__":
         module = import_module(f"{__name__}.{file.stem}")
-        for attr_name in dict(module):
+        for attr_name in dir(module):
             attr = getattr(module, attr_name)
 
-            if issubclass(attr, Model):
+            if isinstance(attr, type) and issubclass(attr, Model) and attr != Model:
                 if attr_name in models_by_name:
                     raise ImportError("Two models found in model package with same name!")
                 models_by_name[attr.name] = attr

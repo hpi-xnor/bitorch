@@ -1,24 +1,60 @@
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import Module
-from torch.nn.modules.loss import _Loss
-from torch.optim import Adam
+from torch.nn.modules.loss import CrossEntropyLoss
+from torch.optim import Adam, SGD
+from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR
 import logging
 from math import floor
+
+
+def create_optimizer(name, model, lr, momentum):
+    if name == "adam":
+        return Adam(params=model.parameters(), lr=lr)
+    elif name == "sgd":
+        return SGD(params=model.parameters(), lr=lr, momentum=momentum)
+    else:
+        raise ValueError(f"No optimizer with name {name} found!")
+
+
+def create_scheduler(scheduler_name, optimizer, lr_factor, lr_steps, epochs):
+    if scheduler_name == "step":
+        if not lr_steps:
+            raise ValueError("step scheduler chosen but no lr steps passed!")
+        return MultiStepLR(optimizer, lr_steps, lr_factor)
+    elif scheduler_name == "exponential":
+        return ExponentialLR(optimizer, lr_factor)
+    elif scheduler_name == "cosine":
+        return CosineAnnealingLR(optimizer, epochs)
+    elif not scheduler_name:
+        return None
+    else:
+        raise ValueError(f"no scheduler with name {scheduler_name} found!")
 
 
 def train_model(
         model: Module,
         train_data: DataLoader,
         test_data: DataLoader,
-        criterion: _Loss,
         epochs: int = 10,
+        optimizer_name: str = "adam",
+        lr_scheduler: str = None,
+        lr_factor: float = 0.1,
+        lr_steps: str = None,
+        momentum: float = 0.9,
         lr: float = 0.001,
         log_interval: int = 100,
-        gpu: bool = False) -> Module:
-    model = model.to('cuda' if gpu else 'cpu')
+        gpus: str = None) -> Module:
 
-    optimizer = Adam(params=model.parameters(), lr=lr)
+    criterion = CrossEntropyLoss()
+    if gpus:
+        device = "cuda:" + gpus
+    else:
+        device = "cpu"
+    model = model.to(device)
+
+    optimizer = create_optimizer(optimizer_name, model, lr, momentum)
+    scheduler = create_scheduler(lr_scheduler, optimizer, lr_factor, lr_steps, epochs)
 
     total_number_of_batches = epochs * len(train_data)
     current_number_of_batches = 0
@@ -29,8 +65,8 @@ def train_model(
         model.train()
         for idx, (x_train, y_train) in enumerate(train_data):
             optimizer.zero_grad()
-            x_train = x_train.to('cuda' if gpu else 'cpu')
-            y_train = y_train.to('cuda' if gpu else 'cpu')
+            x_train = x_train.to(device)
+            y_train = y_train.to(device)
 
             y_hat = model(x_train)
             loss = criterion(y_hat, y_train)
@@ -46,14 +82,17 @@ def train_model(
                     f"    (Progress: {progress}%) Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}")
         epoch_loss /= len(train_data)
 
+        if scheduler:
+            scheduler.step()
+
         model.eval()
         test_loss = 0.0
         correct = 0.0
         # now validate model with test dataset
         with torch.no_grad():
             for idx, (x_test, y_test) in enumerate(test_data):
-                x_test = x_test.to('cuda' if gpu else 'cpu')
-                y_test = y_test.to('cuda' if gpu else 'cpu')
+                x_test = x_test.to(device)
+                y_test = y_test.to(device)
 
                 y_hat = model(x_test)
                 test_loss += criterion(y_hat, y_test).item()

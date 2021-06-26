@@ -9,7 +9,7 @@ class CIFAR10(DatasetBaseClass):
     num_classes = 10
     shape = (1, 3, 32, 32)
 
-    def get_dataset(train: bool, directory: str, download: bool = True):
+    def get_dataset(self, train: bool, directory: str, download: bool = True):
         return cifar.CIFAR10(root=directory, train=train, transform=ToTensor(), download=download)
 
     def transform(self, x: torch.Tensor) -> torch.Tensor:

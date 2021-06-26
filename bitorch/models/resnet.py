@@ -1,3 +1,4 @@
+from bitorch.datasets.base import DatasetBaseClass
 from .base import Model
 from typing import List
 from bitorch.layers.qconv_noact import QConv2d_NoAct
@@ -442,7 +443,7 @@ Resnet specifications
 
 class Resnet(Model):
 
-    name = "Resnet"
+    name = "resnet"
 
     resnet_spec = {18: ('basic_block', [2, 2, 2, 2], [64, 64, 128, 256, 512]),
                    34: ('basic_block', [3, 4, 6, 3], [64, 64, 128, 256, 512]),
@@ -455,13 +456,13 @@ class Resnet(Model):
 
     def __init__(
             self,
-            version: int,
-            num_layers: int,
-            classes: int = 1000,
-            initial_layers: str = "imagenet",
-            image_channels: int = 3) -> None:
-        super(Resnet, self).__init__()
-        self._model = self.create_resnet(version, num_layers, classes, initial_layers, image_channels)
+            resnet_version: int,
+            resnet_num_layers: int,
+            dataset: DatasetBaseClass) -> None:
+        super(Resnet, self).__init__(dataset)
+        self._model = self.create_resnet(resnet_version, resnet_num_layers,
+                                         self._dataset.num_classes, self._dataset.name, self._dataset.shape[1])
+        self.name += f"{str(resnet_num_layers)}v{str(resnet_version)}"
 
     def create_resnet(self,
                       version: int,
@@ -496,7 +497,7 @@ class Resnet(Model):
         return resnet(block, layers, channels, classes, initial_layers, image_channels)
 
     @staticmethod
-    def add_argparse_arguments(parser: argparse.Parser):
+    def add_argparse_arguments(parser: argparse.ArgumentParser):
         parser.add_argument("--resnet-version", type=int, choices=[1, 2], required=True,
                             help="version of resnet to be used")
         parser.add_argument("--resnet-num-layers", type=int, choices=[18, 34, 50, 152], required=True,

@@ -1,4 +1,5 @@
 import argparse
+from bitorch.datasets.base import DatasetBaseClass
 from bitorch.layers import QLinear, QConv2d, QActivation
 from torch import nn
 from .base import Model
@@ -13,14 +14,14 @@ class LeNet(Model):
     num_output = 10
     name = "lenet"
 
-    def __init__(self, bits: int = 1) -> None:
+    def __init__(self, dataset: DatasetBaseClass, bits: int = 1) -> None:
         """builds the model, depending on mode in either quantized or full_precision mode
 
         Args:
             bits (int, optional): if bits < 32, quantized version of lenet is used, else full precision.
                 Default is 1.
         """
-        super(LeNet, self).__init__()
+        super(LeNet, self).__init__(dataset)
         if bits < 32:
             self._model = nn.Sequential(
                 nn.Conv2d(1, self.num_channels_conv, kernel_size=5),

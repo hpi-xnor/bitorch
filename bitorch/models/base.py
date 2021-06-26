@@ -6,7 +6,11 @@ from argparse import ArgumentParser
 class Model(Module):
     """Base class for Bitorch models"""
     name = "None"
-    _model = Module()
+
+    def __init__(self, dataset):
+        super(Model, self).__init__()
+        self._model = None
+        self._dataset = dataset
 
     @staticmethod
     def add_argparse_arguments(parser: ArgumentParser) -> None:
@@ -24,14 +28,6 @@ class Model(Module):
             Module: the main torch.nn.Module of this model
         """
         return self._model
-
-    def name(self) -> str:
-        """getter method for model name
-
-        Returns:
-            str: the name of the model
-        """
-        return self.name
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor through the model.

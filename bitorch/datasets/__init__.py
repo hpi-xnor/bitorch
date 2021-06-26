@@ -8,12 +8,12 @@ datasets_by_name = {}
 current_dir = Path(__file__).resolve().parent
 for file in current_dir.iterdir():
     # grep all python files
-    if file.suffix == ".py":
+    if file.suffix == ".py" and file.stem != "__init__":
         module = import_module(f"{__name__}.{file.stem}")
-        for attr_name in dict(module):
+        for attr_name in dir(module):
             attr = getattr(module, attr_name)
 
-            if issubclass(attr, DatasetBaseClass):
+            if isinstance(attr, type) and issubclass(attr, DatasetBaseClass) and attr != DatasetBaseClass:
                 if attr_name in datasets_by_name:
                     raise ImportError("Two datasets found in dataset package with same name!")
                 datasets_by_name[attr.name] = attr

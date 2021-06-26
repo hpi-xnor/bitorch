@@ -1,3 +1,4 @@
+from typing import Tuple
 import torch
 from torch.utils.data import Dataset
 from enum import Enum
@@ -48,7 +49,10 @@ class DatasetBaseClass(Dataset):
         pass
 
     def __getitem__(self, index: int) -> torch.Tensor:
-        return self.transform(self._dataset[index])
+        item = self._dataset[index]
+        if isinstance(item, Tuple):
+            return self.transform(item[0]), item[1]
+        return self.transform(item)
 
     def __len__(self):
         return len(self._dataset)
