@@ -11,7 +11,7 @@ class Augmentation(Enum):
     HIGH = 3
 
     @staticmethod
-    def from_string(level: str) -> Augmentation:
+    def from_string(level: str) -> Enum:
         return {
             "none": Augmentation.NONE,
             "low": Augmentation.LOW,
