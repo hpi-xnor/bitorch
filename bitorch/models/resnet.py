@@ -460,6 +460,7 @@ class Resnet(Model):
             resnet_num_layers: int,
             dataset: DatasetBaseClass) -> None:
         super(Resnet, self).__init__(dataset)
+        print(dataset.shape)
         self._model = self.create_resnet(resnet_version, resnet_num_layers,
                                          self._dataset.num_classes, self._dataset.name, self._dataset.shape[1])
         self.name += f"{str(resnet_num_layers)}v{str(resnet_version)}"

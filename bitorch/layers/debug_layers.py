@@ -229,5 +229,5 @@ class Shape_Print_Debug(_PrintDebug):
         Returns:
             torch.Tensor: input tensor x
         """
-        self._debug_tensor(torch.Tensor(x.shape))
+        self._debug_tensor(torch.tensor(x.shape))
         return x

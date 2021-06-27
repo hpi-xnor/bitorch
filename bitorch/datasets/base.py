@@ -37,7 +37,7 @@ class DatasetBaseClass(Dataset):
             self._dataset = self.augment_dataset(self._dataset, augmentation)
 
     def get_dataset(self, train: bool, directory: str, download: bool) -> Dataset:
-        raise NotImplementedError()
+        return Dataset()
 
     def transform(self, x: torch.Tensor) -> torch.Tensor:
         return x

@@ -1,4 +1,5 @@
 import argparse
+from bitorch.layers.debug_layers import Shape_Print_Debug
 from bitorch.datasets.base import DatasetBaseClass
 from bitorch.layers import QLinear, QConv2d, QActivation
 from torch import nn
@@ -22,9 +23,11 @@ class LeNet(Model):
                 Default is 1.
         """
         super(LeNet, self).__init__(dataset)
+        input_channels = dataset.shape[1]
         if bits < 32:
             self._model = nn.Sequential(
-                nn.Conv2d(1, self.num_channels_conv, kernel_size=5),
+                Shape_Print_Debug(name="at starts", debug_interval=1),
+                nn.Conv2d(input_channels, self.num_channels_conv, kernel_size=5),
                 self.activation_function(),
                 nn.MaxPool2d(2, 2),
                 nn.BatchNorm2d(self.num_channels_conv),
@@ -39,9 +42,11 @@ class LeNet(Model):
                 nn.MaxPool2d(2, 2),
 
                 nn.Flatten(),
+                Shape_Print_Debug(name="after flatten", debug_interval=1),
 
                 QActivation(activation="sign"),
-                QLinear(self.num_channels_conv * 4 * 4, self.num_fc, weight_quantization="sign"),
+                QLinear(self.num_channels_conv * 4 * 4,
+                        self.num_fc, weight_quantization="sign"),
                 nn.BatchNorm1d(self.num_fc),
                 self.activation_function(),
 
@@ -49,7 +54,7 @@ class LeNet(Model):
             )
         else:
             self._model = nn.Sequential(
-                nn.Conv2d(1, self.num_channels_conv, kernel_size=5),
+                nn.Conv2d(input_channels, self.num_channels_conv, kernel_size=5),
                 nn.BatchNorm2d(self.num_channels_conv),
                 self.activation_function(),
                 nn.MaxPool2d(2, 2),
