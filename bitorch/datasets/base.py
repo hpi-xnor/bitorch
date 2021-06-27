@@ -11,7 +11,7 @@ class Augmentation(Enum):
     HIGH = 3
 
     @staticmethod
-    def from_string(level: str) -> int:
+    def from_string(level: str) -> Augmentation:
         return {
             "none": Augmentation.NONE,
             "low": Augmentation.LOW,
@@ -23,14 +23,14 @@ class Augmentation(Enum):
 class DatasetBaseClass(Dataset):
     name = "None"
     num_classes = 0
-    shape = ()
+    shape = (0, 0, 0, 0)
 
     def __init__(
             self,
             train: bool,
             directory: str,
             download: bool = False,
-            augmentation: int = Augmentation.NONE) -> None:
+            augmentation: Augmentation = Augmentation.NONE) -> None:
         super(DatasetBaseClass, self).__init__()
         self._dataset = self.get_dataset(train, directory, download)
         if train:
@@ -42,17 +42,16 @@ class DatasetBaseClass(Dataset):
     def transform(self, x: torch.Tensor) -> torch.Tensor:
         return x
 
-    def augment_dataset(self, dataset: Dataset, augmentation_level: int = Augmentation.NONE):
+    def augment_dataset(self, dataset: Dataset, augmentation_level: Augmentation = Augmentation.NONE) -> Dataset:
         return dataset
 
-    def add_argparse_arguments(parser):
+    def add_argparse_arguments(parser) -> None:
         pass
 
-    def __getitem__(self, index: int) -> torch.Tensor:
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:  # type: ignore
         item = self._dataset[index]
-        if isinstance(item, Tuple):
+        if isinstance(item, tuple):
             return self.transform(item[0]), item[1]
-        return self.transform(item)
 
-    def __len__(self):
-        return len(self._dataset)
+    def __len__(self) -> int:
+        return len(self._dataset)  # type: ignore

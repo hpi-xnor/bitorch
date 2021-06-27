@@ -2,6 +2,7 @@ from torchvision.datasets import cifar
 from torchvision.transforms import ToTensor, Normalize
 import torch
 from .base import DatasetBaseClass
+from torch.utils.data import Dataset
 
 
 class CIFAR10(DatasetBaseClass):
@@ -9,7 +10,7 @@ class CIFAR10(DatasetBaseClass):
     num_classes = 10
     shape = (1, 3, 32, 32)
 
-    def get_dataset(self, train: bool, directory: str, download: bool = True):
+    def get_dataset(self, train: bool, directory: str, download: bool = True) -> Dataset:
         return cifar.CIFAR10(root=directory, train=train, transform=ToTensor(), download=download)
 
     def transform(self, x: torch.Tensor) -> torch.Tensor:

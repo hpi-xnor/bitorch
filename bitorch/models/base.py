@@ -1,3 +1,4 @@
+from bitorch.datasets.base import DatasetBaseClass
 from torch.nn import Module
 import torch
 from argparse import ArgumentParser
@@ -7,9 +8,9 @@ class Model(Module):
     """Base class for Bitorch models"""
     name = "None"
 
-    def __init__(self, dataset):
+    def __init__(self, dataset: DatasetBaseClass) -> None:
         super(Model, self).__init__()
-        self._model = None
+        self._model = Module()
         self._dataset = dataset
 
     @staticmethod

@@ -1,7 +1,7 @@
 from .base import Model
 from pathlib import Path
 from importlib import import_module
-from typing import List
+from typing import List, Type
 
 models_by_name = {}
 
@@ -21,7 +21,7 @@ for file in current_dir.iterdir():
                 globals()[attr_name] = attr
 
 
-def model_from_name(name: str) -> Model:
+def model_from_name(name: str) -> Type[Model]:
     """returns the model to which the name belongs to (name has to be the value of the models
     name-attribute)
 
@@ -45,4 +45,4 @@ def model_names() -> List:
     Returns:
         List: the model names
     """
-    return models_by_name.keys()
+    return list(models_by_name.keys())

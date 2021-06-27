@@ -497,14 +497,14 @@ class Resnet(Model):
         return resnet(block, layers, channels, classes, initial_layers, image_channels)
 
     @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser):
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         parser.add_argument("--resnet-version", type=int, choices=[1, 2], required=True,
                             help="version of resnet to be used")
         parser.add_argument("--resnet-num-layers", type=int, choices=[18, 34, 50, 152], required=True,
                             help="number of layers to be used inside resnet")
 
 
-def resnet18_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet18_v1(dataset: DatasetBaseClass) -> Module:
     """ResNet-18 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -516,10 +516,10 @@ def resnet18_v1(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     Returns:
         Module: resnet18_v1 model
     """
-    return Resnet(1, 18, classes, inital_layers, image_channels)
+    return Resnet(1, 18, dataset)
 
 
-def resnet34_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet34_v1(dataset: DatasetBaseClass) -> Module:
     """ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -531,10 +531,10 @@ def resnet34_v1(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     Returns:
         Module: resnet34_v1 model
     """
-    return Resnet(1, 34, classes, inital_layers, image_channels)
+    return Resnet(1, 34, dataset)
 
 
-def resnet50_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet50_v1(dataset: DatasetBaseClass) -> Module:
     """ResNet-50 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -546,10 +546,10 @@ def resnet50_v1(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     Returns:
         Module: resnet50_v1 model
     """
-    return Resnet(1, 50, classes, inital_layers, image_channels)
+    return Resnet(1, 50, dataset)
 
 
-def resnet152_v1(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet152_v1(dataset: DatasetBaseClass) -> Module:
     """ResNet-152 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -561,10 +561,10 @@ def resnet152_v1(classes: int = 1000, inital_layers: str = "imagenet", image_cha
     Returns:
         Module: resnet152_v1 model
     """
-    return Resnet(1, 152, classes, inital_layers, image_channels)
+    return Resnet(1, 152, dataset)
 
 
-def resnet18_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet18_v2(dataset: DatasetBaseClass) -> Module:
     """ResNet-18 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -576,10 +576,10 @@ def resnet18_v2(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     Returns:
         Module: resnet18_v2 model
     """
-    return Resnet(2, 18, classes, inital_layers, image_channels)
+    return Resnet(2, 18, dataset)
 
 
-def resnet34_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet34_v2(dataset: DatasetBaseClass) -> Module:
     """ResNet-34 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -591,10 +591,10 @@ def resnet34_v2(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     Returns:
         Module: resnet34_v2 model
     """
-    return Resnet(2, 34, classes, inital_layers, image_channels)
+    return Resnet(2, 34, dataset)
 
 
-def resnet50_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet50_v2(dataset: DatasetBaseClass) -> Module:
     """ResNet-50 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -606,10 +606,10 @@ def resnet50_v2(classes: int = 1000, inital_layers: str = "imagenet", image_chan
     Returns:
         Module: resnet50_v2 model
     """
-    return Resnet(2, 50, classes, inital_layers, image_channels)
+    return Resnet(2, 50, dataset)
 
 
-def resnet152_v2(classes: int = 1000, inital_layers: str = "imagenet", image_channels: int = 3) -> Module:
+def resnet152_v2(dataset: DatasetBaseClass) -> Module:
     """ResNet-152 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -621,4 +621,4 @@ def resnet152_v2(classes: int = 1000, inital_layers: str = "imagenet", image_cha
     Returns:
         Module: resnet152_v2 model
     """
-    return Resnet(2, 152, classes, inital_layers, image_channels)
+    return Resnet(2, 152, dataset)

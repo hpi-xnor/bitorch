@@ -1,6 +1,6 @@
 from .base import DatasetBaseClass
 from pathlib import Path
-from typing import List
+from typing import List, Type
 from importlib import import_module
 
 datasets_by_name = {}
@@ -21,7 +21,7 @@ for file in current_dir.iterdir():
                 globals()[attr_name] = attr
 
 
-def dataset_from_name(name: str) -> DatasetBaseClass:
+def dataset_from_name(name: str) -> Type[DatasetBaseClass]:
     """returns the dataset to which the name belongs to (name has to be the value of the datasets
     name-attribute)
 
@@ -45,4 +45,4 @@ def dataset_names() -> List:
     Returns:
         List: the dataset names
     """
-    return datasets_by_name.keys()
+    return list(datasets_by_name.keys())
