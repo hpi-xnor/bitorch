@@ -1,4 +1,3 @@
-from bitorch.datasets.cifar10 import CIFAR10
 from bitorch.datasets import CIFAR10, dataset_from_name
 from bitorch.models import models_by_name, LeNet, Resnet
 import torch
@@ -39,5 +38,4 @@ def test_models(model_class, kwargs, input_shape) -> None:
 
     model = model_class(dataset=dataset, **kwargs)
     input_values = torch.Tensor(np.random.uniform(0, 1.0, input_shape))
-    print(f"got input shape: {input_values.shape}")
     model(input_values)

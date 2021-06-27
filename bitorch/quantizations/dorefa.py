@@ -5,10 +5,10 @@ import torch
 from typing import Tuple
 
 from torch.autograd.function import Function
-from .quantization import Quantization
+from .base import Quantization
 
 
-class RoundFunction(Function):
+class DoReFaFunction(Function):
     """Round Function for input quantization. Uses STE for backward pass"""
 
     @staticmethod
@@ -48,8 +48,10 @@ class RoundFunction(Function):
         return output_grad, None
 
 
-class Round(Quantization):
+class DoReFa(Quantization):
     """Module for applying the round function with straight through estimator in backward pass"""
+
+    name = "dorefa"
 
     def __init__(self, bits: int = 1) -> None:
         """Initiates quantization bits.
@@ -57,16 +59,16 @@ class Round(Quantization):
         Args:
             bits (int, optional): number of bits to quantize into. Defaults to 1.
         """
-        super(Round, self).__init__()
+        super(DoReFa, self).__init__()
         self.bits = bits
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
-        """rounds the tensor to desired bit resolution.
+        """DoReFas the tensor to desired bit resolution.
 
         Args:
             x (torch.Tensor): tensor to be forwarded.
 
         Returns:
-            torch.Tensor: rounded tensor x
+            torch.Tensor: DoReFaed tensor x
         """
-        return RoundFunction.apply(x, self.bits)
+        return DoReFaFunction.apply(x, self.bits)

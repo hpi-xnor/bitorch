@@ -1,8 +1,8 @@
-from bitorch.quantizations import Round
+from bitorch.quantizations import DoReFa
 import torch
 import pytest
 
-round_ste = Round(bits=2)
+round_ste = DoReFa(bits=2)
 
 TEST_INPUT_DATA = [
     ([0.89, 0.90, 0.95, 1.0, 2.0, 4.0], [1] * 6),
