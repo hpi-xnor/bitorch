@@ -26,7 +26,6 @@ class LeNet(Model):
         input_channels = dataset.shape[1]
         if bits < 32:
             self._model = nn.Sequential(
-                Shape_Print_Debug(name="at starts", debug_interval=1),
                 nn.Conv2d(input_channels, self.num_channels_conv, kernel_size=5),
                 self.activation_function(),
                 nn.MaxPool2d(2, 2),
@@ -42,7 +41,6 @@ class LeNet(Model):
                 nn.MaxPool2d(2, 2),
 
                 nn.Flatten(),
-                Shape_Print_Debug(name="after flatten", debug_interval=1),
 
                 QActivation(activation="sign"),
                 QLinear(self.num_channels_conv * 4 * 4,

@@ -86,7 +86,7 @@ def train_model(
             if idx % log_interval == 0 and idx > 0:
                 progress = floor((current_number_of_batches / total_number_of_batches) * 100000.0) / 1000.0
                 logging.info(
-                    f"    (Progress: {progress}%) Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}")
+                    f"    (Progress: {progress}%) Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}, current lr: {scheduler.get_last_lr()}")
         epoch_loss /= len(train_data)
 
         if scheduler:
