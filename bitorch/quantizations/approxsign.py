@@ -60,4 +60,4 @@ class ApproxSign(Quantization):
         Returns:
             torch.Tensor: sign of tensor x
         """
-        return ApproxSign.apply(x)
+        return ApproxSign.apply(x)  # type: ignore

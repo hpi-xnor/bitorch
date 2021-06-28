@@ -55,4 +55,4 @@ class SteHeaviside(Quantization):
         Returns:
             torch.Tensor: sign of tensor x
         """
-        return SteHeaviside.apply(x, self.gradient_cancelation_threshold)
+        return SteHeaviside.apply(x, self.gradient_cancelation_threshold)  # type: ignore
