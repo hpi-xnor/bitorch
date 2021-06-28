@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import sys
+from typing import Tuple
 from bitorch.models import model_from_name, model_names
 from bitorch.datasets import dataset_names
 
@@ -24,8 +25,8 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
                            help="initial learning rate (default: 0.01)")
     optimizer.add_argument('--lr-factor', default=0.1, type=float,
                            help='learning rate decay ratio. this is used only by the step and exponential lr scheduler')
-    optimizer.add_argument('--lr-steps', default='30,60,90', type=str,
-                           help='list of learning rate decay epochs as in str. this is used only by the step scheduler')
+    optimizer.add_argument('--lr-steps', nargs="*", required=False, default=[30, 60, 90],
+                           help='list of learning rate decay epochs as list. this is used only by the step scheduler')
     optimizer.add_argument('--momentum', type=float, default=0.9,
                            help='momentum value for optimizer, default is 0.9. only used for sgd optimizer')
     optimizer.add_argument('--optimizer', type=str, required=False, default="adam", choices=["adam", "sgd"],
@@ -62,7 +63,7 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                         help="level of augmentation to be used in data preparation (default 'none')")
 
 
-def add_model_args(model_class: object):
+def create_model_argparser(model_class: object) -> ArgumentParser:
     model_parser = ArgumentParser(add_help=False)
     model_class.add_argparse_arguments(model_parser)
     return model_parser
@@ -75,13 +76,13 @@ def help_in_args() -> bool:
     return False
 
 
-def add_all_model_args(parser: ArgumentParser):
+def add_all_model_args(parser: ArgumentParser) -> None:
     for model_name in model_names():
         model_group = parser.add_argument_group(model_name, f"parameters for {model_name} model")
-        model_from_name(model_name).add_argparse_arguments(model_group)
+        model_from_name(model_name).add_argparse_arguments(model_group)  # type: ignore
 
 
-def create_argparser():
+def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
     parser = ArgumentParser(description="Bitorch Image Classification")
     add_logging_args(parser)
     add_training_args(parser)
@@ -95,5 +96,5 @@ def create_argparser():
     args, _ = parser.parse_known_args()
 
     model_class = model_from_name(args.model)
-    model_parser = add_model_args(model_class)
+    model_parser = create_model_argparser(model_class)
     return parser, model_parser

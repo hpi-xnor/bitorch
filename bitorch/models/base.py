@@ -1,5 +1,6 @@
 from bitorch.datasets.base import DatasetBaseClass
 from torch.nn import Module
+from typing import Union, Type
 import torch
 from argparse import ArgumentParser
 
@@ -8,7 +9,7 @@ class Model(Module):
     """Base class for Bitorch models"""
     name = "None"
 
-    def __init__(self, dataset: DatasetBaseClass) -> None:
+    def __init__(self, dataset: Union[DatasetBaseClass, Type[DatasetBaseClass]]) -> None:
         super(Model, self).__init__()
         self._model = Module()
         self._dataset = dataset

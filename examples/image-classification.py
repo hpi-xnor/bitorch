@@ -5,15 +5,15 @@ import logging
 
 sys.path.append("../")
 
-from arg_parser import create_argparser
-from train import train_model
-from bitorch.datasets.base import Augmentation
-from bitorch.models import model_from_name
-from torch.utils.data import DataLoader
-from bitorch.datasets import dataset_from_name
+from arg_parser import create_argparser  # noqa: E402
+from train import train_model  # noqa: E402
+from bitorch.datasets.base import Augmentation  # noqa: E402
+from bitorch.models import model_from_name  # noqa: E402
+from torch.utils.data import DataLoader  # noqa: E402
+from bitorch.datasets import dataset_from_name  # noqa: E402
 
 
-def set_logging(args):
+def set_logging(args: argparse.Namespace) -> None:
     log_level_name = args.log_level.upper()
     log_level = getattr(logging, log_level_name)
 
@@ -31,7 +31,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     augmentation_level = Augmentation.from_string(args.augmentation)
     logging.info(f"using {dataset.name} dataset...")
     train_dataset = dataset(train=True, directory=args.dataset_train_dir,
-                            download=args.download, augmentation=augmentation_level)
+                            download=args.download, augmentation=augmentation_level)  # type: ignore
     test_dataset = dataset(train=False, directory=args.dataset_test_dir, download=args.download)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
@@ -39,7 +39,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model_arg_dict = vars(model_args)
     logging.info(f"got model args as dict: {model_arg_dict}")
-    model = model_from_name(args.model)(**model_arg_dict, dataset=dataset)
+    model = model_from_name(args.model)(**model_arg_dict, dataset=dataset)  # type: ignore
     logging.info(f"using {model.name} model...")
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
     train_model(model, train_loader, test_loader, epochs=args.epochs, optimizer_name=args.optimizer,

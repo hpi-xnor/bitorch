@@ -1,14 +1,16 @@
 import torch
+from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 from torch.nn import Module
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.optim import Adam, SGD
-from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR
+from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR, _LRScheduler
 import logging
+from typing import Union, Optional
 from math import floor
 
 
-def create_optimizer(name, model, lr, momentum):
+def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Optimizer:
     if name == "adam":
         return Adam(params=model.parameters(), lr=lr)
     elif name == "sgd":
@@ -17,7 +19,12 @@ def create_optimizer(name, model, lr, momentum):
         raise ValueError(f"No optimizer with name {name} found!")
 
 
-def create_scheduler(scheduler_name, optimizer, lr_factor, lr_steps, epochs):
+def create_scheduler(
+        scheduler_name: Optional[str],
+        optimizer: Optimizer,
+        lr_factor: float,
+        lr_steps: Optional[list],
+        epochs: int) -> Union[_LRScheduler, None]:
     if scheduler_name == "step":
         if not lr_steps:
             raise ValueError("step scheduler chosen but no lr steps passed!")
@@ -54,7 +61,7 @@ def train_model(
     model = model.to(device)
 
     optimizer = create_optimizer(optimizer_name, model, lr, momentum)
-    scheduler = create_scheduler(lr_scheduler, optimizer, lr_factor, lr_steps, epochs)
+    scheduler = create_scheduler(lr_scheduler, optimizer, lr_factor, lr_steps, epochs)  # type: ignore
 
     total_number_of_batches = epochs * len(train_data)
     current_number_of_batches = 0
