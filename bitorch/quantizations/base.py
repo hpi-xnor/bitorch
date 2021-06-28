@@ -11,7 +11,7 @@ class Quantization(nn.Module):
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """quantize the input tensor. It is recommended to use a torch.Function to also maniputlate backward behaiviour. See
-        the implementations of sign or round quantization functions for more examples.
+        the implementations of sign or dorefa quantization functions for more examples.
 
         Args:
             x (torch.Tensor): the input to be quantized

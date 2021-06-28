@@ -1,4 +1,4 @@
-"""Round Function Implementation"""
+"""Dorefa Function Implementation"""
 
 import typing
 import torch
@@ -9,7 +9,7 @@ from .base import Quantization
 
 
 class DoReFaFunction(Function):
-    """Round Function for input quantization. Uses STE for backward pass"""
+    """DoReFa Function for input quantization. Uses STE for backward pass"""
 
     @staticmethod
     @typing.no_type_check
@@ -20,7 +20,7 @@ class DoReFaFunction(Function):
         """Quantizes the input tensor into 'bits' resolution
 
         Args:
-            input_tensor (tensor): the input values to the Round function
+            input_tensor (tensor): the input values to the DoReFa function
             bits (int): the bits to quantize into
 
         Returns:
@@ -49,7 +49,7 @@ class DoReFaFunction(Function):
 
 
 class DoReFa(Quantization):
-    """Module for applying the round function with straight through estimator in backward pass"""
+    """Module for applying the dorefa function with straight through estimator in backward pass"""
 
     name = "dorefa"
 

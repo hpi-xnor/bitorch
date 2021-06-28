@@ -2,7 +2,6 @@
 
 from torch import tensor
 from .base import Quantization
-from typing import Tuple
 import torch
 import typing
 

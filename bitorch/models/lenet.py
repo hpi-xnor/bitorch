@@ -37,7 +37,7 @@ class LeNet(Model):
                     self.num_channels_conv,
                     kernel_size=5,
                     input_quantization="sign",
-                    weight_quantization="round"),
+                    weight_quantization="dorefa"),
                 nn.BatchNorm2d(self.num_channels_conv),
                 nn.MaxPool2d(2, 2),
 

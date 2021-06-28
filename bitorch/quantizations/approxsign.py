@@ -1,10 +1,8 @@
 """Sign Function Implementation"""
 
 from .base import Quantization
-from typing import Tuple
 import torch
 import typing
-from torch.autograd import Function
 from .sign import SignFunction
 
 
