@@ -2,3 +2,4 @@ numpy
 torch
 torchvision
 matplotlib
+tensorboardX

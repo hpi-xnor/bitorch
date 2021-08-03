@@ -29,7 +29,7 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
                            help='list of learning rate decay epochs as list. this is used only by the step scheduler')
     optimizer.add_argument('--momentum', type=float, default=0.9,
                            help='momentum value for optimizer, default is 0.9. only used for sgd optimizer')
-    optimizer.add_argument('--optimizer', type=str, required=False, default="adam", choices=["adam", "sgd"],
+    optimizer.add_argument('--optimizer', type=str, required=False, default="adam", choices=["adam", "sgd", "radam"],
                            help='the optimizer to use. default is adam.')
 
 
@@ -61,7 +61,12 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                         help="number of workers to be used for dataloading (default: 0)")
     parser.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
                         help="level of augmentation to be used in data preparation (default 'none')")
-
+    data.add_argument("--nv-dali", action="store_true", required=False, default=False,
+                      help="enables nv-dali dataloader, install DALI from https://www.github.com/NVIDIA/DALI")
+    data.add_argument("--nv-dali-gpu-id", type=int, default=0, required=False,
+                      help="choose gpu id for dali pre-processing")
+    data.add_argument("--nv-dali-cpu", action="store_true", required=False, default=False,
+                      help="uses dali-CPU dataloader")
 
 def create_model_argparser(model_class: object) -> ArgumentParser:
     model_parser = ArgumentParser(add_help=False)

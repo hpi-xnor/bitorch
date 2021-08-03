@@ -3,7 +3,7 @@ import sys
 import logging
 
 
-sys.path.append("../")
+sys.path.append("../../")
 
 from arg_parser import create_argparser  # noqa: E402
 from train import train_model  # noqa: E402
@@ -11,7 +11,8 @@ from bitorch.datasets.base import Augmentation  # noqa: E402
 from bitorch.models import model_from_name  # noqa: E402
 from torch.utils.data import DataLoader  # noqa: E402
 from bitorch.datasets import dataset_from_name  # noqa: E402
-
+# TODO: add tensorboard support!
+# from tensorboardX import SummaryWriter
 
 def set_logging(args: argparse.Namespace) -> None:
     log_level_name = args.log_level.upper()
@@ -28,14 +29,20 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     set_logging(args)
 
     dataset = dataset_from_name(args.dataset)
-    augmentation_level = Augmentation.from_string(args.augmentation)
-    logging.info(f"using {dataset.name} dataset...")
-    train_dataset = dataset(train=True, directory=args.dataset_train_dir,
-                            download=args.download, augmentation=augmentation_level)  # type: ignore
-    test_dataset = dataset(train=False, directory=args.dataset_test_dir, download=args.download)
+    if dataset.name == 'imagenet' and args.nv_dali:
+        from examples.image_classification.dali_helper import create_dali_data_loader
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
+        logging.info(f"using {dataset.name} dataset and NV-DALI data loader ...")
+        train_loader, test_loader = create_dali_data_loader(dataset, args)
+    else:
+        augmentation_level = Augmentation.from_string(args.augmentation)
+        logging.info(f"using {dataset.name} dataset...")
+        train_dataset = dataset(train=True, directory=args.dataset_train_dir,
+                                download=args.download, augmentation=augmentation_level)  # type: ignore
+        test_dataset = dataset(train=False, directory=args.dataset_test_dir, download=args.download)
+
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
+        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
 
     model_arg_dict = vars(model_args)
     logging.info(f"got model args as dict: {model_arg_dict}")

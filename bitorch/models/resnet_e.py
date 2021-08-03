@@ -202,7 +202,7 @@ ResNet-e specifications
 
 class Resnet_E(Model):
 
-    name = "Resnet_E"
+    name = "ResnetE"
 
     resnet_spec = {18: ('basic_block', [2, 2, 2, 2], [64, 64, 128, 256, 512]),
                    34: ('basic_block', [3, 4, 6, 3], [64, 64, 128, 256, 512])}
@@ -245,7 +245,7 @@ class Resnet_E(Model):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--num-layers", type=int, choices=[18, 34], required=True,
+        parser.add_argument("--resnetE-num-layers", type=int, choices=[18, 34], required=True,
                             help="number of layers to be used inside resnetE")
 
 
