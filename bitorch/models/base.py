@@ -5,12 +5,11 @@ import torch
 from argparse import ArgumentParser
 
 
-class Model(Module):
+class Model(object):
     """Base class for Bitorch models"""
     name = "None"
 
     def __init__(self, dataset: Union[DatasetBaseClass, Type[DatasetBaseClass]]) -> None:
-        super(Model, self).__init__()
         self._model = Module()
         self._dataset = dataset
 
@@ -31,7 +30,7 @@ class Model(Module):
         """
         return self._model
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def __call__(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor through the model.
 
         Args:

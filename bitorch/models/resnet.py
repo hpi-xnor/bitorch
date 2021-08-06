@@ -505,7 +505,12 @@ class Resnet(Model):
                             help="number of layers to be used inside resnet")
 
 
-def resnet18_v1(dataset: DatasetBaseClass) -> Module:
+# class Resnet18_v1(Resnet):
+#     def __init__(self, *args, **kwargs):
+#         super(Resnet18_v1, self).__init__(1, 18, *args, **kwargs)
+
+
+def resnet18_v1(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-18 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -515,12 +520,12 @@ def resnet18_v1(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet18_v1 model
+        Resnet: resnet18_v1 model
     """
     return Resnet(1, 18, dataset)
 
 
-def resnet34_v1(dataset: DatasetBaseClass) -> Module:
+def resnet34_v1(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -530,12 +535,12 @@ def resnet34_v1(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet34_v1 model
+        Resnet: resnet34_v1 model
     """
     return Resnet(1, 34, dataset)
 
 
-def resnet50_v1(dataset: DatasetBaseClass) -> Module:
+def resnet50_v1(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-50 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -545,12 +550,12 @@ def resnet50_v1(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet50_v1 model
+        Resnet: resnet50_v1 model
     """
     return Resnet(1, 50, dataset)
 
 
-def resnet152_v1(dataset: DatasetBaseClass) -> Module:
+def resnet152_v1(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-152 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -560,12 +565,12 @@ def resnet152_v1(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet152_v1 model
+        Resnet: resnet152_v1 model
     """
     return Resnet(1, 152, dataset)
 
 
-def resnet18_v2(dataset: DatasetBaseClass) -> Module:
+def resnet18_v2(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-18 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -575,12 +580,12 @@ def resnet18_v2(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet18_v2 model
+        Resnet: resnet18_v2 model
     """
     return Resnet(2, 18, dataset)
 
 
-def resnet34_v2(dataset: DatasetBaseClass) -> Module:
+def resnet34_v2(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-34 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -590,12 +595,12 @@ def resnet34_v2(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet34_v2 model
+        Resnet: resnet34_v2 model
     """
     return Resnet(2, 34, dataset)
 
 
-def resnet50_v2(dataset: DatasetBaseClass) -> Module:
+def resnet50_v2(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-50 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -605,12 +610,12 @@ def resnet50_v2(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet50_v2 model
+        Resnet: resnet50_v2 model
     """
     return Resnet(2, 50, dataset)
 
 
-def resnet152_v2(dataset: DatasetBaseClass) -> Module:
+def resnet152_v2(dataset: DatasetBaseClass) -> Resnet:
     """ResNet-152 v2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
 
@@ -620,6 +625,6 @@ def resnet152_v2(dataset: DatasetBaseClass) -> Module:
         image_channels (int, optional): color channels of input images. Defaults to 3.
 
     Returns:
-        Module: resnet152_v2 model
+        Resnet: resnet152_v2 model
     """
     return Resnet(2, 152, dataset)

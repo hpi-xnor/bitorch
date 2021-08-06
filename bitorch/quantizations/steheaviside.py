@@ -27,7 +27,7 @@ class SteHeavisideFunction(SignFunction):
             tensor: binarized input tensor
         """
         ctx.save_for_backward(input_tensor, torch.tensor(threshold))
-        sign_tensor = torch.sign(tensor)
+        sign_tensor = torch.sign(input_tensor)
         sign_tensor[sign_tensor < 0] = 0
         return sign_tensor
 
@@ -55,4 +55,4 @@ class SteHeaviside(Quantization):
         Returns:
             torch.Tensor: sign of tensor x
         """
-        return SteHeaviside.apply(x, self.gradient_cancelation_threshold)  # type: ignore
+        return SteHeavisideFunction.apply(x, self.gradient_cancelation_threshold)  # type: ignore
