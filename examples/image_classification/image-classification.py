@@ -14,6 +14,7 @@ from bitorch.datasets import dataset_from_name  # noqa: E402
 # TODO: add tensorboard support!
 # from tensorboardX import SummaryWriter
 
+
 def set_logging(args: argparse.Namespace) -> None:
     """applies cli configuration to logging
 

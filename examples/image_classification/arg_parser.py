@@ -88,6 +88,7 @@ def add_dataset_args(parser: ArgumentParser) -> None:
     data.add_argument("--nv-dali-cpu", action="store_true", required=False, default=False,
                       help="uses dali-CPU dataloader")
 
+
 def create_model_argparser(model_class: object) -> ArgumentParser:
     """adds model specific cli arguments from model_class object
 

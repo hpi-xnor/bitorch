@@ -17,6 +17,7 @@ class CIFAR10(DatasetBaseClass):
         transform = Normalize([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010])
         return transform(x)
 
+
 class CIFAR100(DatasetBaseClass):
     name = "cifar100"
     num_classes = 100

@@ -31,7 +31,7 @@ def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Op
     elif name == "sgd":
         return SGD(params=model.parameters(), lr=lr, momentum=momentum)
     elif name == "radam":
-        return RAdam(params=model.parameters(), lr=lr, degenerated_to_sgd = False)
+        return RAdam(params=model.parameters(), lr=lr, degenerated_to_sgd=False)
     else:
         raise ValueError(f"No optimizer with name {name} found!")
 

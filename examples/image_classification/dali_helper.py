@@ -4,13 +4,15 @@ try:
     import nvidia.dali.ops as ops
     import nvidia.dali.types as types
 except ImportError:
-    raise ImportError("NV-DALI has not been installed yet, please install DALI first (https://www.github.com/NVIDIA/DALI).")
+    raise ImportError("NV-DALI has not been installed yet, please install DALI first "
+                      "(https://www.github.com/NVIDIA/DALI).")
 
 
 class HybridTrainPipe(Pipeline):
-    '''
-    TODO: there are some magic numbers in this class, we should provide more comments for them, or even find a better solution?
-    '''
+    """TODO: there are some magic numbers in this class, we should provide more comments for them,
+    or even find a better solution?
+    """
+
     def __init__(self, batch_size, num_threads, device_id, data_dir, crop, dali_cpu=True):
         super(HybridTrainPipe, self).__init__(batch_size, num_threads, device_id, seed=12 + device_id,
                                               set_affinity=True)
@@ -51,9 +53,9 @@ class HybridTrainPipe(Pipeline):
 
 
 class HybridValPipe(Pipeline):
-    '''
+    """
     TODO: add description here!
-    '''
+    """
     def __init__(self, batch_size, num_threads, device_id, data_dir, crop, size):
         super(HybridValPipe, self).__init__(batch_size, num_threads, device_id, seed=12 + device_id, set_affinity=True)
 
@@ -80,24 +82,24 @@ class HybridValPipe(Pipeline):
         #  del images, self.jpegs
         return [output, self.labels]
 
+
 def create_dali_data_loader(dataset, args, img_crop_size=224, img_size_val=256):
-    '''
-    creates nv-dali dataloader for image classification.
+    """creates nv-dali dataloader for image classification.
     :param dataset: dataset information
     :param args: input args
     :param img_crop_size: image crop size
     :param img_size_val: image size for validation
     :return: data loader for training and validation
-    '''
+    """
 
     pipe = HybridTrainPipe(batch_size=args.batch_size, num_threads=args.num_workers, device_id=args.nv_dali_gpu_id,
                            data_dir=args.dataset_train_dir, crop=img_crop_size, dali_cpu=args.nv_dali_cpu)
     pipe.build()
-    train_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader") / 1), auto_reset = True)
+    train_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")/1), auto_reset = True)
 
     pipe = HybridValPipe(batch_size=args.batch_size, num_threads=args.num_workers, device_id=args.nv_dali_gpu_id,
                          data_dir=args.dataset_test_dir, crop=img_crop_size, size=img_size_val)
     pipe.build()
-    test_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader") / 1), auto_reset = True)
+    test_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")/1), auto_reset = True)
 
     return train_loader, test_loader

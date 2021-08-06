@@ -11,6 +11,7 @@ from bitorch.models.common_layers import make_initial_layers
 
 __all__ = ['resnetE18', 'resnetE34', 'Resnet_E']
 
+
 class BasicBlock(Module):
     """BasicBlock from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
@@ -77,7 +78,6 @@ class BasicBlock(Module):
         return x + residual
 
 
-
 class SpecificResnet(Module):
     """Superclass for ResNet models"""
 
@@ -108,7 +108,7 @@ class SpecificResnet(Module):
 
         # this tricks adds shortcut connections between original resnet blocks
         # we multiple number of blocks by 2, but add only one layer instead of two in each block
-        layers = layers*2
+        layers = layers * 2
 
         layer_list: List[nn.Module] = []
         layer_list.append(block(in_channels, out_channels, stride))
@@ -218,10 +218,10 @@ class Resnet_E(Model):
         self.name += f"{str(num_layers)}"
 
     def create(self,
-                      num_layers: int,
-                      classes: int = 1000,
-                      initial_layers: str = "imagenet",
-                      image_channels: int = 3) -> Module:
+              num_layers: int,
+              classes: int = 1000,
+              initial_layers: str = "imagenet",
+              image_channels: int = 3) -> Module:
         """Creates a ResNetE complying to given layer number.
 
         Args:
@@ -277,4 +277,3 @@ def resnetE34(dataset: DatasetBaseClass) -> Module:
         Module: resnet34_v1 model
     """
     return Resnet_E(1, 34, dataset)
-
