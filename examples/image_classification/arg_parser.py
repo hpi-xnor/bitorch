@@ -6,6 +6,11 @@ from bitorch.datasets import dataset_names
 
 
 def add_logging_args(parser: ArgumentParser) -> None:
+    """adds cli parameters for logging configuration
+
+    Args:
+        parser (ArgumentParser): the main argument parser
+    """
     log = parser.add_argument_group("Logging", "parameters for logging")
     log.add_argument("--log-level", type=str, required=False, default="info",
                      choices=["debug", "info", "warning", "error", "critical"],
@@ -17,6 +22,11 @@ def add_logging_args(parser: ArgumentParser) -> None:
 
 
 def add_optimizer_args(parser: ArgumentParser) -> None:
+    """adds cli parameters for optimizer configuration
+
+    Args:
+        parser (ArgumentParser): the main argument parser
+    """
     optimizer = parser.add_argument_group("Optimizer", "parameters for optimizer")
     optimizer.add_argument("--lr-scheduler", type=str, required=False,
                            choices=["cosine", "step", "exponential"],
@@ -34,6 +44,11 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
 
 
 def add_training_args(parser: ArgumentParser) -> None:
+    """adds cli parameters for training configuration
+
+    Args:
+        parser (ArgumentParser): the main argument parser
+    """
     train = parser.add_argument_group("training", "parameters for training")
     train.add_argument("--epochs", type=int, default=10,
                        help="number of epochs to train (default: 10)")
@@ -45,6 +60,11 @@ def add_training_args(parser: ArgumentParser) -> None:
 
 
 def add_dataset_args(parser: ArgumentParser) -> None:
+    """adds cli parameters for dataset configuration
+
+    Args:
+        parser (ArgumentParser): the main argument parser
+    """
     data = parser.add_argument_group("dataset", "parameters for the dataset used for training")
     data.add_argument("--dataset", type=str, default="cifar10", choices=dataset_names(),
                       help="name of the dataset to be used for training")
@@ -69,12 +89,25 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                       help="uses dali-CPU dataloader")
 
 def create_model_argparser(model_class: object) -> ArgumentParser:
+    """adds model specific cli arguments from model_class object
+
+    Args:
+        model_class (object): the class-object of selected model
+
+    Returns:
+        ArgumentParser: cli argument parser
+    """
     model_parser = ArgumentParser(add_help=False)
     model_class.add_argparse_arguments(model_parser)
     return model_parser
 
 
 def help_in_args() -> bool:
+    """determines if script was called with a --help or -h flag
+
+    Returns:
+        bool: True if help flag was set, False otherwise
+    """
     passed_args = sys.argv[1:]
     if "--help" in passed_args or "-h" in passed_args:
         return True
@@ -82,12 +115,22 @@ def help_in_args() -> bool:
 
 
 def add_all_model_args(parser: ArgumentParser) -> None:
+    """iterates through all existent models and adds their specific cli args to parser
+
+    Args:
+        parser (ArgumentParser): the main cli argument parser
+    """
     for model_name in model_names():
         model_group = parser.add_argument_group(model_name, f"parameters for {model_name} model")
         model_from_name(model_name).add_argparse_arguments(model_group)  # type: ignore
 
 
 def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
+    """creates a main argument parser for general options and a model parser for model specific options
+
+    Returns:
+        Tuple[ArgumentParser, ArgumentParser]: the main and model argument parser
+    """
     parser = ArgumentParser(description="Bitorch Image Classification")
     add_logging_args(parser)
     add_training_args(parser)

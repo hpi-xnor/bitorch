@@ -15,6 +15,12 @@ from bitorch.datasets import dataset_from_name  # noqa: E402
 # from tensorboardX import SummaryWriter
 
 def set_logging(args: argparse.Namespace) -> None:
+    """applies cli configuration to logging
+
+    Args:
+        args (argparse.Namespace): cli arguments for logging containing log_level and log_file. if log_file is none,
+        logging will be printed to stdout.
+    """
     log_level_name = args.log_level.upper()
     log_level = getattr(logging, log_level_name)
 
@@ -26,6 +32,12 @@ def set_logging(args: argparse.Namespace) -> None:
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
+    """trains a model on the configured image dataset
+
+    Args:
+        args (argparse.Namespace): cli arguments
+        model_args (argparse.Namespace): cli model specific arguments
+    """
     set_logging(args)
 
     dataset = dataset_from_name(args.dataset)

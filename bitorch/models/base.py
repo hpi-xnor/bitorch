@@ -30,6 +30,14 @@ class Model(Module):
             Module: the main torch.nn.Module of this model
         """
         return self._model
+    
+    # def to(self, device) -> None:
+    #     """moves model to device
+
+    #     Args:
+    #         device (str): device name (cpu or cuda)
+    #     """
+    #     self._model.to(device)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor through the model.
