@@ -93,9 +93,6 @@ class DoReFa(Quantization):
         else:
             max_value = 2 ** self.bits - 1
             squashed_values = torch.tanh(x)
-            # print("squashed:", squashed_values)
             max_val = torch.max(abs(squashed_values))
-            # print("max val:", max_val)
             adjusted_values = squashed_values / (2.0 * max_val) + 0.5
-            # print("adjusted:", adjusted_values)
             return 2.0 * (torch.round(adjusted_values * max_value) / max_value) - 1.0

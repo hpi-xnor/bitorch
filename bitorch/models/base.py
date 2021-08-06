@@ -5,11 +5,12 @@ import torch
 from argparse import ArgumentParser
 
 
-class Model(object):
+class Model(Module):
     """Base class for Bitorch models"""
     name = "None"
 
     def __init__(self, dataset: Union[DatasetBaseClass, Type[DatasetBaseClass]]) -> None:
+        super(Model, self).__init__()
         self._model = Module()
         self._dataset = dataset
 
@@ -29,8 +30,16 @@ class Model(object):
             Module: the main torch.nn.Module of this model
         """
         return self._model
+    
+    # def to(self, device) -> None:
+    #     """moves model to device
 
-    def __call__(self, x: torch.Tensor) -> torch.Tensor:
+    #     Args:
+    #         device (str): device name (cpu or cuda)
+    #     """
+    #     self._model.to(device)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor through the model.
 
         Args:

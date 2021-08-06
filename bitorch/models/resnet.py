@@ -505,126 +505,120 @@ class Resnet(Model):
                             help="number of layers to be used inside resnet")
 
 
-# class Resnet18_v1(Resnet):
-#     def __init__(self, *args, **kwargs):
-#         super(Resnet18_v1, self).__init__(1, 18, *args, **kwargs)
-
-
-def resnet18_v1(dataset: DatasetBaseClass) -> Resnet:
+class Resnet18_v1(Resnet):
     """ResNet-18 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet18_v1 model
     """
-    return Resnet(1, 18, dataset)
+
+    name = "resnet18v1"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet18_v1, self).__init__(1, 18, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnet34_v1(dataset: DatasetBaseClass) -> Resnet:
+class Resnet34_v1(Resnet):
     """ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet34_v1 model
     """
-    return Resnet(1, 34, dataset)
+    name = "resnet34v1"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet34_v1, self).__init__(1, 34, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnet50_v1(dataset: DatasetBaseClass) -> Resnet:
+class Resnet50_v1(Resnet):
     """ResNet-50 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet50_v1 model
     """
-    return Resnet(1, 50, dataset)
+
+    name = "resnet50v1"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet50_v1, self).__init__(1, 50, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnet152_v1(dataset: DatasetBaseClass) -> Resnet:
+class Resnet152_v1(Resnet):
     """ResNet-152 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet152_v1 model
     """
-    return Resnet(1, 152, dataset)
+
+    name = "resnet152v1"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet152_v1, self).__init__(1, 152, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnet18_v2(dataset: DatasetBaseClass) -> Resnet:
-    """ResNet-18 v2 model from `"Deep Residual Learning for Image Recognition"
+class Resnet18_v2(Resnet):
+    """ResNet-18 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet18_v2 model
     """
-    return Resnet(2, 18, dataset)
+
+    name = "resnet18v2"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet18_v2, self).__init__(2, 18, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnet34_v2(dataset: DatasetBaseClass) -> Resnet:
-    """ResNet-34 v2 model from `"Deep Residual Learning for Image Recognition"
+class Resnet34_v2(Resnet):
+    """ResNet-34 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet34_v2 model
     """
-    return Resnet(2, 34, dataset)
+
+    name = "resnet34v2"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet34_v2, self).__init__(2, 34, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnet50_v2(dataset: DatasetBaseClass) -> Resnet:
-    """ResNet-50 v2 model from `"Deep Residual Learning for Image Recognition"
+class Resnet50_v2(Resnet):
+    """ResNet-50 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet50_v2 model
     """
-    return Resnet(2, 50, dataset)
+
+    name = "resnet50v2"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet50_v2, self).__init__(2, 50, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnet152_v2(dataset: DatasetBaseClass) -> Resnet:
-    """ResNet-152 v2 model from `"Deep Residual Learning for Image Recognition"
+class Resnet152_v2(Resnet):
+    """ResNet-152 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Resnet: resnet152_v2 model
     """
-    return Resnet(2, 152, dataset)
+
+    name = "resnet152v2"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet152_v2, self).__init__(2, 152, *args, **kwargs)
+    
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
