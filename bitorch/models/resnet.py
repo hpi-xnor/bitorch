@@ -512,9 +512,9 @@ class Resnet18_v1(Resnet):
 
     name = "resnet18v1"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet18_v1, self).__init__(1, 18, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
@@ -526,9 +526,9 @@ class Resnet34_v1(Resnet):
     """
     name = "resnet34v1"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet34_v1, self).__init__(1, 34, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
@@ -541,9 +541,9 @@ class Resnet50_v1(Resnet):
 
     name = "resnet50v1"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet50_v1, self).__init__(1, 50, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
@@ -556,9 +556,9 @@ class Resnet152_v1(Resnet):
 
     name = "resnet152v1"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet152_v1, self).__init__(1, 152, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
@@ -571,9 +571,9 @@ class Resnet18_v2(Resnet):
 
     name = "resnet18v2"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet18_v2, self).__init__(2, 18, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
@@ -586,9 +586,9 @@ class Resnet34_v2(Resnet):
 
     name = "resnet34v2"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet34_v2, self).__init__(2, 34, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
@@ -601,9 +601,9 @@ class Resnet50_v2(Resnet):
 
     name = "resnet50v2"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet50_v2, self).__init__(2, 50, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
@@ -616,9 +616,9 @@ class Resnet152_v2(Resnet):
 
     name = "resnet152v2"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet152_v2, self).__init__(2, 152, *args, **kwargs)
-    
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
