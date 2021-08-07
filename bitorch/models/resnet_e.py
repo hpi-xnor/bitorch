@@ -92,11 +92,10 @@ class SpecificResnet(Module):
         self.features = nn.Sequential()
         self.output_layer = nn.Linear(channels[-1], classes)
 
-    def make_layer(self, block: Module, layers: int, in_channels: int, out_channels: int, stride: int) -> nn.Sequential:
+    def make_layer(self, layers: int, in_channels: int, out_channels: int, stride: int) -> nn.Sequential:
         """builds a layer by stacking blocks in a sequential models.
 
         Args:
-            block (Module): the block of which the layer shall consist
             layers (int): the number of blocks to stack
             in_channels (int): the input channels of this layer
             out_channels (int): the output channels of this layer
@@ -111,16 +110,15 @@ class SpecificResnet(Module):
         layers = layers * 2
 
         layer_list: List[nn.Module] = []
-        layer_list.append(block(in_channels, out_channels, stride))
+        layer_list.append(BasicBlock(in_channels, out_channels, stride))
         for _ in range(layers - 1):
-            layer_list.append(block(out_channels, out_channels, 1))
+            layer_list.append(BasicBlock(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, block: Module, layers: list, channels: list) -> nn.Sequential:
+    def make_feature_layers(self, layers: list, channels: list) -> nn.Sequential:
         """builds the given layers with the specified block.
 
         Args:
-            block (Module): the block of which the layer shall consist
             layers (list): the number of blocks each layer shall consist of
             channels (list): the channels
 
@@ -130,7 +128,7 @@ class SpecificResnet(Module):
         feature_layers: List[nn.Module] = []
         for idx, num_layer in enumerate(layers):
             stride = 1 if idx == 0 else 2
-            feature_layers.append(self.make_layer(block, num_layer, channels[idx], channels[idx + 1], stride))
+            feature_layers.append(self.make_layer(num_layer, channels[idx], channels[idx + 1], stride))
         return nn.Sequential(*feature_layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -155,7 +153,6 @@ class ResNetE(SpecificResnet):
 
     def __init__(
             self,
-            block: Module,
             layers: list,
             channels: list,
             classes: int,
@@ -164,7 +161,6 @@ class ResNetE(SpecificResnet):
         """Creates ResNetE model.
 
         Args:
-            block (Module): Block to be used for building the layers.
             layers (list): layer sizes
             channels (list): channel num used for input/output channel size of layers. there must always be one more
                 channels than there are layers.
@@ -186,7 +182,7 @@ class ResNetE(SpecificResnet):
         feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0]))
 
-        feature_layers.append(self.make_feature_layers(block, layers, channels))
+        feature_layers.append(self.make_feature_layers(layers, channels))
 
         feature_layers.append(nn.ReLU())
         feature_layers.append(nn.AdaptiveAvgPool2d(1))
@@ -241,7 +237,7 @@ class Resnet_E(Model):
 
         block_type, layers, channels = self.resnet_spec[num_layers]
 
-        return ResNetE(BasicBlock, layers, channels, classes, initial_layers, image_channels)
+        return ResNetE(layers, channels, classes, initial_layers, image_channels)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
@@ -261,7 +257,7 @@ def resnetE18(dataset: DatasetBaseClass) -> Module:
     Returns:
         Module: resnet18_v1 model
     """
-    return Resnet_E(1, 18, dataset)
+    return Resnet_E(18, dataset)
 
 
 def resnetE34(dataset: DatasetBaseClass) -> Module:
@@ -276,4 +272,4 @@ def resnetE34(dataset: DatasetBaseClass) -> Module:
     Returns:
         Module: resnet34_v1 model
     """
-    return Resnet_E(1, 34, dataset)
+    return Resnet_E(34, dataset)

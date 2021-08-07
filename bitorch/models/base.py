@@ -30,6 +30,7 @@ class Model(Module):
             Module: the main torch.nn.Module of this model
         """
         return self._model
+
     # def to(self, device) -> None:
     #     """moves model to device
 
