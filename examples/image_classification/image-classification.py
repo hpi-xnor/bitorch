@@ -46,7 +46,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         from examples.image_classification.dali_helper import create_dali_data_loader
 
         logging.info(f"using {dataset.name} dataset and NV-DALI data loader ...")
-        train_loader, test_loader = create_dali_data_loader(dataset, args)
+        train_loader, test_loader = create_dali_data_loader(args)
     else:
         augmentation_level = Augmentation.from_string(args.augmentation)
         logging.info(f"using {dataset.name} dataset...")

@@ -1,3 +1,6 @@
+import argparse
+from typing import Type
+from bitorch.datasets.base import DatasetBaseClass
 try:
     from nvidia.dali.plugin.pytorch import DALIClassificationIterator
     from nvidia.dali.pipeline import Pipeline
@@ -13,7 +16,14 @@ class HybridTrainPipe(Pipeline):
     or even find a better solution?
     """
 
-    def __init__(self, batch_size, num_threads, device_id, data_dir, crop, dali_cpu=True):
+    def __init__(
+            self,
+            batch_size: int,
+            num_threads: int,
+            device_id: int,
+            data_dir: str,
+            crop: int,
+            dali_cpu: bool = True):
         super(HybridTrainPipe, self).__init__(batch_size, num_threads, device_id, seed=12 + device_id,
                                               set_affinity=True)
         self.input = ops.FileReader(file_root=data_dir, num_shards=device_id + 1, shard_id=device_id,
@@ -42,7 +52,7 @@ class HybridTrainPipe(Pipeline):
         self.coin = ops.CoinFlip(probability=0.5)
         print('DALI "{0}" variant'.format(dali_device))
 
-    def define_graph(self):
+    def define_graph(self) -> list:
         rng = self.coin()
         self.jpegs, self.labels = self.input(name="Reader")
         images = self.decode(self.jpegs)
@@ -56,7 +66,13 @@ class HybridValPipe(Pipeline):
     """
     TODO: add description here!
     """
-    def __init__(self, batch_size, num_threads, device_id, data_dir, crop, size):
+    def __init__(self,
+                 batch_size: int,
+                 num_threads: int,
+                 device_id: int,
+                 data_dir: str,
+                 crop: int,
+                 size: int):
         super(HybridValPipe, self).__init__(batch_size, num_threads, device_id, seed=12 + device_id, set_affinity=True)
 
         self.input = ops.FileReader(file_root=data_dir, num_shards=device_id + 1, shard_id=device_id,
@@ -72,7 +88,7 @@ class HybridValPipe(Pipeline):
                                             mean=[0.485 * 255, 0.456 * 255, 0.406 * 255],
                                             std=[0.229 * 255, 0.224 * 255, 0.225 * 255])
 
-    def define_graph(self):
+    def define_graph(self) -> list:
         self.jpegs, self.labels = self.input(name="Reader")
         images = self.decode(self.jpegs)
         images = self.res(images)
@@ -83,9 +99,11 @@ class HybridValPipe(Pipeline):
         return [output, self.labels]
 
 
-def create_dali_data_loader(dataset, args, img_crop_size=224, img_size_val=256):
+def create_dali_data_loader(
+        args: argparse.Namespace,
+        img_crop_size: int = 224,
+        img_size_val: int = 256) -> DALIClassificationIterator:
     """creates nv-dali dataloader for image classification.
-    :param dataset: dataset information
     :param args: input args
     :param img_crop_size: image crop size
     :param img_size_val: image size for validation
