@@ -95,11 +95,11 @@ def create_dali_data_loader(dataset, args, img_crop_size=224, img_size_val=256):
     pipe = HybridTrainPipe(batch_size=args.batch_size, num_threads=args.num_workers, device_id=args.nv_dali_gpu_id,
                            data_dir=args.dataset_train_dir, crop=img_crop_size, dali_cpu=args.nv_dali_cpu)
     pipe.build()
-    train_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")/1), auto_reset = True)
+    train_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader") / 1), auto_reset=True)
 
     pipe = HybridValPipe(batch_size=args.batch_size, num_threads=args.num_workers, device_id=args.nv_dali_gpu_id,
                          data_dir=args.dataset_test_dir, crop=img_crop_size, size=img_size_val)
     pipe.build()
-    test_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")/1), auto_reset = True)
+    test_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader") / 1), auto_reset=True)
 
     return train_loader, test_loader

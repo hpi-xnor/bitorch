@@ -218,10 +218,10 @@ class Resnet_E(Model):
         self.name += f"{str(num_layers)}"
 
     def create(self,
-              num_layers: int,
-              classes: int = 1000,
-              initial_layers: str = "imagenet",
-              image_channels: int = 3) -> Module:
+               num_layers: int,
+               classes: int = 1000,
+               initial_layers: str = "imagenet",
+               image_channels: int = 3) -> Module:
         """Creates a ResNetE complying to given layer number.
 
         Args:
