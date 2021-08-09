@@ -12,7 +12,7 @@ from bitorch.models import model_from_name  # noqa: E402
 from torch.utils.data import DataLoader  # noqa: E402
 from bitorch.datasets import dataset_from_name  # noqa: E402
 # TODO: add tensorboard support!
-# from tensorboardX import SummaryWriter
+from tensorboardX import SummaryWriter
 
 
 def set_logging(args: argparse.Namespace) -> None:
@@ -63,11 +63,13 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model = model_from_name(args.model)(**model_arg_dict, dataset=dataset)  # type: ignore
     logging.info(f"using {model.name} model...")
 
+    writer = SummaryWriter(args.tensorboard_output) if args.tensorboard else None
+
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
     train_model(model, train_loader, test_loader, epochs=args.epochs, optimizer_name=args.optimizer,
                 lr_scheduler=args.lr_scheduler, lr_factor=args.lr_factor, lr_steps=args.lr_steps,
                 momentum=args.momentum,
-                lr=args.lr, log_interval=args.log_interval, gpus=gpus)
+                lr=args.lr, log_interval=args.log_interval, gpus=gpus, writer=writer)
 
 
 if __name__ == "__main__":

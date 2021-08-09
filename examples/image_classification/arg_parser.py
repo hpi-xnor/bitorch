@@ -19,6 +19,10 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      help="how many batches to wait before logging training status")
     log.add_argument("-l", "--log-file", type=str, required=False, default=None,
                      help="output file path for logging. default to stdout")
+    log.add_argument("--tensorboard", action="store_true", default=False, required=False,
+                     help="toggles use of tensorboard for logging learning progress")
+    log.add_argument("--tensorboard-output", type=str, required=False, default="./runs",
+                     help="output dir for tensorboard. default to ./runs")
 
 
 def add_optimizer_args(parser: ArgumentParser) -> None:

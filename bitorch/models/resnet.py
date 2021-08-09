@@ -4,6 +4,7 @@ from typing import List
 from bitorch.layers.qconv_noact import QConv2d_NoAct
 import torch
 import argparse
+import logging
 from torch import nn
 from torch.nn import Module
 
@@ -462,7 +463,7 @@ class Resnet(Model):
         super(Resnet, self).__init__(dataset)
         self._model = self.create_resnet(resnet_version, resnet_num_layers,
                                          self._dataset.num_classes, self._dataset.name, self._dataset.shape[1])
-        self.name += f"{str(resnet_num_layers)}v{str(resnet_version)}"
+        logging.info(f"building Resnetv{str(resnet_version)} with {str(resnet_num_layers)} layers...")
 
     def create_resnet(self,
                       version: int,
