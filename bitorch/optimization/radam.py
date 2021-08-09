@@ -6,8 +6,9 @@ https://arxiv.org/abs/1908.03265
 """
 
 import math
-from typing import Callable, Optional
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 import torch
+from torch.functional import Tensor
 from torch.optim.optimizer import Optimizer
 
 
@@ -15,19 +16,20 @@ class RAdam(Optimizer):
 
     def __init__(
             self,
-            params: object,
+            params: Union[Iterable[Tensor], Iterable[Dict[Any, Any]]],
             lr: float = 1e-3,
-            betas: list = (0.9, 0.999),
+            betas: Tuple[float, float] = (0.9, 0.999),
             eps: float = 1e-8,
             weight_decay: float = 0,
             degenerated_to_sgd: bool = True) -> None:
         """Initialises RAdam optimizer
 
         Args:
-            params (object): iterable of parameters to optimize or dicts defining parameter groups
+            params (Union[Iterable[Tensor], Iterable[Dict[Any, Any]]]): iterable of parameters to optimize or dicts
+                defining parameter groups
             lr (float, optional): learning range. Defaults to 1e-3.
-            betas (list, optional): coefficients used for computing running averages of gradient and its square.
-                Defaults to (0.9, 0.999).
+            betas (Tuple[float, float], optional): coefficients used for computing running averages of gradient and its
+                square. Defaults to (0.9, 0.999).
             eps (float, optional): term added to the denominator to improve numerical stability. Defaults to 1e-8.
             weight_decay (float, optional): weight decay (L2 penality). Defaults to 0.
             degenerated_to_sgd (bool, optional): toggles wether to use sgd step. Defaults to True.
@@ -136,9 +138,9 @@ class RAdam(Optimizer):
 class PlainRAdam(Optimizer):
     def __init__(
             self,
-            params: object,
+            params: Union[Iterable[Tensor], Iterable[Dict[Any, Any]]],
             lr: float = 1e-3,
-            betas: list = (0.9, 0.999),
+            betas: Tuple[float, float] = (0.9, 0.999),
             eps: float = 1e-8,
             weight_decay: float = 0,
             degenerated_to_sgd: bool = True) -> None:
@@ -219,9 +221,9 @@ class AdamW(Optimizer):
 
     def __init__(
             self,
-            params: object,
+            params: Union[Iterable[Tensor], Iterable[Dict[Any, Any]]],
             lr: float = 1e-3,
-            betas: list = (0.9, 0.999),
+            betas: Tuple[float, float] = (0.9, 0.999),
             eps: float = 1e-8,
             weight_decay: float = 0,
             warmup: int = 0) -> None:

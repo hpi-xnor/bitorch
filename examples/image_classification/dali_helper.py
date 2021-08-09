@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Any, List, Tuple
 import torch
 import argparse
 
@@ -53,7 +53,7 @@ class HybridTrainPipe(Pipeline):
         self.coin = ops.CoinFlip(probability=0.5)
         print('DALI "{0}" variant'.format(dali_device))
 
-    def define_graph(self) -> Tuple[torch.Tensor, torch.Tensor]:
+    def define_graph(self) -> List[Any]:
         rng = self.coin()
         self.jpegs, self.labels = self.input(name="Reader")
         images = self.decode(self.jpegs)
@@ -90,7 +90,7 @@ class HybridValPipe(Pipeline):
                                             mean=[0.485 * 255, 0.456 * 255, 0.406 * 255],
                                             std=[0.229 * 255, 0.224 * 255, 0.225 * 255])
 
-    def define_graph(self) -> Tuple[torch.Tensor, torch.Tensor]:
+    def define_graph(self) -> List[Any]:
         self.jpegs, self.labels = self.input(name="Reader")
         images = self.decode(self.jpegs)
         images = self.res(images)

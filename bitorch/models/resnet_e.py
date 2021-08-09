@@ -256,7 +256,7 @@ class Resnet_E18(Resnet_E):
 
     name = "ResnetE18"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet_E18, self).__init__(18, *args, **kwargs)
 
     @staticmethod
@@ -271,7 +271,7 @@ class Resnet_E34(Resnet_E):
 
     name = "ResnetE34"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet_E34, self).__init__(34, *args, **kwargs)
 
     @staticmethod
