@@ -1,5 +1,4 @@
-from typing import Any, List, Tuple
-import torch
+from typing import Any, List
 import argparse
 
 try:
