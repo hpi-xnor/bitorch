@@ -1,3 +1,7 @@
+"""
+Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
+<https://arxiv.org/abs/1906.08637>`_ paper.
+"""
 from bitorch.datasets.base import DatasetBaseClass
 from .base import Model
 from typing import List
@@ -9,7 +13,7 @@ from torch.nn import Module
 from bitorch.layers import QConv2d
 from bitorch.models.common_layers import make_initial_layers
 
-__all__ = ['resnetE18', 'resnetE34', 'Resnet_E']
+__all__ = ['Resnet_E34', 'Resnet_E18', 'Resnet_E']
 
 
 class BasicBlock(Module):
@@ -204,24 +208,24 @@ class Resnet_E(Model):
 
     name = "ResnetE"
 
-    resnet_spec = {18: ('basic_block', [2, 2, 2, 2], [64, 64, 128, 256, 512]),
-                   34: ('basic_block', [3, 4, 6, 3], [64, 64, 128, 256, 512])}
+    resnet_spec = {18: ([2, 2, 2, 2], [64, 64, 128, 256, 512]),
+                   34: ([3, 4, 6, 3], [64, 64, 128, 256, 512])}
 
     def __init__(
             self,
-            num_layers: int,
+            resnete_num_layers: int,
             dataset: DatasetBaseClass) -> None:
         super(Resnet_E, self).__init__(dataset)
-        print(dataset.shape)
-        self._model = self.create(num_layers, self._dataset.num_classes,
+        self._model = self.create(resnete_num_layers, self._dataset.num_classes,
                                   self._dataset.name, self._dataset.shape[1])
-        self.name += f"{str(num_layers)}"
+        self.name += f"{str(resnete_num_layers)}"
 
-    def create(self,
-              num_layers: int,
-              classes: int = 1000,
-              initial_layers: str = "imagenet",
-              image_channels: int = 3) -> Module:
+    def create(
+            self,
+            num_layers: int,
+            classes: int = 1000,
+            initial_layers: str = "imagenet",
+            image_channels: int = 3) -> Module:
         """Creates a ResNetE complying to given layer number.
 
         Args:
@@ -239,7 +243,7 @@ class Resnet_E(Model):
         if num_layers not in self.resnet_spec:
             raise ValueError(f"No resnet spec for {num_layers} available!")
 
-        block_type, layers, channels = self.resnet_spec[num_layers]
+        layers, channels = self.resnet_spec[num_layers]
 
         return ResNetE(BasicBlock, layers, channels, classes, initial_layers, image_channels)
 
@@ -249,31 +253,31 @@ class Resnet_E(Model):
                             help="number of layers to be used inside resnetE")
 
 
-def resnetE18(dataset: DatasetBaseClass) -> Module:
+class Resnet_E18(Resnet_E):
     """ResNetE-18 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Module: resnet18_v1 model
     """
-    return Resnet_E(1, 18, dataset)
+
+    name = "ResnetE18"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet_E18, self).__init__(18, *args, **kwargs)
+
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass
 
 
-def resnetE34(dataset: DatasetBaseClass) -> Module:
+class Resnet_E34(Resnet_E):
     """ResNetE-34 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
-
-    Args:
-        classes (int, optional): number of classes. Defaults to 1000.
-        inital_layers (str, optional): variant of intial layers, depending on dataset. Defaults to "imagenet".
-        image_channels (int, optional): color channels of input images. Defaults to 3.
-
-    Returns:
-        Module: resnet34_v1 model
     """
-    return Resnet_E(1, 34, dataset)
+
+    name = "ResnetE34"
+
+    def __init__(self, *args, **kwargs):
+        super(Resnet_E34, self).__init__(34, *args, **kwargs)
+
+    @staticmethod
+    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        pass

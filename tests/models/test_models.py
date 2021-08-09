@@ -8,7 +8,10 @@ from bitorch.models import (
     Resnet50_v1,
     Resnet18_v2,
     Resnet34_v2,
-    Resnet50_v2
+    Resnet50_v2,
+    Resnet_E,
+    Resnet_E18,
+    Resnet_E34
 )
 import torch
 import numpy as np
@@ -16,46 +19,52 @@ import pytest
 
 TEST_INPUT_DATA = [
     (Resnet, {"resnet_version": 1, "resnet_num_layers": 18}, (100, 1, 28, 28)),
-    (Resnet, {"resnet_version": 1, "resnet_num_layers": 18}, (100, 3, 32, 32)),
-    (Resnet, {"resnet_version": 1, "resnet_num_layers": 18}, (2, 3, 244, 244)),
     (Resnet, {"resnet_version": 1, "resnet_num_layers": 34}, (100, 1, 28, 28)),
-    (Resnet, {"resnet_version": 1, "resnet_num_layers": 34}, (100, 3, 32, 32)),
-    (Resnet, {"resnet_version": 1, "resnet_num_layers": 34}, (2, 3, 244, 244)),
     (Resnet, {"resnet_version": 1, "resnet_num_layers": 50}, (10, 1, 28, 28)),
-    (Resnet, {"resnet_version": 1, "resnet_num_layers": 50}, (10, 3, 32, 32)),
-    (Resnet, {"resnet_version": 1, "resnet_num_layers": 50}, (1, 3, 244, 244)),
     (Resnet, {"resnet_version": 2, "resnet_num_layers": 18}, (100, 1, 28, 28)),
-    (Resnet, {"resnet_version": 2, "resnet_num_layers": 18}, (100, 3, 32, 32)),
-    (Resnet, {"resnet_version": 2, "resnet_num_layers": 18}, (2, 3, 244, 244)),
     (Resnet, {"resnet_version": 2, "resnet_num_layers": 34}, (100, 1, 28, 28)),
-    (Resnet, {"resnet_version": 2, "resnet_num_layers": 34}, (100, 3, 32, 32)),
-    (Resnet, {"resnet_version": 2, "resnet_num_layers": 34}, (2, 3, 244, 244)),
     (Resnet, {"resnet_version": 2, "resnet_num_layers": 50}, (10, 1, 28, 28)),
-    (Resnet, {"resnet_version": 2, "resnet_num_layers": 50}, (10, 3, 32, 32)),
-    (Resnet, {"resnet_version": 2, "resnet_num_layers": 50}, (1, 3, 244, 244)),
 
     (Resnet18_v1, {}, (100, 1, 28, 28)),
     (Resnet18_v1, {}, (100, 3, 32, 32)),
     (Resnet18_v1, {}, (2, 3, 244, 244)),
+
     (Resnet34_v1, {}, (100, 1, 28, 28)),
     (Resnet34_v1, {}, (100, 3, 32, 32)),
     (Resnet34_v1, {}, (2, 3, 244, 244)),
+
     (Resnet50_v1, {}, (10, 1, 28, 28)),
     (Resnet50_v1, {}, (10, 3, 32, 32)),
     (Resnet50_v1, {}, (1, 3, 244, 244)),
+
     (Resnet18_v2, {}, (100, 1, 28, 28)),
     (Resnet18_v2, {}, (100, 3, 32, 32)),
     (Resnet18_v2, {}, (2, 3, 244, 244)),
+
     (Resnet34_v2, {}, (100, 1, 28, 28)),
     (Resnet34_v2, {}, (100, 3, 32, 32)),
     (Resnet34_v2, {}, (2, 3, 244, 244)),
+
     (Resnet50_v2, {}, (10, 1, 28, 28)),
     (Resnet50_v2, {}, (10, 3, 32, 32)),
     (Resnet50_v2, {}, (1, 3, 244, 244)),
+
+    (Resnet_E, {"resnete_num_layers": 18}, (10, 1, 28, 28)),
+    (Resnet_E, {"resnete_num_layers": 34}, (10, 1, 28, 28)),
+
+    (Resnet_E18, {}, (10, 1, 28, 28)),
+    (Resnet_E18, {}, (10, 3, 32, 32)),
+    (Resnet_E18, {}, (2, 3, 244, 244)),
+
+    (Resnet_E34, {}, (10, 1, 28, 28)),
+    (Resnet_E34, {}, (10, 3, 32, 32)),
+    (Resnet_E34, {}, (2, 3, 244, 244)),
+
     (LeNet, {"lenet_quantized": True}, (100, 1, 28, 28)),
     (LeNet, {"lenet_quantized": True}, (100, 2, 28, 28)),
     (LeNet, {"lenet_quantized": True}, (100, 3, 28, 28)),
     (LeNet, {"lenet_quantized": True}, (100, 10, 28, 28)),
+
     (LeNet, {"lenet_quantized": False}, (100, 1, 28, 28)),
     (LeNet, {"lenet_quantized": False}, (100, 2, 28, 28)),
     (LeNet, {"lenet_quantized": False}, (100, 3, 28, 28)),
