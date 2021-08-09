@@ -1,5 +1,6 @@
 from typing import Tuple
 import torch
+import argparse
 
 try:
     from nvidia.dali.plugin.pytorch import DALIClassificationIterator
@@ -100,10 +101,11 @@ class HybridValPipe(Pipeline):
         return [output, self.labels]
 
 
-def create_dali_data_loader(dataset, args, img_crop_size=224, img_size_val=256):
-    
+def create_dali_data_loader(
+        args: argparse.Namespace,
+        img_crop_size: int = 224,
+        img_size_val: int = 256) -> DALIClassificationIterator:
     """creates nv-dali dataloader for image classification.
-    :param dataset: dataset information
     :param args: input args
     :param img_crop_size: image crop size
     :param img_size_val: image size for validation

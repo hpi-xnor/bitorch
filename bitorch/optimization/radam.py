@@ -6,6 +6,7 @@ https://arxiv.org/abs/1908.03265
 """
 
 import math
+from typing import Callable, Optional
 import torch
 from torch.optim.optimizer import Optimizer
 
@@ -60,7 +61,7 @@ class RAdam(Optimizer):
         )
         super(RAdam, self).__init__(params, defaults)
 
-    def step(self, closure: object = None) -> object:
+    def step(self, closure: Callable = None) -> Optional[float]:
 
         loss = None
         if closure is not None:
@@ -155,7 +156,7 @@ class PlainRAdam(Optimizer):
 
         super(PlainRAdam, self).__init__(params, defaults)
 
-    def step(self, closure: object = None) -> object:
+    def step(self, closure: Callable = None) -> Optional[float]:
 
         loss = None
         if closure is not None:
@@ -237,7 +238,7 @@ class AdamW(Optimizer):
                         weight_decay=weight_decay, warmup=warmup)
         super(AdamW, self).__init__(params, defaults)
 
-    def step(self, closure: object = None) -> object:
+    def step(self, closure: Callable = None) -> Optional[float]:
         loss = None
         if closure is not None:
             loss = closure()

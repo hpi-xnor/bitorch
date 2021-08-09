@@ -46,7 +46,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         from examples.image_classification.dali_helper import create_dali_data_loader
 
         logging.info(f"using {dataset.name} dataset and NV-DALI data loader ...")
-        train_loader, test_loader = create_dali_data_loader(dataset, args)
+        train_loader, test_loader = create_dali_data_loader(args)
     else:
         augmentation_level = Augmentation.from_string(args.augmentation)
         logging.info(f"using {dataset.name} dataset...")
@@ -59,8 +59,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model_arg_dict = vars(model_args)
     logging.info(f"got model args as dict: {model_arg_dict}")
+
     model = model_from_name(args.model)(**model_arg_dict, dataset=dataset)  # type: ignore
     logging.info(f"using {model.name} model...")
+
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
     train_model(model, train_loader, test_loader, epochs=args.epochs, optimizer_name=args.optimizer,
                 lr_scheduler=args.lr_scheduler, lr_factor=args.lr_factor, lr_steps=args.lr_steps,
