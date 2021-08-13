@@ -6,4 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.1.0] - Unreleased
 
-Coming soon...
+- added basic quanitzed layers
+    - QActivation
+    - QConv
+    - QLinear
+- added several debug layers
+- added resnet, lenet
+- added various quantization functions
+    - approxsign
+    - dorefa
+    - sign
+    - steheaviside
+    - swishsign
+- added support for cifar10 and mnist
+- adds general training script for image classification
