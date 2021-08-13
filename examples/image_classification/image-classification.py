@@ -15,23 +15,6 @@ from bitorch.datasets import dataset_from_name  # noqa: E402
 from tensorboardX import SummaryWriter
 
 
-def set_logging(args: argparse.Namespace) -> None:
-    """applies cli configuration to logging
-
-    Args:
-        args (argparse.Namespace): cli arguments for logging containing log_level and log_file. if log_file is none,
-        logging will be printed to stdout.
-    """
-    log_level_name = args.log_level.upper()
-    log_level = getattr(logging, log_level_name)
-
-    if args.log_file is None:
-        logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', level=log_level, force=True)
-    else:
-        logging.basicConfig(filename=args.log_file, format='%(asctime)s - %(levelname)s: %(message)s',
-                            level=logging.DEBUG, force=True)
-
-
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     """trains a model on the configured image dataset
 
@@ -62,8 +45,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model = model_from_name(args.model)(**model_arg_dict, dataset=dataset)  # type: ignore
     logging.info(f"using {model.name} model...")
-
-    writer = SummaryWriter(args.tensorboard_output) if args.tensorboard else None
 
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
     train_model(model, train_loader, test_loader, epochs=args.epochs, optimizer_name=args.optimizer,
