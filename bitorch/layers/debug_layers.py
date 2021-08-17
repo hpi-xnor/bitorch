@@ -5,16 +5,19 @@ from .layerconfig import config
 class _Debug(torch.nn.Module):
     def __init__(self,
                  debug_interval: int = 100,
-                 num_outputs: int = 10) -> None:
+                 num_outputs: int = 10,
+                 name: str = "Debug") -> None:
         """inits values.
 
         Args:
             debug_interval (int, optional): interval at which debug output shall be prompted. Defaults to 100.
             num_outputs (int, optional): number of weights/inputs that shall be debugged. Defaults to 10.
+            name (str, optional): name of debug layer, only relevant for print debugging
         """
         super(_Debug, self).__init__()
         self._debug_interval = debug_interval
         self._num_outputs = num_outputs
+        self.name = name
 
         self._forward_counter = 0
 
@@ -40,7 +43,8 @@ class _PrintDebug(_Debug):
         Args:
             debug_tensor (torch.Tensor): tensor to be debugged
         """
-        print(debug_tensor if len(debug_tensor) < self._num_outputs else debug_tensor[:self._num_outputs])
+        print(self.name, ":", debug_tensor if len(debug_tensor) <
+              self._num_outputs else debug_tensor[:self._num_outputs])
 
 
 class _GraphicalDebug(_Debug):
@@ -212,4 +216,18 @@ class WeightGraphicalDebug(_GraphicalDebug):
             weight = self._debug_module.quantize(weight)  # type: ignore
         self._debug_tensor(weight)
 
+        return x
+
+
+class Shape_Print_Debug(_PrintDebug):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """prints the shape of x, leaves x untouched
+
+        Args:
+            x (torch.Tensor): the tensor to be debugged
+
+        Returns:
+            torch.Tensor: input tensor x
+        """
+        self._debug_tensor(torch.tensor(x.shape))
         return x
