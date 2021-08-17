@@ -1,6 +1,7 @@
 import argparse
 import sys
 import logging
+from utils import set_logging, ResultLogger, CheckpointManager, ExperimentCreator, ETAEstimator
 
 
 sys.path.append("../../")
@@ -11,8 +12,6 @@ from bitorch.datasets.base import Augmentation  # noqa: E402
 from bitorch.models import model_from_name  # noqa: E402
 from torch.utils.data import DataLoader  # noqa: E402
 from bitorch.datasets import dataset_from_name  # noqa: E402
-# TODO: add tensorboard support!
-from tensorboardX import SummaryWriter
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
@@ -23,6 +22,14 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         model_args (argparse.Namespace): cli model specific arguments
     """
     set_logging(args)
+    if args.experiment:
+        experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir)
+        experimentCreator.create()
+        experimentCreator.run_experiment()
+
+    resultLogger = ResultLogger(args.result_file, args.tensorboard, args.tensorboard_output)
+    checkpointManager = CheckpointManager(args.checkpoint_store_dir, args.checkpoint_keep_count)
+    etaEstimator = ETAEstimator(args.eta_file, args.log_interval)
 
     dataset = dataset_from_name(args.dataset)
     if dataset.name == 'imagenet' and args.nv_dali:
@@ -50,7 +57,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     train_model(model, train_loader, test_loader, epochs=args.epochs, optimizer_name=args.optimizer,
                 lr_scheduler=args.lr_scheduler, lr_factor=args.lr_factor, lr_steps=args.lr_steps,
                 momentum=args.momentum,
-                lr=args.lr, log_interval=args.log_interval, gpus=gpus, writer=writer)
+                lr=args.lr, log_interval=args.log_interval, gpus=gpus,
+                resultLogger=resultLogger, checkpointManager=checkpointManager, etaEstimator=etaEstimator)
 
 
 if __name__ == "__main__":
