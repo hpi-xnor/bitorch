@@ -19,12 +19,34 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      help="how many batches to wait before logging training status")
     log.add_argument("--log-file", type=str, required=False, default=None,
                      help="output file path for logging. default to stdout")
+    log.add_argument("--log-stdout", action="store_true", default=False, required=False,
+                     help="toggles force logging to stdout. if a log file is specified, logging will be "
+                     "printed to both the log file and stdout")
     log.add_argument("--tensorboard", action="store_true", default=False, required=False,
                      help="toggles use of tensorboard for logging learning progress")
     log.add_argument("--tensorboard-output", type=str, required=False, default="./runs",
                      help="output dir for tensorboard. default to ./runs")
     log.add_argument("--result-file", type=str, required=False, default=None,
                      help="path to result file; train and test metrics will be logged in csv format")
+    log.add_argument("--eta-file", type=str, required=False, default=None,
+                     help="path to eta file; this file will contain only the eta of the training process. this eta will"
+                     " also be logged, so if eta file is ommitted, eta can still be obtained via logging output")
+
+
+def add_checkpoint_args(parser: ArgumentParser) -> None:
+    checkpoint = parser.add_argument_group("checkpoints", "parameters for checkpoint storing / loading")
+    checkpoint.add_argument("--checkpoint-dir", type=str, required=False, default=None,
+                            help="path to directory to store checkpoints in.")
+    checkpoint.add_argument("--checkpoint-keep-count", type=int, required=False, default=10,
+                            help="number of checkpoints to keep.")
+
+
+def add_experiment_args(parser: ArgumentParser) -> None:
+    experiment = parser.add_argument_group("experiment", "parameters for executing current training as an experiment")
+    experiment.add_argument("--experiment-dir", type=str, required=False, default="./",
+                            help="path to directory to create the experiment dir in.")
+    experiment.add_argument("--experiment-name", type=str, required=False, default=None,
+                            help="name of experiment. needs to be set for experiment.")
 
 
 def add_optimizer_args(parser: ArgumentParser) -> None:

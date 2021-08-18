@@ -139,10 +139,20 @@ class ExperimentCreator():
     def __init__(self, experiment_name, experiment_dir):
         self._experiment_name = experiment_name
         if not self._experiment_name:
-            self._aquire_name()
+            self._acquire_name()
         self._experiment_dir = Path(experiment_dir) / self._eperiment_name
         self._experiment_dir.mkdir(parents=True, exist_ok=True)
         logging.info(f"Experiment will be created in {self._experiment_dir}")
+
+    def _acquire_name(self):
+        while not self._experiment_name:
+            print(
+                "No experiment name given! Please enter a meaningful experiment name (e.g. new-resnet-architecture, "
+                "sign-clipping-2.0, etc.). This will be the name of the experiment directory as well as log files, "
+                "result file, etc."
+            )
+            self._experiment_name = input("experiment name > ")
+            print("got experiment name: >", self._experiment_name, "<")
 
     def _extract_run_args(self, parser, args, model_parser, model_args):
         run_args = {}

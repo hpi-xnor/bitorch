@@ -1,3 +1,4 @@
+from examples.image_classification.utils import CheckpointManager, ETAEstimator, ResultLogger
 import torch
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
@@ -77,6 +78,9 @@ def train_model(
         model: Module,
         train_data: DataLoader,
         test_data: DataLoader,
+        result_logger: ResultLogger,
+        checkpoint_Manager: CheckpointManager,
+        eta_estimator: ETAEstimator,
         epochs: int = 10,
         optimizer_name: str = "adam",
         lr_scheduler: str = None,
@@ -85,8 +89,7 @@ def train_model(
         momentum: float = 0.9,
         lr: float = 0.001,
         log_interval: int = 100,
-        gpus: str = None,
-        writer: SummaryWriter = None) -> Module:
+        gpus: str = None) -> Module:
     """trains the given model on the given train and test data. creates optimizer and lr scheduler with the given params.
     in each epoch validation on the test data is performed. gpu acceleration can be enabled.
 
@@ -148,9 +151,9 @@ def train_model(
                     f"current lr: {scheduler.get_last_lr() if scheduler else lr}")
         epoch_loss /= len(train_data)
 
-        if writer:
-            writer.add_scalar("Loss/train", epoch_loss, epoch)
-            writer.add_scalar("lr", scheduler.get_last_lr() if scheduler else lr, epoch)
+        # if writer:
+        #     writer.add_scalar("Loss/train", epoch_loss, epoch)
+        #     writer.add_scalar("lr", scheduler.get_last_lr() if scheduler else lr, epoch)
 
         if scheduler:
             scheduler.step()
