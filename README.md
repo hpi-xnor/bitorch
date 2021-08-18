@@ -4,19 +4,18 @@
 
 Similar to recent versions of [torchvision](https://github.com/pytorch/vision), you should be using Python 3.8 or newer.
 
-Install the requirements and add this path to your _PYTHONPATH_:
+Install the package with pip:
 ```bash
-pip install -r requirements.txt
-# add to PYTHONPATH with virtualenvwrapper:
-add2virtualenv . 
+pip install -e .
 ```
 
 ## Development
 
-Install the development requirements with:
+Install the _dev_ package with:
 ```bash
- pip install -r requirements-dev.txt
+ pip install -e .[dev]
 ```
+Use quotes, i.e., `".[dev]"` in zsh.
 
 ### Code formatting and typing
 
