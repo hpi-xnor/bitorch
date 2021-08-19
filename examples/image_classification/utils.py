@@ -171,6 +171,7 @@ class ExperimentCreator():
         self._experiment_name = experiment_name
         if not self._experiment_name:
             self._acquire_name()
+        # Todo: throw error if experiment dir is subdir of project code files / directories (causes loop in code copy)
         self._experiment_dir = Path(experiment_dir) / self._experiment_name
         self._experiment_dir.mkdir(parents=True, exist_ok=True)
         logging.info(f"Experiment will be created in {self._experiment_dir}")
@@ -192,7 +193,6 @@ class ExperimentCreator():
         actions = parser._get_optional_actions()
 
         for action in actions:
-            logging.info(f"option string: {action.option_strings}")
             if "--help" not in action.option_strings:
                 run_args[action.option_strings[0]] = args_dict[action.dest]
 
