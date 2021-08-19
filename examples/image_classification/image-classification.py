@@ -1,7 +1,15 @@
 import argparse
 import sys
 import logging
-from utils import set_logging, ResultLogger, CheckpointManager, ExperimentCreator, ETAEstimator
+from utils import (
+    set_logging,
+    create_optimizer,
+    create_scheduler,
+    ResultLogger,
+    CheckpointManager,
+    ExperimentCreator,
+    ETAEstimator
+)
 
 
 sys.path.append("../../")
@@ -14,22 +22,28 @@ from torch.utils.data import DataLoader  # noqa: E402
 from bitorch.datasets import dataset_from_name  # noqa: E402
 
 
-def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
-    """trains a model on the configured image dataset
+def main(
+        parser: argparse.ArgumentParser,
+        args: argparse.Namespace,
+        model_parser: argparse.ArgumentParser,
+        model_args: argparse.Namespace) -> None:
+    """trains a model on the configured image dataset.
 
     Args:
+        parser (argparse.ArgumentParser): parser for cli args (used for experiment creation and)
         args (argparse.Namespace): cli arguments
-        model_args (argparse.Namespace): cli model specific arguments
+        model_parser (argparse.ArgumentParser): parser for model cli args (used for experiment creation)
+        model_args (argparse.Namespace): model specific cli arguments
     """
-    set_logging(args)
+    set_logging(args.log_file, args.log_level, args.log_stdout)
     if args.experiment:
-        experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir)
-        experimentCreator.create()
+        experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
+        experimentCreator.create(parser, args, model_parser, model_args)
         experimentCreator.run_experiment()
 
-    resultLogger = ResultLogger(args.result_file, args.tensorboard, args.tensorboard_output)
-    checkpointManager = CheckpointManager(args.checkpoint_store_dir, args.checkpoint_keep_count)
-    etaEstimator = ETAEstimator(args.eta_file, args.log_interval)
+    result_logger = ResultLogger(args.result_file, args.tensorboard, args.tensorboard_output)
+    checkpoint_manager = CheckpointManager(args.checkpoint_dir, args.checkpoint_keep_count)
+    eta_estimator = ETAEstimator(args.eta_file, args.log_interval)
 
     dataset = dataset_from_name(args.dataset)
     if dataset.name == 'imagenet' and args.nv_dali:
@@ -48,17 +62,25 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
 
     model_arg_dict = vars(model_args)
-    logging.info(f"got model args as dict: {model_arg_dict}")
+    logging.debug(f"got model args as dict: {model_arg_dict}")
 
     model = model_from_name(args.model)(**model_arg_dict, dataset=dataset)  # type: ignore
     logging.info(f"using {model.name} model...")
 
+    optimizer = create_optimizer(args.optimizer, model, args.lr, args.momentum)
+    scheduler = create_scheduler(args.lr_scheduler, optimizer, args.lr_factor,
+                                 args.lr_steps, args.epochs)  # type: ignore
+
+    if args.checkpoint_load:
+        model, optimizer, scheduler, start_epoch = checkpoint_manager.load_checkpoint(
+            args.checkpoint_load, model, optimizer, scheduler, args.fresh_start)
+    else:
+        start_epoch = 0
+
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
-    train_model(model, train_loader, test_loader, epochs=args.epochs, optimizer_name=args.optimizer,
-                lr_scheduler=args.lr_scheduler, lr_factor=args.lr_factor, lr_steps=args.lr_steps,
-                momentum=args.momentum,
-                lr=args.lr, log_interval=args.log_interval, gpus=gpus,
-                resultLogger=resultLogger, checkpointManager=checkpointManager, etaEstimator=etaEstimator)
+    train_model(model, train_loader, test_loader, start_epochs=start_epoch, epochs=args.epochs, optimizer=optimizer,
+                scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
+                result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
 
 
 if __name__ == "__main__":
@@ -66,4 +88,4 @@ if __name__ == "__main__":
     args, unparsed_model_args = parser.parse_known_args()
     model_args = model_parser.parse_args(unparsed_model_args)
 
-    main(args, model_args)
+    main(parser, args, model_parser, model_args)

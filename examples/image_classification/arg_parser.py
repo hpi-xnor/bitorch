@@ -39,10 +39,17 @@ def add_checkpoint_args(parser: ArgumentParser) -> None:
                             help="path to directory to store checkpoints in.")
     checkpoint.add_argument("--checkpoint-keep-count", type=int, required=False, default=10,
                             help="number of checkpoints to keep.")
+    checkpoint.add_argument("--checkpoint-load", type=str, required=False, default=None,
+                            help="path to checkpoint file to load state from. if omitted, a new model will be trained.")
+    checkpoint.add_argument("--fresh-start", action="store_true", default=False, required=False,
+                            help="toggles fresh start, i.e. only the model state dict will be loaded from the "
+                            "chekcpoint optimizer, lr scheduler and epoch count will start from zero")
 
 
 def add_experiment_args(parser: ArgumentParser) -> None:
     experiment = parser.add_argument_group("experiment", "parameters for executing current training as an experiment")
+    experiment.add_argument("--experiment", action="store_true", default=False, required=False,
+                            help="toggles whether script should run as experiment. Default is false")
     experiment.add_argument("--experiment-dir", type=str, required=False, default="./",
                             help="path to directory to create the experiment dir in.")
     experiment.add_argument("--experiment-name", type=str, required=False, default=None,
@@ -165,6 +172,8 @@ def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
     add_training_args(parser)
     add_dataset_args(parser)
     add_optimizer_args(parser)
+    add_experiment_args(parser)
+    add_checkpoint_args(parser)
 
     parser.add_argument("--model", type=str, choices=model_names(),
                         help="name of the model to be trained")
