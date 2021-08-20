@@ -8,6 +8,7 @@ from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealing
 import logging
 from typing import Union, Optional
 from math import floor
+from bitorch.optimization.radam import RAdam
 
 
 def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Optimizer:
@@ -29,6 +30,8 @@ def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Op
         return Adam(params=model.parameters(), lr=lr)
     elif name == "sgd":
         return SGD(params=model.parameters(), lr=lr, momentum=momentum)
+    elif name == "radam":
+        return RAdam(params=model.parameters(), lr=lr, degenerated_to_sgd=False)
     else:
         raise ValueError(f"No optimizer with name {name} found!")
 
