@@ -1,24 +1,25 @@
 import argparse
 import sys
 import logging
-from utils import (
-    set_logging,
+from torch.utils.data import DataLoader
+
+from utils.utils import (
     create_optimizer,
     create_scheduler,
-    ResultLogger,
-    CheckpointManager,
-    ExperimentCreator,
-    ETAEstimator
+    set_logging,
 )
+from utils.resultlogger import ResultLogger
+from utils.checkpointmanager import CheckpointManager
+from utils.experimentcreator import ExperimentCreator
+from utils.etaestimator import ETAEstimator
+from utils.arg_parser import create_argparser
+from train import train_model
 
 
 sys.path.append("../../")
 
-from arg_parser import create_argparser  # noqa: E402
-from train import train_model  # noqa: E402
 from bitorch.datasets.base import Augmentation  # noqa: E402
 from bitorch.models import model_from_name  # noqa: E402
-from torch.utils.data import DataLoader  # noqa: E402
 from bitorch.datasets import dataset_from_name  # noqa: E402
 
 

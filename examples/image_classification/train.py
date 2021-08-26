@@ -1,4 +1,6 @@
-from utils import CheckpointManager, ETAEstimator, ResultLogger
+from utils.checkpointmanager import CheckpointManager
+from utils.etaestimator import ETAEstimator
+from utils.resultlogger import ResultLogger
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import Module

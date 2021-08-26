@@ -148,3 +148,6 @@ test/
 
 # tensorboard output files
 runs/
+
+# other files
+*.csv

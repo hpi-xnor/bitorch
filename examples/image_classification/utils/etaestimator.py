@@ -1,0 +1,88 @@
+import time
+import logging
+from pathlib import Path
+from math import floor
+
+
+class ETAEstimator():
+    """estimates the total runtime of a training run. A maximum number of single units needs to be set. after that, time
+    consumption of single units can be measured by with-call of this object"""
+
+    def __init__(self, eta_file: str, log_interval: int, iterations: int = 0) -> None:
+        """creates eta file, inits some attributes
+
+        Args:
+            eta_file (str): path to eta file. will be created.
+            log_interval (int): number of iterations to wait between eta outputs.
+            iterations (Union[int, None], optional): max number of iterations. can be set later via set_iterations
+                method. Defaults to None.
+        """
+        if eta_file:
+            self._eta_file = Path(eta_file)
+            self._eta_file.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            self._eta_file = None  # type: ignore
+            logging.warn("no eta file given, eta will only be outputed via logging")
+        self._log_interval = log_interval
+        self._num_iterations = iterations
+        self._current_iteration = 0
+        self._start_time = 0.0
+        self._abs_time = 0.0
+
+    def set_iterations(self, num_iterations: int) -> None:
+        """setter of iterations
+
+        Args:
+            num_iterations (int): number of maximum number of units.
+        """
+        self._num_iterations = num_iterations
+
+    def _seconds_to_timestamp(self, seconds: float) -> str:
+        hours = floor(seconds / 3600)
+        minutes = floor((seconds % 3600) / 60)
+        seconds = round(seconds % 60, 1)
+        return f"{str(hours)}h {str(minutes)}m {str(seconds)}s"
+
+    def _log_eta(self) -> None:
+        """creates an eta log message and outputs it both to logging and eta file.
+
+        Raises:
+            IOError: thrown if eta file cannot be written to.
+        """
+        avg_time_per_unit = self._abs_time / self._current_iteration
+        total_estimated_time = avg_time_per_unit * self._num_iterations
+        remaining_estimated_time = total_estimated_time - self._abs_time
+        progress = round(self._current_iteration / self._num_iterations * 100, 3)
+
+        log_msg = (
+            f"average time per unit: {avg_time_per_unit} seconds, "
+            f"progress: {progress}%, "
+            f"remaining estimated time: {self._seconds_to_timestamp(remaining_estimated_time)}"
+        )
+
+        logging.info(log_msg)
+        if self._eta_file:
+            try:
+                with self._eta_file.open("a") as eta_file:
+                    eta_file.write(log_msg + "\n")
+            except IOError as e:
+                logging.error(f"cannot write to eta file: {e}")
+                raise IOError from e
+
+    def __enter__(self) -> None:
+        """executed when entering with statement.
+
+        Raises:
+            ValueError: thrown if max number of units / iterations not specified yet.
+        """
+        if self._num_iterations == 0:
+            raise ValueError("number of iterations is not specified!")
+        self._start_time = time.time()
+
+    def __exit__(self, *args: list) -> None:
+        """executed when leaving with statement. logs eta if log interval is over."""
+        self._current_iteration += 1
+        time_diff = time.time() - self._start_time
+        self._abs_time += time_diff
+        if (self._current_iteration % self._log_interval) == 0:
+            self._log_eta()
