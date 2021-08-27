@@ -20,7 +20,7 @@ class Augmentation(Enum):
         }[level]
 
 
-class DatasetBaseClass(Dataset):
+class BasicDataset(Dataset):
     name = "None"
     num_classes = 0
     shape = (0, 0, 0, 0)
@@ -31,7 +31,7 @@ class DatasetBaseClass(Dataset):
             directory: str,
             download: bool = False,
             augmentation: Augmentation = Augmentation.NONE) -> None:
-        super(DatasetBaseClass, self).__init__()
+        super(BasicDataset, self).__init__()
         self._dataset = self.get_dataset(train, directory, download)
         if train:
             self._dataset = self.augment_dataset(self._dataset, augmentation)

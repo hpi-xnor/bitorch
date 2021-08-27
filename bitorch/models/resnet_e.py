@@ -2,7 +2,7 @@
 Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
 <https://arxiv.org/abs/1906.08637>`_ paper.
 """
-from bitorch.datasets.base import DatasetBaseClass
+from bitorch.datasets.base import BasicDataset
 from .base import Model
 from typing import List
 import torch
@@ -211,7 +211,7 @@ class Resnet_E(Model):
     def __init__(
             self,
             resnete_num_layers: int,
-            dataset: DatasetBaseClass) -> None:
+            dataset: BasicDataset) -> None:
         super(Resnet_E, self).__init__(dataset)
         self._model = self.create(resnete_num_layers, self._dataset.num_classes,
                                   self._dataset.name, self._dataset.shape[1])

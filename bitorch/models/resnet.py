@@ -1,4 +1,4 @@
-from bitorch.datasets.base import DatasetBaseClass
+from bitorch.datasets.base import BasicDataset
 from .base import Model
 from typing import List
 from bitorch.layers.qconv_noact import QConv2d_NoAct
@@ -459,7 +459,7 @@ class Resnet(Model):
             self,
             resnet_version: int,
             resnet_num_layers: int,
-            dataset: DatasetBaseClass) -> None:
+            dataset: BasicDataset) -> None:
         super(Resnet, self).__init__(dataset)
         self._model = self.create_resnet(resnet_version, resnet_num_layers,
                                          self._dataset.num_classes, self._dataset.name, self._dataset.shape[1])
