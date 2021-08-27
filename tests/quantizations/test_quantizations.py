@@ -13,6 +13,10 @@ from bitorch.quantizations import (
 TEST_INPUT_DATA = [
     (Sign(1.0), [-1.5, -1.0, -0.3, 0.0, 0.3, 1.0, 1.5], [-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
         [0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0]),
+    (Sign(2.0), [-1.5, -1.0, -0.3, 0.0, 0.3, 1.0, 1.5], [-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
+        [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
+    (Sign(0.2), [-1.5, -1.0, -0.3, 0.0, 0.3, 1.0, 1.5], [-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]),
     (ApproxSign(), [-1.5, -1.0, -0.3, 0.0, 0.3, 1.0, 1.5], [-1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0],
         [0.0, 0.0, 1.4, 2.0, 1.4, 0.0, 0.0]),
     (SteHeaviside(1.0), [-1.5, -1.0, -0.3, 0.0, 0.3, 1.0, 1.5],
@@ -27,7 +31,7 @@ TEST_INPUT_DATA = [
 
 
 @pytest.mark.parametrize("quantization, input_values, expected_output, expected_gradient_factors", TEST_INPUT_DATA)
-def test_dorefa2_function(
+def test_quantizations(
         quantization: Quantization,
         input_values: list,
         expected_output: list,
