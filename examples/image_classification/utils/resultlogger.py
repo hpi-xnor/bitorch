@@ -57,12 +57,18 @@ class ResultLogger():
         if tensorboard:
             self.tensorboard_results(**kwargs)  # type: ignore
 
+        create_header = False
+        if not self._result_file.exists():
+            create_header = True
+
         with self._result_file.open("a+") as result_file:
             file_header = csv.DictReader(result_file).fieldnames
             if file_header:
                 file_header = list(set().union(file_header, kwargs.keys()))  # type: ignore
             else:
                 file_header = list(kwargs.keys())
+                if create_header:
+                    csv.writer(result_file).writerow(file_header)
             logging.debug(f"field names: {file_header}")
             dict_writer = csv.DictWriter(result_file, file_header, "0.0")
             dict_writer.writerow(kwargs)
