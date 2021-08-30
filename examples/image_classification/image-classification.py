@@ -72,8 +72,11 @@ def main(
     scheduler = create_scheduler(args.lr_scheduler, optimizer, args.lr_factor,
                                  args.lr_steps, args.epochs)  # type: ignore
 
-    model, optimizer, scheduler, start_epoch = checkpoint_manager.load_checkpoint(
-        args.checkpoint_load, model, optimizer, scheduler, args.fresh_start)
+    if args.checkpoint_load:
+        model, optimizer, scheduler, start_epoch = checkpoint_manager.load_checkpoint(
+            args.checkpoint_load, model, optimizer, scheduler, args.fresh_start)
+    else:
+        start_epoch = 0
 
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
     train_model(model, train_loader, test_loader, start_epochs=start_epoch, epochs=args.epochs, optimizer=optimizer,
