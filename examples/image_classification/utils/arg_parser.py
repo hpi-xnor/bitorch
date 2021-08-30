@@ -110,8 +110,8 @@ def add_dataset_args(parser: ArgumentParser) -> None:
     data.add_argument("--download", action="store_true", required=False, default=True,
                       help="toggles wether the dataset shall be downloaded if not present. "
                       "only has effect with the cifar10 and mnist dataset so far.")
-    parser.add_argument("--batch-size", type=int, default=100,
-                        help="batch size for training and testing (default: 100)")
+    parser.add_argument("--batch-size", type=int, default=128,
+                        help="batch size for training and testing (default: 128)")
     parser.add_argument("--num-workers", type=int, default=0,
                         help="number of workers to be used for dataloading (default: 0)")
     parser.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
@@ -175,7 +175,7 @@ def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
     add_experiment_args(parser)
     add_checkpoint_args(parser)
 
-    parser.add_argument("--model", type=str, choices=model_names(),
+    parser.add_argument("--model", type=str, choices=model_names(), required=True,
                         help="name of the model to be trained")
     if help_in_args():
         add_all_model_args(parser)
