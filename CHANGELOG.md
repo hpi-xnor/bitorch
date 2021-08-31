@@ -20,7 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     - swishsign
 - added support for cifar10 and mnist
 - adds general training script for image classification
-- result logger
+- result logger for csv and tensorboard
 - checkpoint manager
 - eta estimator
 - experiment creator
+- model visualization in logs and tensorboard
