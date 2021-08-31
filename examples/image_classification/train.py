@@ -7,6 +7,7 @@ from torch.nn import Module
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
+from torchsummary import summary
 import logging
 
 
@@ -48,6 +49,13 @@ def train_model(
         device = "cpu"
     model = model.to(device)
 
+    # some code for model visualization / storing of initial state
+    images, _ = iter(train_data).next()
+    result_logger.log_model(model, images)
+    checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
+    logging.info(f"Model summary:\n{summary(model, input_data=images, verbose=0, depth=5)}")
+
+    # initialization of eta estimator
     total_number_of_batches = (epochs - start_epochs) * (len(train_data) + len(test_data))
     eta_estimator.set_iterations(total_number_of_batches)
     current_number_of_batches = 0
@@ -107,12 +115,15 @@ def train_model(
                     for idx, top5 in enumerate(predictions_top5):
                         correct_top5 += int(y_test[idx] in top5)
         test_loss /= len(test_data)
+
         batch_size = test_data.batch_size
         if batch_size is None:
             batch_size = 1
+
         accuracy = correct / (len(test_data) * batch_size)
         accuracy_top5 = correct_top5 / (len(test_data) * batch_size)
 
+        # performance logging
         result_logger.log_result(
             epoch=epoch + 1,
             lr=scheduler.get_last_lr() if scheduler else lr,
@@ -132,6 +143,8 @@ def train_model(
             top1_acc=accuracy,
             top5_acc=accuracy_top5
         )
+
+        # checkpoint updating
         checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, epoch)
         if accuracy > best_accuracy:
             logging.info("updating best model....")

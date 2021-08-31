@@ -1,5 +1,7 @@
 import logging
 import csv
+import torch
+from torch.nn import Module
 from pathlib import Path
 from typing import Union
 from tensorboardX import SummaryWriter
@@ -39,6 +41,20 @@ class ResultLogger():
             self._tensorboard = SummaryWriter(self._tensorboard_output)
         else:
             logging.warning("No tensorboard enabled!")
+
+    def log_model(self, model: Module, example_input: torch.Tensor) -> None:
+        """adds model graph to tensorboard.
+
+        Args:
+            model (Module): model to be visualized in tensorboard
+            example_input (torch.Tensor): an example input (e.g. train data) to infer tensor dimensions throughout the
+                model.
+        """
+        if not self._tensorboard:
+            return
+
+        self._tensorboard.add_graph(model, example_input)
+        self._tensorboard.flush()
 
     def log_result(self, tensorboard: bool = False, log: bool = True, **kwargs: dict) -> None:
         """writes the values of the kwargs into a csv file while updating its header row.
