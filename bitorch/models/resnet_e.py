@@ -83,7 +83,7 @@ class BasicBlock(Module):
         return x + residual
 
 
-class SpecificResnet(Module):
+class SpecificResnetE(Module):
     """Superclass for ResNet models"""
 
     def __init__(self, classes: int, channels: list) -> None:
@@ -93,7 +93,7 @@ class SpecificResnet(Module):
             classes (int): number of output classes
             channels (list): the channels used in the net
         """
-        super(SpecificResnet, self).__init__()
+        super(SpecificResnetE, self).__init__()
         self.features = nn.Sequential()
         self.output_layer = nn.Linear(channels[-1], classes)
 
@@ -150,7 +150,7 @@ class SpecificResnet(Module):
         return x
 
 
-class ResNetE(SpecificResnet):
+class ResNetE(SpecificResnetE):
     """ResNetE-18 model from
     `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
