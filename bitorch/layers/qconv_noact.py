@@ -6,7 +6,7 @@ from torch.nn.modules.conv import Conv1d, Conv2d, Conv3d
 from torch.nn.functional import pad, conv1d, conv2d, conv3d
 
 from bitorch.quantizations import Quantization
-from layerconfig import config
+from bitorch.layers.layerconfig import config
 
 
 def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
