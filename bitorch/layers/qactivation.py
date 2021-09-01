@@ -3,7 +3,7 @@ from bitorch.quantizations import Quantization
 import torch
 from torch import nn
 
-from . import layerconfig
+from layerconfig import config
 
 
 class QActivation(nn.Module):
@@ -17,7 +17,7 @@ class QActivation(nn.Module):
                 Defaults to None.
         """
         super(QActivation, self).__init__()
-        self.activation = layerconfig.config.get_quantization_function(activation)
+        self.activation = config.get_quantization_function(activation)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forwards input tensor through activation function.
@@ -28,5 +28,4 @@ class QActivation(nn.Module):
         Returns:
             torch.Tensor: quantized input tensor.
         """
-        # grad cancel on every quantization function? always ste?
         return self.activation(input_tensor)
