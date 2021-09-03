@@ -1,11 +1,12 @@
 """Module containing the quantized convolution layer"""
 
-from bitorch.quantizations import Quantization
 from typing import Callable, Type, Union
 from torch import Tensor
 from torch.nn.modules.conv import Conv1d, Conv2d, Conv3d
-from . import layerconfig
 from torch.nn.functional import pad, conv1d, conv2d, conv3d
+
+from bitorch.quantizations import Quantization
+from bitorch.layers.layerconfig import config
 
 
 def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
@@ -32,8 +33,8 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
                 padding_value (float, optional): value used for padding the input sequence. Defaults to None.
             """
             super(QConv_NoAct, self).__init__(*args, **kwargs)
-            self.quantize = layerconfig.config.get_quantization_function(weight_quantization)
-            self.pad_value = pad_value or layerconfig.config.get_padding_value()
+            self.quantize = config.get_quantization_function(weight_quantization)
+            self.pad_value = pad_value or config.get_padding_value()
 
         def _apply_padding(self, x: Tensor) -> Tensor:
             """pads the input tensor with the given padding value

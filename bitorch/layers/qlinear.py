@@ -6,7 +6,7 @@ from torch.nn import Linear
 from torch.nn.functional import linear
 
 from bitorch.quantizations import Quantization
-from . import layerconfig
+from bitorch.layers.layerconfig import config
 
 
 class QLinear(Linear):
@@ -20,7 +20,7 @@ class QLinear(Linear):
             **kwargs (keyword Argument list): keyword arguments for linear layer
         """
         super(QLinear, self).__init__(*args, **kwargs)
-        self.quantize = layerconfig.config.get_quantization_function(weight_quantization)
+        self.quantize = config.get_quantization_function(weight_quantization)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards x through the binary linear layer.
