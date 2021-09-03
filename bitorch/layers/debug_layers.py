@@ -1,5 +1,5 @@
 import torch
-from .layerconfig import config
+from .config import config
 
 
 class _Debug(torch.nn.Module):
@@ -30,7 +30,7 @@ class _Debug(torch.nn.Module):
         Args:
             debug_tensor (torch.Tensor): tensor to be debugged
         """
-        if config.debug_activated() and self._forward_counter % self._debug_interval == 0:
+        if config.debug_activated and self._forward_counter % self._debug_interval == 0:
             self._debug(debug_tensor)
 
         self._forward_counter += 1

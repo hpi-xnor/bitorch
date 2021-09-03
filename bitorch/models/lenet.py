@@ -1,4 +1,5 @@
 import argparse
+from bitorch.layers.debug_layers import Shape_Print_Debug
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QLinear, QConv2d, QActivation
 from torch import nn
@@ -37,6 +38,7 @@ class LeNet(Model):
                     weight_quantization="weightdorefa"),
                 nn.BatchNorm2d(self.num_channels_conv),
                 nn.MaxPool2d(2, 2),
+                Shape_Print_Debug(),
 
                 nn.Flatten(),
 

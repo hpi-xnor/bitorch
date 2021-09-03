@@ -1,13 +1,16 @@
 """Config class for quantization layers. This file should be imported before the other layers."""
 
 from typing import Union
-from bitorch.quantizations import quantization_from_name, Quantization
 import torch
 
+from bitorch.config import Config
+from bitorch.quantizations import quantization_from_name, Quantization
 
-class LayerConfig():
+
+class LayerConfig(Config):
     """Class to provide layer configurations."""
-    _debug_activated = True
+
+    name = "layer_config"
 
     def get_quantization_function(self, quantization: Union[str, Quantization] = None) -> torch.nn.Module:
         """Returns the quanitization module specified in quantization_name.
@@ -20,7 +23,7 @@ class LayerConfig():
             torch.nn.Module: Quantization module
         """
         if quantization is None:
-            return self.default_quantization()
+            return self.quantization()
         elif isinstance(quantization, Quantization):
             return quantization
         elif isinstance(quantization, str):
@@ -36,30 +39,9 @@ class LayerConfig():
         """
         return quantization_from_name("sign")()
 
-    def get_padding_value(self) -> float:
-        """default padding value used in qconvolution layers (neccessary because 0 padding does not make much sense in a
-        binary network which only uses -1 and 1 as values)
-
-        Returns:
-            float: default padding value
-        """
-        return -1.
-
-    def debug_activated(self) -> bool:
-        """function to get the current debug activation status. Debug layers won't output if this function returns False.
-
-        Returns:
-            bool: debug activation flag
-        """
-        return self._debug_activated
-
-    def activate_debug(self, debug: bool) -> None:
-        """setter method for debug mode.
-
-        Args:
-            debug (bool): flag that determines wether there should be debug output from debug layers
-        """
-        self._debug_activated = debug
+    quantization = quantization_from_name("sign")
+    debug_activated = False
+    padding_value = -1.0
 
 
 # config object, global referencable

@@ -6,7 +6,7 @@ from torch.nn.modules.conv import Conv1d, Conv2d, Conv3d
 from torch.nn.functional import pad, conv1d, conv2d, conv3d
 
 from bitorch.quantizations import Quantization
-from bitorch.layers.layerconfig import config
+from .config import config
 
 
 def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
@@ -34,7 +34,7 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
             """
             super(QConv_NoAct, self).__init__(*args, **kwargs)
             self.quantize = config.get_quantization_function(weight_quantization)
-            self.pad_value = pad_value or config.get_padding_value()
+            self.pad_value = pad_value or config.padding_value
 
         def _apply_padding(self, x: Tensor) -> Tensor:
             """pads the input tensor with the given padding value

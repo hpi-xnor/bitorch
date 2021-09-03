@@ -3,6 +3,7 @@ import sys
 from typing import Tuple
 from bitorch.models import model_from_name, model_names
 from bitorch.datasets import dataset_names
+from bitorch import add_config_args
 
 
 def add_logging_args(parser: ArgumentParser) -> None:
@@ -174,6 +175,8 @@ def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
     add_optimizer_args(parser)
     add_experiment_args(parser)
     add_checkpoint_args(parser)
+
+    add_config_args(parser)
 
     parser.add_argument("--model", type=str, choices=model_names(), required=True,
                         help="name of the model to be trained")

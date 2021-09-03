@@ -3,7 +3,7 @@ from bitorch.quantizations import Quantization
 import torch
 from torch import nn
 
-from bitorch.layers.layerconfig import config
+from .config import config
 
 
 class QActivation(nn.Module):
