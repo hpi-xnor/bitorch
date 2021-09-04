@@ -31,16 +31,13 @@ class LayerConfig(Config):
         else:
             raise ValueError(f"Invalid quantization: {quantization}")
 
-    def default_quantization(self) -> torch.nn.Module:
-        """default quantization function. used if none is passed to qlayers
-
-        Returns:
-            torch.nn.Module: default quantization module
-        """
-        return quantization_from_name("sign")()
-
+    # default quantization to be used in layers
     quantization = quantization_from_name("sign")
+
+    # toggles print / matplotlib output in debug layers
     debug_activated = False
+
+    # default padding value used in convolution layers
     padding_value = -1.0
 
 
