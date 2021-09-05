@@ -19,10 +19,10 @@ class Config():
             self._add_getter_setter_methods(attribute)
 
     def _add_getter_setter_methods(self, attribute: str) -> None:
-        def getter(self):
+        def getter(self):  # type: ignore
             return getattr(self, attribute)
 
-        def setter(self, value):
+        def setter(self, value):  # type: ignore
             setattr(self, attribute, value)
 
         setattr(self, f"get_{attribute}", getter)
