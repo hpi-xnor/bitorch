@@ -22,7 +22,7 @@ class ETAEstimator():
             self._eta_file.parent.mkdir(parents=True, exist_ok=True)
         else:
             self._eta_file = None  # type: ignore
-            logging.warn("no eta file given, eta will only be outputed via logging")
+            logging.warn("no eta file given, eta will only be printed to logs")
         self._log_interval = log_interval
         self._num_iterations = iterations
         self._current_iteration = 0
