@@ -101,11 +101,12 @@ class CheckpointManager():
         model.load_state_dict(checkpoint["model"])
         if pretrained:
             epoch = 0
-            logging.info("using a pretrained model....")
+            logging.info(f"using a pretrained model from checkpoint {path} ...")
         else:
             epoch = checkpoint["epoch"] + 1
             optimizer.load_state_dict(checkpoint["optimizer"])
             if lr_scheduler and checkpoint["lr_scheduler"]:
                 lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+            logging.info(f"resuming model training from epoch {epoch} ...")
 
         return model, optimizer, lr_scheduler, epoch
