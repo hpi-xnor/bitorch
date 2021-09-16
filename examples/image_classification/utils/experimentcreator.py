@@ -12,8 +12,10 @@ class ExperimentCreator():
     """Creates an experiment directory and runs scirpt in there. copys code, redirects logging, tensorboard and checkpoint
     output. Starts the script in that experiment directory and exits this programm."""
 
-    # the root folder of this repository (relative to main script)
-    project_root = "../.."
+    # the root folder of this repository
+    # (we need to navigate to the parent 4 times: utils, image_classification, examples, project root)
+    project_root = Path(__file__).parent.parent.parent.parent
+    assert (project_root / "bitorch").is_dir(), "The project root '{}' does not contain 'bitorch'.".format(project_root)
 
     # the files that will be copied for experiment execution.
     project_code = [
@@ -44,11 +46,11 @@ class ExperimentCreator():
         self._experiment_name = experiment_name
         if not self._experiment_name:
             self._acquire_name()
-        self._experiment_dir = Path(experiment_dir) / self._experiment_name  # type: ignore
+        self._experiment_dir = (Path(experiment_dir) / self._experiment_name).absolute()  # type: ignore
 
         # checks if experiment directory in one of the specified code files / directories
         for code_file in self.project_code:
-            code_path = Path(self.project_root) / code_file
+            code_path = self.project_root / code_file
             if code_path in self._experiment_dir.parents:
                 raise ValueError(f"experiment directory must not be in a subdirectory of {code_path.resolve()}!")
 
@@ -174,19 +176,18 @@ class ExperimentCreator():
         run_args = self._extract_run_args(parser, args, model_parser, model_args)
 
         code_path = (self._experiment_dir / "code/").resolve()
-        root_path = Path(self.project_root)
 
         logging.debug(f"now copying files to {code_path}....")
         for file_name in self.project_code:
             logging.debug(f"copying {file_name}...")
-            file_path = (root_path / Path(file_name)).resolve()
+            file_path = (self.project_root / Path(file_name)).resolve()
             if file_path.is_dir():
                 shutil.copytree(str(file_path), str(code_path / file_name), dirs_exist_ok=True)
             else:
                 shutil.copy(str(file_path), str(code_path / file_name))
 
         script_path = Path(self._main_script_path).resolve()
-        relative_script_path = Path("code") / Path(os.path.relpath(script_path, start=root_path))
+        relative_script_path = Path("code") / Path(os.path.relpath(script_path, start=self.project_root))
 
         self._run_file_path = self._experiment_dir / "run.sh"
         self._create_run_file(self._run_file_path, run_args, relative_script_path)
