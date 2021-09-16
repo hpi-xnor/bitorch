@@ -1,13 +1,17 @@
-from utils.checkpointmanager import CheckpointManager
-from utils.etaestimator import ETAEstimator
-from utils.resultlogger import ResultLogger
+import logging
+import time
+from math import floor
+
 import torch
-from torch.utils.data import DataLoader
 from torch.nn import Module
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
-import logging
+from torch.utils.data import DataLoader
+
+from utils.checkpointmanager import CheckpointManager
+from utils.etaestimator import ETAEstimator
+from utils.resultlogger import ResultLogger
 
 
 def train_model(
@@ -19,7 +23,7 @@ def train_model(
         eta_estimator: ETAEstimator,
         optimizer: Optimizer,
         scheduler: _LRScheduler,
-        start_epochs: int = 0,
+        start_epoch: int = 0,
         epochs: int = 10,
         lr: float = 0.001,
         log_interval: int = 100,
@@ -48,12 +52,14 @@ def train_model(
         device = "cpu"
     model = model.to(device)
 
-    total_number_of_batches = (epochs - start_epochs) * (len(train_data) + len(test_data))
+    total_number_of_batches = (epochs - start_epoch) * (len(train_data) + len(test_data))
     eta_estimator.set_iterations(total_number_of_batches)
     current_number_of_batches = 0
     best_accuracy = 0.0
 
-    for epoch in range(start_epochs, epochs):
+    btic = time.time()
+
+    for epoch in range(start_epoch, epochs):
         epoch_loss = 0.0
         logging.info(f"\n-------------------------- epoch {epoch + 1} --------------------------")
 
@@ -78,9 +84,17 @@ def train_model(
                 )
 
             if idx % log_interval == 0 and idx > 0:
+                progress = floor((current_number_of_batches / total_number_of_batches) * 100000.0) / 1000.0
+                speed_in_sample_per_s = train_data.batch_size / (time.time() - btic)
+                lr = scheduler.get_last_lr() if scheduler else lr
+                if isinstance(lr, list):
+                    lr = lr[0]
                 logging.info(
-                    f"Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}, "
-                    f"current lr: {scheduler.get_last_lr() if scheduler else lr}")
+                    f"train epoch {epoch + 1:3d} batch {idx:5d} ({progress:03.3f}%) - loss: {epoch_loss / idx:2.2f}, "
+                    f"lr: {lr:.7f} (speed: {speed_in_sample_per_s:5.1f} samples/s)")
+
+            btic = time.time()
+
         epoch_loss /= len(train_data)
 
         if scheduler:

@@ -1,3 +1,7 @@
+import os
+if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
+    import pydevd_pycharm
+    pydevd_pycharm.settrace('localhost', port=int(os.environ.get('REMOTE_PYCHARM_DEBUG_PORT', "12345")), stdoutToServer=True, stderrToServer=True)
 import argparse
 import sys
 import logging
@@ -50,17 +54,19 @@ def main(
     if dataset.name == 'imagenet' and args.nv_dali:
         from examples.image_classification.dali_helper import create_dali_data_loader
 
-        logging.info(f"using {dataset.name} dataset and NV-DALI data loader ...")
+        logging.info(f"dataset: {dataset.name} (with DALI data loader)...")
         train_loader, test_loader = create_dali_data_loader(args)
     else:
         augmentation_level = Augmentation.from_string(args.augmentation)
-        logging.info(f"using {dataset.name} dataset...")
+        logging.info(f"dataset: {dataset.name}...")
         train_dataset = dataset(train=True, directory=args.dataset_train_dir,
                                 download=args.download, augmentation=augmentation_level)  # type: ignore
         test_dataset = dataset(train=False, directory=args.dataset_test_dir, download=args.download)
 
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
-        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
+                                  shuffle=True, pin_memory=True)
+        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
+                                 shuffle=False, pin_memory=True)
 
     model_arg_dict = vars(model_args)
     logging.debug(f"got model args as dict: {model_arg_dict}")
@@ -79,7 +85,7 @@ def main(
         start_epoch = 0
 
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
-    train_model(model, train_loader, test_loader, start_epochs=start_epoch, epochs=args.epochs, optimizer=optimizer,
+    train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
                 scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
                 result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
 

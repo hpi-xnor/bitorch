@@ -7,8 +7,6 @@ from typing import Union, Optional
 from torch.nn import Module
 from torch.optim.optimizer import Optimizer
 
-sys.path.append("../..")
-
 from bitorch.optimization.radam import RAdam  # noqa: E402
 
 
@@ -28,7 +26,8 @@ def set_logging(log_file: Union[None, str], log_level: str, output_stdout: bool)
     logger.setLevel(log_level)
 
     logging_format = logging.Formatter(
-        '%(asctime)s - %(levelname)s [%(filename)s : %(funcName)s() : l. %(lineno)s]: %(message)s')
+        '%(asctime)s - %(levelname)s [%(filename)s : %(funcName)s() : l. %(lineno)s]: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S')
 
     if log_file:
         log_file_path = Path(log_file)

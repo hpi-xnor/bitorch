@@ -112,8 +112,8 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                       "only has effect with the cifar10 and mnist dataset so far.")
     parser.add_argument("--batch-size", type=int, default=128,
                         help="batch size for training and testing (default: 128)")
-    parser.add_argument("--num-workers", type=int, default=0,
-                        help="number of workers to be used for dataloading (default: 0)")
+    parser.add_argument("--num-workers", type=int, default=4,
+                        help="number of workers to be used for dataloading (default: 4)")
     parser.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
                         help="level of augmentation to be used in data preparation (default 'none')")
     data.add_argument("--nv-dali", action="store_true", required=False, default=False,
