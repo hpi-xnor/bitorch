@@ -47,7 +47,7 @@ class CheckpointManager():
             return
 
         if not checkpoint_name:
-            checkpoint_path = self._store_dir / f"checkpoint_epoch_{epoch + 1}.pth"
+            checkpoint_path = self._store_dir / f"checkpoint_epoch_{epoch + 1:03d}.pth"
         else:
             checkpoint_path = self._store_dir / f"{checkpoint_name}.pth"
         logging.debug(f"storing checkpoint {checkpoint_path}...")

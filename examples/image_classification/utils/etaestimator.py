@@ -5,8 +5,8 @@ from math import floor
 
 
 class ETAEstimator():
-    """estimates the total runtime of a training run. A maximum number of single iterations needs to be set. after that, time
-    consumption of single iterations can be measured by with-call of this object"""
+    """estimates the total runtime of a training run. A maximum number of single iterations needs to be set. after that,
+    time consumption of single iterations can be measured by with-call of this object"""
 
     def __init__(self, eta_file: str, log_interval: int, iterations: int = 0) -> None:
         """creates eta file, inits some attributes
