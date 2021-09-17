@@ -24,8 +24,8 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      "printed to both the log file and stdout")
     log.add_argument("--tensorboard", action="store_true", default=False,
                      help="toggles use of tensorboard for logging learning progress")
-    log.add_argument("--tensorboard-output", type=str, default="./runs",
-                     help="output dir for tensorboard. default to ./runs")
+    log.add_argument("--tensorboard-output", type=str, default="./tblogs",
+                     help="output dir for tensorboard. default to ./tblogs")
     log.add_argument("--result-file", type=str, default=None,
                      help="path to result file; train and test metrics will be logged in csv format")
     log.add_argument("--eta-file", type=str, default=None,
@@ -49,7 +49,7 @@ def add_experiment_args(parser: ArgumentParser) -> None:
     experiment = parser.add_argument_group("experiment", "parameters for executing current training as an experiment")
     experiment.add_argument("--experiment", action="store_true", default=False,
                             help="toggles whether script should run as experiment. Default is false")
-    experiment.add_argument("--experiment-dir", type=str, default="./tblogs",
+    experiment.add_argument("--experiment-dir", type=str, default="./runs",
                             help="path to directory to create the experiment dir in.")
     experiment.add_argument("--experiment-name", type=str, default=None,
                             help="name of experiment. needs to be set for experiment.")
