@@ -5,8 +5,8 @@ from math import floor
 
 
 class ETAEstimator():
-    """estimates the total runtime of a training run. A maximum number of single units needs to be set. after that, time
-    consumption of single units can be measured by with-call of this object"""
+    """estimates the total runtime of a training run. A maximum number of single iterations needs to be set. after that, time
+    consumption of single iterations can be measured by with-call of this object"""
 
     def __init__(self, eta_file: str, log_interval: int, iterations: int = 0) -> None:
         """creates eta file, inits some attributes
@@ -33,7 +33,7 @@ class ETAEstimator():
         """setter of iterations
 
         Args:
-            num_iterations (int): number of maximum number of units.
+            num_iterations (int): number of maximum number of iterations.
         """
         self._num_iterations = num_iterations
 
@@ -57,8 +57,8 @@ class ETAEstimator():
         Returns:
             str: eta time string
         """
-        avg_time_per_unit = self._abs_time / self._current_iteration
-        total_estimated_time = avg_time_per_unit * self._num_iterations
+        avg_time_per_iteration = self._abs_time / self._current_iteration
+        total_estimated_time = avg_time_per_iteration * self._num_iterations
         remaining_estimated_time = total_estimated_time - self._abs_time
 
         return self._seconds_to_timestamp(remaining_estimated_time)
@@ -72,11 +72,11 @@ class ETAEstimator():
         Returns:
             str: the log message (for e.g. logging)
         """
-        avg_time_per_unit = self._abs_time / self._current_iteration
+        avg_time_per_iteration = self._abs_time / self._current_iteration
         progress = round(self._current_iteration / self._num_iterations * 100, 3)
 
         log_msg = (
-            f"average time per unit: {avg_time_per_unit} seconds, "
+            f"average time per iteration: {avg_time_per_iteration} seconds, "
             f"progress: {progress}%, "
             f"remaining estimated time: {self.eta()}"
         )
@@ -94,7 +94,7 @@ class ETAEstimator():
         """executed when entering with statement.
 
         Raises:
-            ValueError: thrown if max number of units / iterations not specified yet.
+            ValueError: thrown if max number of iterations / iterations not specified yet.
         """
         if self._num_iterations == 0:
             raise ValueError("number of iterations is not specified!")
