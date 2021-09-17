@@ -43,24 +43,31 @@ class ETAEstimator():
         seconds = round(seconds % 60, 1)
         return f"{str(hours)}h {str(minutes)}m {str(seconds)}s"
 
-    def _log_eta(self) -> None:
+    def eta(self):
+        avg_time_per_unit = self._abs_time / self._current_iteration
+        total_estimated_time = avg_time_per_unit * self._num_iterations
+        remaining_estimated_time = total_estimated_time - self._abs_time
+
+        return self._seconds_to_timestamp(remaining_estimated_time)
+
+    def summary(self) -> None:
         """creates an eta log message and outputs it both to logging and eta file.
 
         Raises:
             IOError: thrown if eta file cannot be written to.
+
+        Returns:
+            str: the log message (for e.g. logging)
         """
         avg_time_per_unit = self._abs_time / self._current_iteration
-        total_estimated_time = avg_time_per_unit * self._num_iterations
-        remaining_estimated_time = total_estimated_time - self._abs_time
         progress = round(self._current_iteration / self._num_iterations * 100, 3)
 
         log_msg = (
             f"average time per unit: {avg_time_per_unit} seconds, "
             f"progress: {progress}%, "
-            f"remaining estimated time: {self._seconds_to_timestamp(remaining_estimated_time)}"
+            f"remaining estimated time: {self.eta()}"
         )
 
-        logging.info(log_msg)
         if self._eta_file:
             try:
                 with self._eta_file.open("a") as eta_file:
@@ -68,6 +75,7 @@ class ETAEstimator():
             except IOError as e:
                 logging.error(f"cannot write to eta file: {e}")
                 raise IOError from e
+        return log_msg
 
     def __enter__(self) -> None:
         """executed when entering with statement.
@@ -85,4 +93,4 @@ class ETAEstimator():
         time_diff = time.time() - self._start_time
         self._abs_time += time_diff
         if (self._current_iteration % self._log_interval) == 0:
-            self._log_eta()
+            self.summary()

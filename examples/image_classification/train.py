@@ -80,7 +80,7 @@ def train_model(
             if idx % log_interval == 0 and idx > 0:
                 logging.info(
                     f"Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}, "
-                    f"current lr: {scheduler.get_last_lr() if scheduler else lr}")
+                    f"current lr: {scheduler.get_last_lr() if scheduler else lr}, eta: {eta_estimator.eta()}")
         epoch_loss /= len(train_data)
 
         if scheduler:
@@ -132,9 +132,12 @@ def train_model(
             top1_acc=accuracy,
             top5_acc=accuracy_top5
         )
+
         checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, epoch)
         if accuracy > best_accuracy:
             logging.info("updating best model....")
             checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, epoch, f"{model.name}_best")
             best_accuracy = accuracy
+
+        logging.info(eta_estimator.summary())
     return model
