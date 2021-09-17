@@ -103,7 +103,7 @@ class ExperimentCreator():
 
         run_args["--log-file"] = self._experiment_dir / (f"{self._experiment_name}.log")
         run_args["--result-file"] = self._experiment_dir / (f"{self._experiment_name}.csv")
-        run_args["--tensorboard-output"] = self._experiment_dir / "runs"
+        run_args["--tensorboard-output"] = self._experiment_dir / "tblogs"
         run_args["--checkpoint-dir"] = self._experiment_dir / "checkpoints"
 
         if "--experiment" in run_args:

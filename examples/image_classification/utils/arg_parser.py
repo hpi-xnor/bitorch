@@ -49,7 +49,7 @@ def add_experiment_args(parser: ArgumentParser) -> None:
     experiment = parser.add_argument_group("experiment", "parameters for executing current training as an experiment")
     experiment.add_argument("--experiment", action="store_true", default=False,
                             help="toggles whether script should run as experiment. Default is false")
-    experiment.add_argument("--experiment-dir", type=str, default="./runs",
+    experiment.add_argument("--experiment-dir", type=str, default="./tblogs",
                             help="path to directory to create the experiment dir in.")
     experiment.add_argument("--experiment-name", type=str, default=None,
                             help="name of experiment. needs to be set for experiment.")
