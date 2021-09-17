@@ -107,6 +107,6 @@ class CheckpointManager():
             optimizer.load_state_dict(checkpoint["optimizer"])
             if lr_scheduler and checkpoint["lr_scheduler"]:
                 lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
-            logging.info(f"resuming model training from epoch {epoch} ...")
+            logging.info(f"resuming model training from epoch {epoch}, loaded from checkpoint {path}...")
 
         return model, optimizer, lr_scheduler, epoch
