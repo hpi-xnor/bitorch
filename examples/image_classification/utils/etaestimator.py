@@ -38,19 +38,32 @@ class ETAEstimator():
         self._num_iterations = num_iterations
 
     def _seconds_to_timestamp(self, seconds: float) -> str:
+        """converts a given number of seconds to a time stamp with hours minutes and seconds.
+
+        Args:
+            seconds (float): number of seconds
+
+        Returns:
+            str: time stamp string
+        """
         hours = floor(seconds / 3600)
         minutes = floor((seconds % 3600) / 60)
         seconds = round(seconds % 60, 1)
         return f"{str(hours)}h {str(minutes)}m {str(seconds)}s"
 
-    def eta(self):
+    def eta(self) -> str:
+        """creates an eta time string
+
+        Returns:
+            str: eta time string
+        """
         avg_time_per_unit = self._abs_time / self._current_iteration
         total_estimated_time = avg_time_per_unit * self._num_iterations
         remaining_estimated_time = total_estimated_time - self._abs_time
 
         return self._seconds_to_timestamp(remaining_estimated_time)
 
-    def summary(self) -> None:
+    def summary(self) -> str:
         """creates an eta log message and outputs it both to logging and eta file.
 
         Raises:
