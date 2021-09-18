@@ -1,6 +1,7 @@
 from utils.checkpointmanager import CheckpointManager
 from utils.etaestimator import ETAEstimator
 from utils.resultlogger import ResultLogger
+from utils.metricscalculator import MetricsCalculator
 import torch
 from torch.utils.data import DataLoader
 from torch.nn import Module
@@ -53,11 +54,14 @@ def train_model(
     current_number_of_batches = 0
     best_accuracy = 0.0
 
+    metrics = MetricsCalculator()
+
     for epoch in range(start_epochs, epochs):
-        epoch_loss = 0.0
+        eta_estimator.epoch_start()
         logging.info(f"\n-------------------------- epoch {epoch + 1} --------------------------")
 
         model.train()
+        metrics.clear()
         for idx, (x_train, y_train) in enumerate(train_data):
             current_number_of_batches += 1
             with eta_estimator:
@@ -70,26 +74,45 @@ def train_model(
                 loss.backward()
                 optimizer.step()
 
-                epoch_loss += loss.item()
+                metrics.update(y_hat, y_train, loss)
                 result_logger.tensorboard_results(
-                    category="Train/Batches",
-                    batch_num=current_number_of_batches,
-                    loss=epoch_loss / max(idx, 1)
+                    category="Batches",
+                    step=current_number_of_batches * len(x_train),
+                    loss=metrics.avg_loss(),
                 )
 
             if idx % log_interval == 0 and idx > 0:
+                result_logger.tensorboard_results(
+                    category="Batches",
+                    step=current_number_of_batches * len(x_train),
+                    accuracy=metrics.accuracy(),
+                    recall=metrics.recall(),
+                    precision=metrics.precision(),
+                    f1=metrics.f1(),
+                    top_5_accuracy=metrics.top_5_accuracy(),
+                )
                 logging.info(
-                    f"Loss in epoch {epoch + 1} for batch {idx}: {epoch_loss / idx}, "
-                    f"current lr: {scheduler.get_last_lr() if scheduler else lr}")
-        epoch_loss /= len(train_data)
+                    f"Loss in epoch {epoch + 1} for batch {idx}: {metrics.avg_loss()}, batch acc: {metrics.accuracy()},"
+                    f" current lr: {scheduler.get_last_lr() if scheduler else lr}, eta: {eta_estimator.eta()}")
+
+        result_logger.tensorboard_results(
+            category="Train",
+            step=epoch + 1,
+            loss=metrics.avg_loss(),
+            accuracy=metrics.accuracy(),
+            recall=metrics.recall(),
+            precision=metrics.precision(),
+            f1=metrics.f1(),
+            top_5_accuracy=metrics.top_5_accuracy(),
+        )
+        train_loss = metrics.avg_loss()
 
         if scheduler:
             scheduler.step()
 
         model.eval()
-        test_loss = 0.0
-        correct = 0.0
-        correct_top5 = 0.0
+        metrics.clear()
+
         # now validate model with test dataset
         with torch.no_grad():
             for idx, (x_test, y_test) in enumerate(test_data):
@@ -98,43 +121,46 @@ def train_model(
                     y_test = y_test.to(device)
 
                     y_hat = model(x_test)
-                    test_loss += criterion(y_hat, y_test).item()
+                    test_loss = criterion(y_hat, y_test)
+                    metrics.update(y_hat, y_test, test_loss)
 
-                    # determine count of correctly predicted labels
-                    predictions = torch.argmax(y_hat, dim=1)
-                    _, predictions_top5 = torch.topk(y_hat, 5, dim=1)
-                    correct += torch.sum(y_test == predictions).item()
-                    for idx, top5 in enumerate(predictions_top5):
-                        correct_top5 += int(y_test[idx] in top5)
-        test_loss /= len(test_data)
-        batch_size = test_data.batch_size
-        if batch_size is None:
-            batch_size = 1
-        accuracy = correct / (len(test_data) * batch_size)
-        accuracy_top5 = correct_top5 / (len(test_data) * batch_size)
-
+        accuracy = metrics.accuracy()
         result_logger.log_result(
             epoch=epoch + 1,
             lr=scheduler.get_last_lr() if scheduler else lr,
-            train_epoch_loss=epoch_loss,
-            test_epoch_loss=test_loss,
+            train_epoch_loss=train_loss,
+            test_epoch_loss=metrics.avg_loss(),
             test_top1_acc=accuracy,
-            test_top5_acc=accuracy_top5)
-        result_logger.tensorboard_results(
-            category="Train",
-            epoch=epoch + 1,
-            loss=epoch_loss
+            test_top5_acc=metrics.top_5_accuracy(),
+            test_recall=metrics.recall(),
+            test_precision=metrics.precision(),
+            test_f1=metrics.f1(),
         )
         result_logger.tensorboard_results(
             category="Test",
-            epoch=epoch + 1,
-            loss=test_loss,
-            top1_acc=accuracy,
-            top5_acc=accuracy_top5
+            step=epoch + 1,
+            loss=metrics.avg_loss(),
+            accuracy=accuracy,
+            recall=metrics.recall(),
+            precision=metrics.precision(),
+            f1=metrics.f1(),
+            top_5_accuracy=metrics.top_5_accuracy(),
         )
+
         checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, epoch)
         if accuracy > best_accuracy:
             logging.info("updating best model....")
             checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, epoch, f"{model.name}_best")
             best_accuracy = accuracy
+
+        logging.info(eta_estimator.summary())
+        eta_estimator.epoch_end()
+
+        result_logger.tensorboard_results(
+            category="Training",
+            reverse_tag=True,
+            step=epoch + 1,
+            epoch_duration=eta_estimator.epoch_duration(),
+            lr=scheduler.get_last_lr()[0] if scheduler else lr,
+        )
     return model

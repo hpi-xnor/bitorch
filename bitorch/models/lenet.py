@@ -71,5 +71,5 @@ class LeNet(Model):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--lenet-quantized", action="store_true", default=False, required=False,
+        parser.add_argument("--lenet-quantized", action="store_true", default=False,
                             help="toggles use of quantized verion of lenet")

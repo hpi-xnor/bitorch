@@ -74,7 +74,7 @@ def main(
 
     if args.checkpoint_load:
         model, optimizer, scheduler, start_epoch = checkpoint_manager.load_checkpoint(
-            args.checkpoint_load, model, optimizer, scheduler, args.fresh_start)
+            args.checkpoint_load, model, optimizer, scheduler, args.pretrained)
     else:
         start_epoch = 0
 
