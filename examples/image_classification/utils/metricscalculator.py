@@ -40,7 +40,7 @@ class MetricsCalculator():
         self._total_loss += loss.item()
         self._prediction_argmax = None
 
-    def _calculate_argmaxes(self) -> None:
+    def _calculate_argmax(self) -> None:
         """computes argmax of predicted labels. this function is called lazily when metrics are requested and only
         if it was not already called since the last updated
 
@@ -58,23 +58,23 @@ class MetricsCalculator():
 
     def top_5_accuracy(self) -> float:
         if self._prediction_argmax is None:
-            self._calculate_argmaxes()
+            self._calculate_argmax()
         labels = list(range(len(self._prediction[0])))
         return top_k_accuracy_score(self._ground_truth, self._prediction, k=5, labels=labels)
 
     def precision(self) -> float:
         if self._prediction_argmax is None:
-            self._calculate_argmaxes()
+            self._calculate_argmax()
         return precision_score(self._ground_truth, self._prediction_argmax, average="macro", zero_division=0)
 
     def recall(self) -> float:
         if self._prediction_argmax is None:
-            self._calculate_argmaxes()
+            self._calculate_argmax()
         return recall_score(self._ground_truth, self._prediction_argmax, average="macro", zero_division=0)
 
     def f1(self) -> float:
         if self._prediction_argmax is None:
-            self._calculate_argmaxes()
+            self._calculate_argmax()
         return f1_score(self._ground_truth, self._prediction_argmax, average="macro", zero_division=0)
 
     def avg_loss(self) -> float:
