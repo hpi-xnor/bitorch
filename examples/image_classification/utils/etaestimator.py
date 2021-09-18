@@ -28,6 +28,26 @@ class ETAEstimator():
         self._current_iteration = 0
         self._start_time = 0.0
         self._abs_time = 0.0
+        self._epoch_duration = 0.0
+        self._epoch_start = 0.0
+
+    def epoch_start(self) -> None:
+        """can be called at the start of an epoch. stores the current time as the start of an epoch"""
+        self._epoch_start = time.time()
+
+    def epoch_end(self) -> None:
+        """can be called at the end of an epoch. stores the epoch duration as the time difference between stored epoch
+        start and current time."""
+        self._epoch_duration = time.time() - self._epoch_start
+        self._epoch_start = 0.0
+
+    def epoch_duration(self) -> float:
+        """getter method for epoch duration.
+
+        Returns:
+            float: duration of an epoch in seconds.
+        """
+        return self._epoch_duration
 
     def set_iterations(self, num_iterations: int) -> None:
         """setter of iterations
