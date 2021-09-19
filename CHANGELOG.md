@@ -25,3 +25,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - eta estimator
 - experiment creator
 - model visualization in logs and tensorboard
+- config classes for bitorch layers / quantizations with automated argparse argument creation

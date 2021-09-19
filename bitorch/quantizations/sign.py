@@ -1,10 +1,11 @@
 """Sign Function Implementation"""
-
-from .base import Quantization
-from typing import Tuple
 import torch
 import typing
+from typing import Tuple, Union
 from torch.autograd import Function
+
+from .base import Quantization
+from .config import config
 
 
 class SignFunction(Function):
@@ -71,14 +72,14 @@ class Sign(Quantization):
 
     name = "sign"
 
-    def __init__(self, gradient_cancelation_threshold: float = 1.0) -> None:
+    def __init__(self, gradient_cancelation_threshold: Union[float, None] = None) -> None:
         """Initializes gradient cancelation threshold.
 
         Args:
-            gradient_cancelation_threshold (float, optional): threshold after which gradient is 0. Defaults to 1.0.
+            gradient_cancelation_threshold (float, optional): threshold after which gradient is 0. Defaults to None.
         """
         super(Sign, self).__init__()
-        self.gradient_cancelation_threshold = gradient_cancelation_threshold
+        self.gradient_cancelation_threshold = gradient_cancelation_threshold or config.gradient_cancellation_threshold
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.
