@@ -6,7 +6,7 @@ from torch.nn import Linear
 from torch.nn.functional import linear
 
 from bitorch.quantizations import Quantization
-from bitorch.layers.layerconfig import config
+from .config import config
 
 
 class QLinear(Linear):

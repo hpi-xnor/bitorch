@@ -1,4 +1,5 @@
 import argparse
+from bitorch.layers.debug_layers import Shape_Print_Debug
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QLinear, QConv2d, QActivation
 from torch import nn
@@ -37,6 +38,7 @@ class LeNet(Model):
                     weight_quantization="weightdorefa"),
                 nn.BatchNorm2d(self.num_channels_conv),
                 nn.MaxPool2d(2, 2),
+                Shape_Print_Debug(),
 
                 nn.Flatten(),
 
@@ -71,5 +73,5 @@ class LeNet(Model):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--lenet-quantized", action="store_true", default=False, required=False,
+        parser.add_argument("--lenet-quantized", action="store_true", default=False,
                             help="toggles use of quantized verion of lenet")

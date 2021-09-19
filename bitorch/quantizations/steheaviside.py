@@ -1,11 +1,12 @@
 """Sign Function Implementation"""
 
-from torch import tensor
-from .base import Quantization
 import torch
 import typing
+from typing import Union
 
+from .base import Quantization
 from .sign import SignFunction
+from .config import config
 
 
 class SteHeavisideFunction(SignFunction):
@@ -37,14 +38,14 @@ class SteHeaviside(Quantization):
 
     name = "steheaviside"
 
-    def __init__(self, gradient_cancelation_threshold: float = 1.0) -> None:
+    def __init__(self, gradient_cancelation_threshold: Union[float, None] = None) -> None:
         """Initializes gradient cancelation threshold.
 
         Args:
             gradient_cancelation_threshold (float, optional): threshold after which gradient is 0. Defaults to 1.0.
         """
         super(SteHeaviside, self).__init__()
-        self.gradient_cancelation_threshold = gradient_cancelation_threshold
+        self.gradient_cancelation_threshold = gradient_cancelation_threshold or config.gradient_cancellation_threshold
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.

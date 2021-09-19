@@ -25,6 +25,7 @@ sys.path.append("../../")
 from bitorch.datasets.base import Augmentation  # noqa: E402
 from bitorch.models import model_from_name  # noqa: E402
 from bitorch.datasets import dataset_from_name  # noqa: E402
+from bitorch import apply_args_to_configuration  # noqa: E402
 
 
 def main(
@@ -45,6 +46,8 @@ def main(
         experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
         experimentCreator.create(parser, args, model_parser, model_args)
         experimentCreator.run_experiment()
+
+    apply_args_to_configuration(args)
 
     result_logger = ResultLogger(args.result_file, args.tensorboard, args.tensorboard_output)
     checkpoint_manager = CheckpointManager(args.checkpoint_dir, args.checkpoint_keep_count)
@@ -80,7 +83,7 @@ def main(
 
     if args.checkpoint_load:
         model, optimizer, scheduler, start_epoch = checkpoint_manager.load_checkpoint(
-            args.checkpoint_load, model, optimizer, scheduler, args.fresh_start)
+            args.checkpoint_load, model, optimizer, scheduler, args.pretrained)
     else:
         start_epoch = 0
 

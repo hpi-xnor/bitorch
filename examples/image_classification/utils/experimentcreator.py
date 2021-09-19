@@ -103,9 +103,9 @@ class ExperimentCreator():
             if "help" not in action.option_strings:
                 run_args[action.option_strings[0]] = model_args_dict[action.dest]
 
-        run_args["--log-file"] = self._experiment_dir / (f"{self._experiment_name}.log")
-        run_args["--result-file"] = self._experiment_dir / (f"{self._experiment_name}.csv")
-        run_args["--tensorboard-output"] = self._experiment_dir / "runs"
+        run_args["--log-file"] = self._experiment_dir / "experiment.log"
+        run_args["--result-file"] = self._experiment_dir / "metrics.csv"
+        run_args["--tensorboard-output"] = self._experiment_dir / "tblogs"
         run_args["--checkpoint-dir"] = self._experiment_dir / "checkpoints"
 
         if "--experiment" in run_args:

@@ -47,7 +47,7 @@ class CheckpointManager():
             return
 
         if not checkpoint_name:
-            checkpoint_path = self._store_dir / f"checkpoint_epoch_{epoch + 1}.pth"
+            checkpoint_path = self._store_dir / f"checkpoint_epoch_{epoch + 1:03d}.pth"
         else:
             checkpoint_path = self._store_dir / f"{checkpoint_name}.pth"
         logging.debug(f"storing checkpoint {checkpoint_path}...")
@@ -73,7 +73,7 @@ class CheckpointManager():
             model: Module,
             optimizer: Optimizer,
             lr_scheduler: _LRScheduler,
-            fresh_start: bool = False) -> Tuple[Module, Optimizer, _LRScheduler, int]:
+            pretrained: bool = False) -> Tuple[Module, Optimizer, _LRScheduler, int]:
         """loads the checkpoint at the given path. restores model, optimizer and lr scheduler state dict. !Note!: the model,
         optimizer and lr scheduler have to be the same as the stored ones, e.g. a resnet cannot load the state dict of a
         lenet obviously. only loads model state dict if fresh start is activated.
@@ -83,8 +83,8 @@ class CheckpointManager():
             model (Module): model to load the state dict
             optimizer (Optimizer): optimizer to load the state dict
             lr_scheduler (_LRScheduler): lr scheduler to load the state dict
-            fresh_start (bool, optional): toggles fresh start, i.e. if activated, the optimizer and lr scheduler are not
-                modified and epoch will be set to 0. Defaults to False.
+            pretrained (bool, optional): toggles use of pretrained model, i.e. if activated, the optimizer and lr
+                scheduler are not modified and epoch will be set to 0. Defaults to False.
 
         Raises:
             ValueError: thrown if checkpoint at given path does not exist.
@@ -99,13 +99,14 @@ class CheckpointManager():
         logging.debug(f"loading checkpoint {path}....")
         checkpoint = torch.load(path)
         model.load_state_dict(checkpoint["model"])
-        if fresh_start:
+        if pretrained:
             epoch = 0
-            logging.info("making a fresh start with pretrained model....")
+            logging.info(f"using a pretrained model from checkpoint {path} ...")
         else:
             epoch = checkpoint["epoch"] + 1
             optimizer.load_state_dict(checkpoint["optimizer"])
             if lr_scheduler and checkpoint["lr_scheduler"]:
                 lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
+            logging.info(f"resuming model training from epoch {epoch}, loaded from checkpoint {path}...")
 
         return model, optimizer, lr_scheduler, epoch

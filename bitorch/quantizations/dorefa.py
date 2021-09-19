@@ -2,10 +2,11 @@
 
 import typing
 import torch
-from typing import Tuple
-
+from typing import Tuple, Union
 from torch.autograd.function import Function
+
 from .base import Quantization
+from .config import config
 
 
 class DoReFaFunction(Function):
@@ -52,7 +53,6 @@ class DoReFaFunction(Function):
             torch.Tensor: the output gradient
         """
         input_tensor = ctx.saved_tensors[0]
-        print(input_tensor)
         canceled_gradients = torch.logical_or(input_tensor > 1, input_tensor < 0)
         output_grad[canceled_gradients] = 0
 
@@ -102,14 +102,14 @@ class InputDoReFa(Quantization):
 
     name = "inputdorefa"
 
-    def __init__(self, bits: int = 1) -> None:
+    def __init__(self, bits: Union[int, None] = 1) -> None:
         """Initiates quantization bits.
 
         Args:
             bits (int, optional): number of bits to quantize into. Defaults to 1.
         """
         super(InputDoReFa, self).__init__()
-        self.bits = bits
+        self.bits = bits or config.dorefa_bits
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """DoReFas the tensor to desired bit resolution.
