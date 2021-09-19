@@ -3,6 +3,7 @@ import sys
 from typing import Tuple
 from bitorch.models import model_from_name, model_names
 from bitorch.datasets import dataset_names
+from bitorch import add_config_args
 
 
 def add_logging_args(parser: ArgumentParser) -> None:
@@ -160,13 +161,12 @@ def add_all_model_args(parser: ArgumentParser) -> None:
         model_from_name(model_name).add_argparse_arguments(model_group)  # type: ignore
 
 
-def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
-    """creates a main argument parser for general options and a model parser for model specific options
+def add_regular_args(parser: ArgumentParser) -> None:
+    """adds all regular arguments, including dynamically created config args to parser.
 
-    Returns:
-        Tuple[ArgumentParser, ArgumentParser]: the main and model argument parser
+    Args:
+        parser (ArgumentParser): parser to add the regular arguments to
     """
-    parser = ArgumentParser(description="Bitorch Image Classification")
     add_logging_args(parser)
     add_training_args(parser)
     add_dataset_args(parser)
@@ -174,8 +174,22 @@ def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
     add_experiment_args(parser)
     add_checkpoint_args(parser)
 
+    add_config_args(parser)
+
     parser.add_argument("--model", type=str, choices=model_names(), required=True,
                         help="name of the model to be trained")
+
+
+def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
+    """creates a main argument parser for general options and a model parser for model specific options
+
+    Returns:
+        Tuple[ArgumentParser, ArgumentParser]: the main and model argument parser
+    """
+    parser = ArgumentParser(description="Bitorch Image Classification")
+
+    add_regular_args(parser)
+
     if help_in_args():
         add_all_model_args(parser)
     args, _ = parser.parse_known_args()

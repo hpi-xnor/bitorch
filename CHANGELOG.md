@@ -24,3 +24,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - checkpoint manager
 - eta estimator
 - experiment creator
+- config classes for bitorch layers / quantizations with automated argparse argument creation
