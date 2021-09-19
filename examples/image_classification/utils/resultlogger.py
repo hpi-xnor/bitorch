@@ -89,21 +89,29 @@ class ResultLogger():
             dict_writer = csv.DictWriter(result_file, file_header, "0.0")
             dict_writer.writerow(kwargs)
 
-    def tensorboard_results(self, category: str = "", **kwargs: dict) -> None:
+    def tensorboard_results(
+            self,
+            step: Union[int, float],
+            category: str = "",
+            reverse_tag: bool = False,
+            **kwargs: dict) -> None:
         """loggs the values in kwargs in tensorboard. category specifies the field to store the values in.
         Note: only scalar values supported right now.
 
-        The first value in kwargs will be used as 'step' value, i.e. the x-value in scalar charts (e.g. epoch or
-        batch num)
-
         Args:
             category (str, optional): name of field to store the values in. Defaults to "".
+            step (int or float, optional): step variable for scalar logging
+            reverse_tag (bool, optional): reverses the tag for tensorboard logging (i.e. variable name / category
+                vs. category / variable name)
         """
         if not self._tensorboard:
             return
 
-        step_variable = list(kwargs.values())[0]
-        for key, value in list(kwargs.items())[1:]:
+        for key, value in kwargs.items():
             if isinstance(value, float) or isinstance(value, int):
-                self._tensorboard.add_scalar(category + "/" + str(key), value, step_variable)
+                if reverse_tag:
+                    tag = category + "/" + str(key)
+                else:
+                    tag = str(key) + "/" + category
+                self._tensorboard.add_scalar(tag, value, step)
         self._tensorboard.flush()

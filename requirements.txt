@@ -1,6 +1,7 @@
 numpy
 torch
 torchvision
+sklearn
 matplotlib
 tensorboardX
 torch-summary

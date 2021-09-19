@@ -52,7 +52,6 @@ class DoReFaFunction(Function):
             torch.Tensor: the output gradient
         """
         input_tensor = ctx.saved_tensors[0]
-        print(input_tensor)
         canceled_gradients = torch.logical_or(input_tensor > 1, input_tensor < 0)
         output_grad[canceled_gradients] = 0
 
