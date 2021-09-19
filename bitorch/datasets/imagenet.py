@@ -12,7 +12,7 @@ class ImageNetDataset(BasicDataset):
     num_classes = 1000
     shape = (1, 3, 224, 224)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         self._normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         super().__init__(*args, **kwargs)
 
