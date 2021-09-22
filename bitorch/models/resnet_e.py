@@ -9,6 +9,7 @@ import torch
 import argparse
 from torch import nn
 from torch.nn import Module
+import logging
 
 from bitorch.layers import QConv2d
 from bitorch.models.common_layers import make_initial_layers
@@ -202,7 +203,7 @@ ResNet-e specifications
 
 class Resnet_E(Model):
 
-    name = "ResnetE"
+    name = "resnete"
 
     resnet_spec = {18: ([2, 2, 2, 2], [64, 64, 128, 256, 512]),
                    34: ([3, 4, 6, 3], [64, 64, 128, 256, 512])}
@@ -214,7 +215,7 @@ class Resnet_E(Model):
         super(Resnet_E, self).__init__(dataset)
         self._model = self.create(resnete_num_layers, self._dataset.num_classes,
                                   self._dataset.name, self._dataset.shape[1])
-        self.name += f"{str(resnete_num_layers)}"
+        logging.info(f"building ResnetE with {str(resnete_num_layers)} layers...")
 
     def create(
             self,
@@ -254,7 +255,7 @@ class Resnet_E18(Resnet_E):
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "ResnetE18"
+    name = "resnete18"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet_E18, self).__init__(18, *args, **kwargs)
@@ -269,7 +270,7 @@ class Resnet_E34(Resnet_E):
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "ResnetE34"
+    name = "resnete34"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
         super(Resnet_E34, self).__init__(34, *args, **kwargs)
