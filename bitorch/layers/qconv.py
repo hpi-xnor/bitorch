@@ -1,8 +1,9 @@
 """Module containing the quantized convolution layer"""
 
-from bitorch.quantizations import Quantization
 from typing import Type, Union
 from torch import Tensor
+
+from bitorch.quantizations import Quantization
 from bitorch.layers.qactivation import QActivation
 from bitorch.layers.qconv_noact import QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
 

@@ -1,5 +1,6 @@
 import argparse
-from bitorch.datasets.base import DatasetBaseClass
+from bitorch.layers.debug_layers import Shape_Print_Debug
+from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QLinear, QConv2d, QActivation
 from torch import nn
 from .base import Model
@@ -13,7 +14,7 @@ class LeNet(Model):
     num_fc = 1000
     name = "lenet"
 
-    def __init__(self, dataset: DatasetBaseClass, lenet_quantized: bool = False) -> None:
+    def __init__(self, dataset: BasicDataset, lenet_quantized: bool = False) -> None:
         """builds the model, depending on mode in either quantized or full_precision mode
 
         Args:
@@ -34,9 +35,10 @@ class LeNet(Model):
                     self.num_channels_conv,
                     kernel_size=5,
                     input_quantization="sign",
-                    weight_quantization="dorefa"),
+                    weight_quantization="weightdorefa"),
                 nn.BatchNorm2d(self.num_channels_conv),
                 nn.MaxPool2d(2, 2),
+                Shape_Print_Debug(),
 
                 nn.Flatten(),
 

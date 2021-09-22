@@ -1,11 +1,11 @@
 from torchvision.datasets import cifar
 from torchvision.transforms import ToTensor, Normalize
 import torch
-from .base import DatasetBaseClass
+from .base import BasicDataset
 from torch.utils.data import Dataset
 
 
-class CIFAR10(DatasetBaseClass):
+class CIFAR10(BasicDataset):
     name = "cifar10"
     num_classes = 10
     shape = (1, 3, 32, 32)
@@ -18,7 +18,7 @@ class CIFAR10(DatasetBaseClass):
         return transform(x)
 
 
-class CIFAR100(DatasetBaseClass):
+class CIFAR100(BasicDataset):
     name = "cifar100"
     num_classes = 100
     shape = (1, 3, 32, 32)

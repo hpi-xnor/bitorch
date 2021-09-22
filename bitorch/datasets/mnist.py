@@ -1,10 +1,10 @@
 from torchvision.datasets import mnist
 from torchvision.transforms import ToTensor
 from torch.utils.data import Dataset
-from .base import DatasetBaseClass
+from .base import BasicDataset
 
 
-class MNIST(DatasetBaseClass):
+class MNIST(BasicDataset):
     name = "mnist"
     num_classes = 10
     shape = (1, 1, 28, 28)

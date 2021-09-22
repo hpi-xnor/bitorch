@@ -1,11 +1,12 @@
 """Sign Function Implementation"""
 
-from .base import Quantization
-from typing import Tuple
 import torch
 import typing
+from typing import Tuple, Union
 
+from .base import Quantization
 from .sign import SignFunction
+from .config import config
 
 
 class SwishSignFunction(SignFunction):
@@ -56,14 +57,14 @@ class SwishSign(Quantization):
 
     name = "swishsign"
 
-    def __init__(self, beta: float = 5.0) -> None:
+    def __init__(self, beta: Union[float, None] = None) -> None:
         """Initializes gradient cancelation threshold.
 
         Args:
             gradient_cancelation_threshold (float, optional): threshold after which gradient is 0. Defaults to 1.0.
         """
         super(SwishSign, self).__init__()
-        self.beta = beta
+        self.beta = beta or config.beta
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the swishsign function.

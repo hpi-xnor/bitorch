@@ -1,4 +1,4 @@
-from .base import DatasetBaseClass
+from .base import BasicDataset
 from pathlib import Path
 from typing import List, Type
 from importlib import import_module
@@ -13,7 +13,7 @@ for file in current_dir.iterdir():
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
 
-            if isinstance(attr, type) and issubclass(attr, DatasetBaseClass) and attr != DatasetBaseClass:
+            if isinstance(attr, type) and issubclass(attr, BasicDataset) and attr != BasicDataset:
                 if attr_name in datasets_by_name:
                     raise ImportError("Two datasets found in dataset package with same name!")
                 datasets_by_name[attr.name] = attr
@@ -21,7 +21,7 @@ for file in current_dir.iterdir():
                 globals()[attr_name] = attr
 
 
-def dataset_from_name(name: str) -> Type[DatasetBaseClass]:
+def dataset_from_name(name: str) -> Type[BasicDataset]:
     """returns the dataset to which the name belongs to (name has to be the value of the datasets
     name-attribute)
 

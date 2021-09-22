@@ -1,11 +1,11 @@
 from torchvision.datasets import ImageNet
 from torchvision.transforms import ToTensor, Normalize
 import torch
-from .base import DatasetBaseClass
+from .base import BasicDataset
 from torch.utils.data import Dataset
 
 
-class ImageNetDataset(DatasetBaseClass):
+class ImageNetDataset(BasicDataset):
     name = "imagenet"
     num_classes = 1000
     shape = (1, 3, 224, 224)
