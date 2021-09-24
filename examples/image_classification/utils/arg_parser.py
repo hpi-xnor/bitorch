@@ -103,10 +103,8 @@ def add_dataset_args(parser: ArgumentParser) -> None:
     data = parser.add_argument_group("dataset", "parameters for the dataset used for training")
     data.add_argument("--dataset", type=str, default="cifar10", choices=dataset_names(),
                       help="name of the dataset to be used for training")
-    data.add_argument("--dataset-train-dir", type=str, default="./train",
+    data.add_argument("--dataset-dir", type=str, default=None,
                       help="path to where the train dataset is saved / shall be downloaded to")
-    data.add_argument("--dataset-test-dir", type=str, default="./test",
-                      help="path to where the test dataset is saved / shall be downloaded to")
     data.add_argument("--download", action="store_true", default=True,
                       help="toggles wether the dataset shall be downloaded if not present. "
                       "only has effect with the cifar10 and mnist dataset so far.")

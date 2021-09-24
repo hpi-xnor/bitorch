@@ -1,19 +1,25 @@
-import torch
-from typing import Tuple
-from torch.utils.data import Dataset
+import logging
+import os
 from enum import Enum
+from typing import Tuple, Any
+
+import torch
+from torch.utils.data import Dataset
+from torchvision.transforms import transforms
 
 
 class Augmentation(Enum):
-    NONE = 0
+    NONE = -1
+    DEFAULT = 0
     LOW = 1
     MEDIUM = 2
     HIGH = 3
 
     @staticmethod
-    def from_string(level: str) -> Enum:
+    def from_string(level: str) -> "Augmentation":
         return {
             "none": Augmentation.NONE,
+            "default": Augmentation.DEFAULT,
             "low": Augmentation.LOW,
             "medium": Augmentation.MEDIUM,
             "high": Augmentation.HIGH,
@@ -24,25 +30,77 @@ class BasicDataset(Dataset):
     name = "None"
     num_classes = 0
     shape = (0, 0, 0, 0)
+    mean = None
+    std_dev = None
+    num_train_samples = 0
+    num_val_samples = 0
 
     def __init__(
             self,
             train: bool,
-            directory: str,
+            root_directory: str = None,
             download: bool = False,
-            augmentation: Augmentation = Augmentation.NONE) -> None:
-        super(BasicDataset, self).__init__()
-        self._dataset = self.get_dataset(train, directory, download)
-        if train:
-            self._dataset = self.augment_dataset(self._dataset, augmentation)
-
-    def get_dataset(self, train: bool, directory: str, download: bool) -> Dataset:
-        """creates the dataset, has to respond to train flag, i.e. if train true the train dataset is to be created,
-        if false the test dataset.
+            augmentation: Augmentation = Augmentation.DEFAULT) -> None:
+        """initializes the dataset.
 
         Args:
-            train (bool): toggles if train or test dataset shall be created
-            directory (str): path to test/train dataset store dir (optional)
+            train (bool): whether the train or test dataset is wanted
+            root_directory (str): path to main dataset storage directory
+            download (bool): whether train/test should be downloaded if it does not exist
+            augmentation (Augmentation): the level of augmentation (only for train dataset)
+
+        Returns:
+            Dataset: the created test/train dataset
+        """
+        super(BasicDataset, self).__init__()
+        self.is_train = train
+        self.augmentation_level = augmentation
+        self._download = download
+        self.root_directory = self.get_dataset_root_directory(root_directory)
+        self._dataset = self.get_dataset(download)
+
+    @classmethod
+    def get_train_and_test(
+            cls,
+            root_directory: str,
+            download: bool = False,
+            augmentation: Augmentation = Augmentation.DEFAULT) -> ["BasicDataset", "BasicDataset"]:
+        """creates a pair of train and test dataset.
+
+        Returns:
+            Tuple: the train and test dataset
+        """
+        return cls(True, root_directory, download, augmentation), cls(False, root_directory, download)
+
+    def get_dataset_root_directory(self, root_directory_argument: str) -> str:
+        """chooses the dataset root directory based on the passed argument or environment variables.
+
+        Returns:
+            Tuple: the train and test dataset
+        """
+        if root_directory_argument is not None:
+            return root_directory_argument
+
+        environment_variable_name = f"{self.name.upper()}_HOME"
+        if os.environ.get(environment_variable_name) is not None:
+            return os.environ.get(environment_variable_name)
+        if os.environ.get("BITORCH_DATA_HOME") is not None:
+            return os.path.join(os.environ.get("BITORCH_DATA_HOME"), self.name)
+
+        environment_variable_hint = \
+            f" To change this, set '{environment_variable_name}' or 'BITORCH_DATA_HOME' " \
+            f"(in the latter case, the data resides in the folder '{self.name}' in BITORCH_DATA_HOME)."
+
+        if self._download:
+            logging.warning("Dataset is being downloaded to the directory './data'." + environment_variable_hint)
+            return "./data"
+        else:
+            raise ValueError(f"Dataset {self.name} not found." + environment_variable_hint)
+
+    def get_dataset(self, download: bool) -> Dataset:
+        """creates the actual dataset
+
+        Args:
             download (bool): toggles if train/test shall be downloaded if possible
 
         Raises:
@@ -53,42 +111,47 @@ class BasicDataset(Dataset):
         """
         raise NotImplementedError()
 
-    def transform(self, x: torch.Tensor) -> torch.Tensor:
-        """transforms the data tensor x. this method is called lazily every time an item is fetched.
+    def get_transform(self) -> Any:
+        if self.is_train:
+            return self.train_transform(self.augmentation_level)
+        return self.test_transform()
 
-        Args:
-            x (torch.Tensor): the input tensor to be transformed
-
-        Returns:
-            torch.Tensor: the transformed tensor
-        """
-        return x
-
-    def augment_dataset(self, dataset: Dataset, augmentation_level: Augmentation = Augmentation.NONE) -> Dataset:
-        """custom dataset augmentation can be implemented here.
-
-        Args:
-            dataset (Dataset): the dataset to be augmented
-            augmentation_level (Augmentation, optional): the augmentation level (4 different levels available).
-                Defaults to Augmentation.NONE.
+    @classmethod
+    def test_transform(cls) -> Any:
+        """get the transform for the test data.
 
         Returns:
-            Dataset: the augmented dataset
+            transform: the transform pipeline
         """
-        return dataset
+        return transforms.Compose([transforms.ToTensor(), cls.get_normalize_transform()])
+
+    @classmethod
+    def train_transform(cls, augmentation: Augmentation = Augmentation.DEFAULT) -> Any:
+        """get the transform for the training data (should consider the current augmentation_level).
+
+        Returns:
+            transform: the transform pipeline
+        """
+        return transforms.Compose([transforms.ToTensor(), cls.get_normalize_transform()])
+
+    @classmethod
+    def get_normalize_transform(cls) -> transforms.Normalize:
+        return transforms.Normalize(cls.mean, cls.std_dev)
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:  # type: ignore
-        """returns the item on the specified index after applying the transform opteration.
+        """returns the item at the given index of the dataset.
 
         Args:
             index (int): requested index
 
         Returns:
-            Tuple[torch.Tensor, torch.Tensor]: the data and lable at the specified index
+            Tuple[torch.Tensor, torch.Tensor]: data and label at the specified index
         """
-        item = self._dataset[index]
-        if isinstance(item, tuple):
-            return self.transform(item[0]), item[1]
+        return self._dataset[index]
 
     def __len__(self) -> int:
         return len(self._dataset)  # type: ignore
+
+    def num_samples(self) -> int:
+        """returns the (theoretical) dataset size."""
+        return self.num_train_samples if self.is_train else self.num_val_samples

@@ -1,6 +1,6 @@
-from torchvision.datasets import mnist
-from torchvision.transforms import ToTensor
 from torch.utils.data import Dataset
+from torchvision.datasets import mnist
+
 from .base import BasicDataset
 
 
@@ -9,5 +9,15 @@ class MNIST(BasicDataset):
     num_classes = 10
     shape = (1, 1, 28, 28)
 
-    def get_dataset(self, train: bool, directory: str, download: bool = True) -> Dataset:
-        return mnist.MNIST(root=directory, train=train, transform=ToTensor(), download=download)
+    mean = (0.1307,)
+    std_dev = (0.3081,)
+    num_train_samples = 60000
+    num_val_samples = 10000
+
+    def get_dataset(self, download: bool = True) -> Dataset:
+        return mnist.MNIST(
+            root=self.root_directory,
+            train=self.is_train,
+            transform=self.get_transform(),
+            download=download
+        )

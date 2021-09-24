@@ -192,9 +192,8 @@ class ExperimentCreator():
         self._run_file_path = self._experiment_dir / "run.sh"
         self._create_run_file(self._run_file_path, run_args, relative_script_path)
 
-    def run_experiment(self) -> None:
+    def run_experiment_in_subprocess(self) -> None:
         """runs the run.sh in experiment dir. exits this programm afterwards."""
         logging.info(f"executing run file {str(self._run_file_path)}, exiting this script afterwards...")
 
         subprocess.Popen(str(self._run_file_path))
-        sys.exit(0)

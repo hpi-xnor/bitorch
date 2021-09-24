@@ -1,3 +1,5 @@
+import time
+
 import torch
 import logging
 from torch.nn import Module
@@ -57,9 +59,10 @@ def train_model(
 
     metrics = MetricsCalculator()
 
+    btic = time.time()
+
     for epoch in range(start_epoch, epochs):
         eta_estimator.epoch_start()
-        logging.info(f"\n-------------------------- epoch {epoch + 1} --------------------------")
 
         model.train()
         metrics.clear()
@@ -77,14 +80,14 @@ def train_model(
 
                 metrics.update(y_hat, y_train, loss)
                 result_logger.tensorboard_results(
-                    category="Batches",
+                    category="Batch",
                     step=current_number_of_batches * len(x_train),
                     loss=metrics.avg_loss(),
                 )
 
             if idx % log_interval == 0 and idx > 0:
                 result_logger.tensorboard_results(
-                    category="Batches",
+                    category="Batch",
                     step=current_number_of_batches * len(x_train),
                     accuracy=metrics.accuracy(),
                     recall=metrics.recall(),
@@ -92,9 +95,14 @@ def train_model(
                     f1=metrics.f1(),
                     top_5_accuracy=metrics.top_5_accuracy(),
                 )
+                speed_in_sample_per_s = train_data.batch_size / (time.time() - btic)
+                lr = scheduler.get_last_lr()[0] if scheduler else lr
                 logging.info(
-                    f"Loss in epoch {epoch + 1} for batch {idx}: {metrics.avg_loss()}, batch acc: {metrics.accuracy()},"
-                    f" current lr: {scheduler.get_last_lr() if scheduler else lr}, eta: {eta_estimator.eta()}")
+                    f"epoch {epoch + 1:03d} batch {idx:4d}: loss: {metrics.avg_loss():.4f}, acc: {metrics.accuracy():.4f},"
+                    f" current lr: {lr:.7f}, ({speed_in_sample_per_s:.1f} samples/s, eta: {eta_estimator.eta()})"
+                )
+
+            btic = time.time()
 
         result_logger.tensorboard_results(
             category="Train",
