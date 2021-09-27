@@ -1,11 +1,17 @@
 from pathlib import Path
+from typing import Union
 
 import setuptools
 
 root_path = Path(__file__).resolve().parent
 
-requirements = [requirement.strip() for requirement in (root_path / 'requirements.txt').open().readlines()]
-requirements_dev = [requirement.strip() for requirement in (root_path / 'requirements-dev.txt').open().readlines()]
+
+def get_requirements(file_path: Union[Path, str]):
+    return [requirement.strip() for requirement in (root_path / file_path).open().readlines()]
+
+
+requirements = get_requirements('requirements.txt')
+requirements_dev = get_requirements('requirements-dev.txt')
 
 setuptools.setup(
     name="bitorch",
