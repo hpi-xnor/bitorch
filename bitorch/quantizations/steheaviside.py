@@ -27,7 +27,7 @@ class SteHeavisideFunction(SignFunction):
         Returns:
             tensor: binarized input tensor
         """
-        ctx.save_for_backward(input_tensor, torch.tensor(threshold))
+        ctx.save_for_backward(input_tensor, torch.tensor(threshold, device=input_tensor.device))
         sign_tensor = torch.sign(input_tensor)
         sign_tensor[sign_tensor < 0] = 0
         return sign_tensor

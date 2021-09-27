@@ -9,7 +9,6 @@ from examples.image_classification.utils.arg_parser import create_argparser
 
 
 import os
-import schedulers
 import numpy as np
 import torch
 import torch.nn as nn
@@ -83,14 +82,12 @@ def main(args: argparse.Namespace, model_kwargs: Dict) -> None:
             train_dataset,
             batch_size=args.batch_size,
             sampler=train_sampler,
-            # drop_last=FLAGS.drop_last,
             shuffle=False if train_sampler else True,
             num_workers=args.num_workers)
         test_loader = torch.utils.data.DataLoader(
             test_dataset,
             batch_size=args.batch_size,
             sampler=test_sampler,
-            # drop_last=FLAGS.drop_last,
             shuffle=False,
             num_workers=args.num_workers)
 
