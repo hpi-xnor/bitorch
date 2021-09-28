@@ -36,6 +36,7 @@ def _train_update(device, step, loss, tracker, epoch, writer):
         epoch,
         summary_writer=writer)
 
+
 def main(args: argparse.Namespace, model_kwargs: Dict) -> None:
     """trains a model on the configured image dataset with tpu.
 

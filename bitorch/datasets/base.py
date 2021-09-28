@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 from enum import Enum
 from typing import Tuple, Any
 
@@ -64,7 +65,7 @@ class BasicDataset(Dataset):
             cls,
             root_directory: str,
             download: bool = False,
-            augmentation: Augmentation = Augmentation.DEFAULT) -> ["BasicDataset", "BasicDataset"]:
+            augmentation: Augmentation = Augmentation.DEFAULT) -> Tuple["BasicDataset", "BasicDataset"]:
         """creates a pair of train and test dataset.
 
         Returns:
@@ -85,7 +86,7 @@ class BasicDataset(Dataset):
         if os.environ.get(environment_variable_name) is not None:
             return os.environ.get(environment_variable_name)
         if os.environ.get("BITORCH_DATA_HOME") is not None:
-            return os.path.join(os.environ.get("BITORCH_DATA_HOME"), self.name)
+            return Path(os.environ.get("BITORCH_DATA_HOME")) / self.name
 
         environment_variable_hint = \
             f" To change this, set '{environment_variable_name}' or 'BITORCH_DATA_HOME' " \

@@ -59,8 +59,6 @@ def train_model(
 
     metrics = MetricsCalculator()
 
-    btic = time.time()
-
     for epoch in range(start_epoch, epochs):
         eta_estimator.epoch_start()
 
@@ -95,14 +93,13 @@ def train_model(
                     f1=metrics.f1(),
                     top_5_accuracy=metrics.top_5_accuracy(),
                 )
-                speed_in_sample_per_s = train_data.batch_size / (time.time() - btic)
+                speed_in_sample_per_s = train_data.batch_size * eta_estimator.iterations_per_second()
                 lr = scheduler.get_last_lr()[0] if scheduler else lr
                 logging.info(
-                    f"epoch {epoch + 1:03d} batch {idx:4d}: loss: {metrics.avg_loss():.4f}, acc: {metrics.accuracy():.4f},"
-                    f" current lr: {lr:.7f}, ({speed_in_sample_per_s:.1f} samples/s, eta: {eta_estimator.eta()})"
+                    f"epoch {epoch + 1:03d} batch {idx:4d}: loss: {metrics.avg_loss():.4f}, "
+                    f"acc: {metrics.accuracy():.4f}, current lr: {lr:.7f}, ({speed_in_sample_per_s:.1f} samples/s, "
+                    f"eta: {eta_estimator.eta()})"
                 )
-
-            btic = time.time()
 
         result_logger.tensorboard_results(
             category="Train",
