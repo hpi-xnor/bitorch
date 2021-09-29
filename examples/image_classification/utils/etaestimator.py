@@ -84,7 +84,7 @@ class ETAEstimator():
 
         return self._seconds_to_timestamp(remaining_estimated_time)
 
-    def iterations_per_second(self):
+    def iterations_per_second(self) -> float:
         """returns the estimated number of samples per second based on the last iteration
 
         Returns:

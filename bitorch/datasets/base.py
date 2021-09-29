@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 from enum import Enum
-from typing import Tuple, Any
+from typing import Optional, Tuple, Any, Union
 
 import torch
 from torch.utils.data import Dataset
@@ -31,8 +31,8 @@ class BasicDataset(Dataset):
     name = "None"
     num_classes = 0
     shape = (0, 0, 0, 0)
-    mean = None
-    std_dev = None
+    mean: Any = None
+    std_dev: Any = None
     num_train_samples = 0
     num_val_samples = 0
 
@@ -73,7 +73,7 @@ class BasicDataset(Dataset):
         """
         return cls(True, root_directory, download, augmentation), cls(False, root_directory, download)
 
-    def get_dataset_root_directory(self, root_directory_argument: str) -> str:
+    def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Any:
         """chooses the dataset root directory based on the passed argument or environment variables.
 
         Returns:
@@ -86,7 +86,7 @@ class BasicDataset(Dataset):
         if os.environ.get(environment_variable_name) is not None:
             return os.environ.get(environment_variable_name)
         if os.environ.get("BITORCH_DATA_HOME") is not None:
-            return Path(os.environ.get("BITORCH_DATA_HOME")) / self.name
+            return Path(os.environ.get("BITORCH_DATA_HOME")) / self.name  # type: ignore
 
         environment_variable_hint = \
             f" To change this, set '{environment_variable_name}' or 'BITORCH_DATA_HOME' " \
