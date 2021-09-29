@@ -30,6 +30,7 @@ class ETAEstimator():
         self._abs_time = 0.0
         self._epoch_duration = 0.0
         self._epoch_start = 0.0
+        self._iterations_per_second = 0.0
 
     def epoch_start(self) -> None:
         """can be called at the start of an epoch. stores the current time as the start of an epoch"""
@@ -83,6 +84,14 @@ class ETAEstimator():
 
         return self._seconds_to_timestamp(remaining_estimated_time)
 
+    def iterations_per_second(self):
+        """returns the estimated number of samples per second based on the last iteration
+
+        Returns:
+            float: estimated iterations per second
+        """
+        return self._iterations_per_second
+
     def summary(self) -> str:
         """creates an eta log message and outputs it both to logging and eta file.
 
@@ -124,6 +133,7 @@ class ETAEstimator():
         """executed when leaving with statement. logs eta if log interval is over."""
         self._current_iteration += 1
         time_diff = time.time() - self._start_time
+        self._iterations_per_second = 1.0 / time_diff
         self._abs_time += time_diff
         if (self._current_iteration % self._log_interval) == 0:
             self.summary()

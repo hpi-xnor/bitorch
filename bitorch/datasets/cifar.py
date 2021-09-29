@@ -1,5 +1,3 @@
-from abc import ABC
-
 from torch.utils.data import Dataset
 from torchvision.datasets import cifar
 from torchvision.transforms import transforms
@@ -7,7 +5,7 @@ from torchvision.transforms import transforms
 from .base import BasicDataset, Augmentation
 
 
-class CIFAR(BasicDataset, ABC):
+class CIFAR(BasicDataset):
     shape = (1, 3, 32, 32)
     num_train_samples = 50000
     num_val_samples = 10000

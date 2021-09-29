@@ -1,4 +1,3 @@
-import sys
 import logging
 from pathlib import Path
 from torch.optim import Adam, SGD
@@ -7,7 +6,7 @@ from typing import Union, Optional
 from torch.nn import Module
 from torch.optim.optimizer import Optimizer
 
-from bitorch.optimization.radam import RAdam  # noqa: E402
+from bitorch.optimization.radam import RAdam
 
 
 def set_logging(log_file: Union[None, str], log_level: str, output_stdout: bool) -> None:
