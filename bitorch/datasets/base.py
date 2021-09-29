@@ -73,18 +73,18 @@ class BasicDataset(Dataset):
         """
         return cls(True, root_directory, download, augmentation), cls(False, root_directory, download)
 
-    def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Any:
+    def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Path:
         """chooses the dataset root directory based on the passed argument or environment variables.
 
         Returns:
             Tuple: the train and test dataset
         """
         if root_directory_argument is not None:
-            return root_directory_argument
+            return Path(root_directory_argument)
 
         environment_variable_name = f"{self.name.upper()}_HOME"
         if os.environ.get(environment_variable_name) is not None:
-            return os.environ.get(environment_variable_name)
+            return Path(os.environ.get(environment_variable_name))  # type: ignore
         if os.environ.get("BITORCH_DATA_HOME") is not None:
             return Path(os.environ.get("BITORCH_DATA_HOME")) / self.name  # type: ignore
 
@@ -94,7 +94,7 @@ class BasicDataset(Dataset):
 
         if self._download:
             logging.warning("Dataset is being downloaded to the directory './data'." + environment_variable_hint)
-            return "./data"
+            return Path("./data")
         else:
             raise ValueError(f"Dataset {self.name} not found." + environment_variable_hint)
 

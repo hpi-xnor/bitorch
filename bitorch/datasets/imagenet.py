@@ -18,8 +18,8 @@ class ImageNet(BasicDataset):
 
     def get_dataset(self, download: bool) -> Dataset:
         split = "train" if self.is_train else "val"
-        directory = os.path.join(self.root_directory, split)
-        if download and not os.path.isdir(directory):
+        directory = self.root_directory / split
+        if download and not directory.is_dir():
             raise RuntimeError("ImageNet dataset must be downloaded and prepared manually.")
         return ImageFolder(directory, transform=self.get_transform())
 
