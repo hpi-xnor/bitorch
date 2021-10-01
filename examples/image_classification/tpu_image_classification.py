@@ -15,6 +15,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
+import torchvision.transforms as transforms
 import torch_xla
 import torch_xla.debug.metrics as met
 import torch_xla.distributed.parallel_loader as pl
@@ -36,14 +37,16 @@ def _train_update(device, step, loss, tracker, epoch, writer):
         epoch,
         summary_writer=writer)
 
-def main(args: argparse.Namespace, model_kwargs: Dict) -> None:
+
+def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> None:
     """trains a model on the configured image dataset with tpu.
 
     Args:
         args (argparse.Namespace): cli arguments
+        index (int): tpu device index
         model_kwargs (dict): model specific cli arguments as a dictionary
     """
-    print('==> Preparing data..')
+    print('==> Preparing data... ({})'.format(device_index))
     dataset = dataset_from_name(args.dataset)
     assert dataset == ImageNet, "TPU training should only be used to train imagenet."
 
@@ -58,13 +61,36 @@ def main(args: argparse.Namespace, model_kwargs: Dict) -> None:
                   torch.zeros(args.batch_size, dtype=torch.int64)),
             sample_count=ImageNet.num_val_samples // args.batch_size // xm.xrt_world_size())
     else:
+        # train_dataset = torchvision.datasets.ImageFolder(
+        #     os.path.join(args.dataset_dir, 'train'),
+        #     ImageNet.train_transform())
+        # assert ImageNet.num_train_samples == len(train_dataset.imgs), "not all imagenet images are present"
+        # test_dataset = torchvision.datasets.ImageFolder(
+        #     os.path.join(args.dataset_dir, 'val'),
+        #     ImageNet.test_transform())
+        normalize = transforms.Normalize(
+            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         train_dataset = torchvision.datasets.ImageFolder(
             os.path.join(args.dataset_dir, 'train'),
-            ImageNet.train_transform())
-        assert ImageNet.num_train_samples == len(train_dataset.imgs), "not all imagenet images are present"
+            transforms.Compose([
+                transforms.RandomResizedCrop(img_dim),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]))
+        train_dataset_len = len(train_dataset.imgs)
+        resize_dim = max(img_dim, 256)
         test_dataset = torchvision.datasets.ImageFolder(
             os.path.join(args.dataset_dir, 'val'),
-            ImageNet.test_transform())
+            # Matches Torchvision's eval transforms except Torchvision uses size
+            # 256 resize for all models both here and in the train loader. Their
+            # version crashes during training on 299x299 images, e.g. inception.
+            transforms.Compose([
+                transforms.Resize(resize_dim),
+                transforms.CenterCrop(img_dim),
+                transforms.ToTensor(),
+                normalize,
+            ]))
 
         train_sampler, test_sampler = None, None
         if xm.xrt_world_size() > 1:
@@ -159,7 +185,7 @@ def main(args: argparse.Namespace, model_kwargs: Dict) -> None:
 
 def _mp_fn(index, args, model_kwargs):
     torch.set_default_tensor_type('torch.FloatTensor')
-    main(args, model_kwargs)
+    main(args, index, model_kwargs)
 
 
 if __name__ == '__main__':

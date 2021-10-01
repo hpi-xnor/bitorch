@@ -33,7 +33,7 @@ class SignFunction(Function):
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor,
-            threshold: float = 1.0) -> torch.Tensor:
+            threshold: torch.Tensor) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
 
         Args:
@@ -42,7 +42,7 @@ class SignFunction(Function):
         Returns:
             tensor: binarized input tensor
         """
-        ctx.save_for_backward(input_tensor, torch.tensor(threshold, device=input_tensor.device))
+        ctx.save_for_backward(input_tensor, threshold)
         return SignFunction._sign(input_tensor)
 
     @staticmethod
@@ -80,6 +80,7 @@ class Sign(Quantization):
         """
         super(Sign, self).__init__()
         self.gradient_cancelation_threshold = gradient_cancelation_threshold or config.gradient_cancellation_threshold
+        self._threshold_tensor = None
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.
@@ -90,4 +91,8 @@ class Sign(Quantization):
         Returns:
             torch.Tensor: sign of tensor x
         """
-        return SignFunction.apply(x, self.gradient_cancelation_threshold)
+        if self._threshold_tensor is None:
+            self._threshold_tensor = torch.tensor(
+                self.gradient_cancelation_threshold, device=x.device, requires_grad=False
+            )
+        return SignFunction.apply(x, self._threshold_tensor)
