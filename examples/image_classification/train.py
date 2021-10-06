@@ -1,15 +1,17 @@
-from utils.checkpointmanager import CheckpointManager
-from utils.etaestimator import ETAEstimator
-from utils.resultlogger import ResultLogger
-from utils.metricscalculator import MetricsCalculator
 import torch
+import logging
 from torch.utils.data import DataLoader
 from torch.nn import Module
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
-from torchsummary import summary
-import logging
+
+from utils.checkpointmanager import CheckpointManager
+from utils.etaestimator import ETAEstimator
+from utils.resultlogger import ResultLogger
+from utils.metricscalculator import MetricsCalculator
+from binary_torchinfo.torchinfo import summary
+from bitorch.quantizations.base import Quantization
 
 
 def train_model(
@@ -54,7 +56,7 @@ def train_model(
     images, _ = iter(train_data).next()
     result_logger.log_model(model, images)
     checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
-    logging.info(f"Model summary:\n{summary(model, input_data=images, verbose=0, depth=5)}")
+    logging.info(f"Model summary:\n{summary(model, input_data=images, depth=10, quantization_base_class=Quantization)}")
 
     # initialization of eta estimator
     total_number_of_batches = (epochs - start_epochs) * (len(train_data) + len(test_data))
