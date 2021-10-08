@@ -64,7 +64,9 @@ class QActivation(nn.Module):
         """
         super(QActivation, self).__init__()
         self._activation = config.get_quantization_function(activation)
-        self._gradient_cancellation_threshold = gradient_cancellation_threshold
+        self._gradient_cancellation_threshold = (
+            gradient_cancellation_threshold or config.gradient_cancellation_threshold
+        )
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forwards input tensor through activation function.

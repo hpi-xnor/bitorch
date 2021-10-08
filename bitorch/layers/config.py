@@ -40,6 +40,9 @@ class LayerConfig(Config):
     # default padding value used in convolution layers
     padding_value = -1.0
 
+    # threshold used by qactivation for gradient cancellation
+    gradient_cancellation_threshold = 1.0
+
 
 # config object, global referencable
 config = LayerConfig()
