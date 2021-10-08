@@ -17,7 +17,6 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import torch_xla
-import torch_xla.debug.metrics as met
 import torch_xla.distributed.parallel_loader as pl
 import torch_xla.utils.utils as xu
 import torch_xla.core.xla_model as xm
@@ -61,36 +60,13 @@ def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> Non
                   torch.zeros(args.batch_size, dtype=torch.int64)),
             sample_count=ImageNet.num_val_samples // args.batch_size // xm.xrt_world_size())
     else:
-        # train_dataset = torchvision.datasets.ImageFolder(
-        #     os.path.join(args.dataset_dir, 'train'),
-        #     ImageNet.train_transform())
-        # assert ImageNet.num_train_samples == len(train_dataset.imgs), "not all imagenet images are present"
-        # test_dataset = torchvision.datasets.ImageFolder(
-        #     os.path.join(args.dataset_dir, 'val'),
-        #     ImageNet.test_transform())
-        normalize = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         train_dataset = torchvision.datasets.ImageFolder(
             os.path.join(args.dataset_dir, 'train'),
-            transforms.Compose([
-                transforms.RandomResizedCrop(img_dim),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ]))
-        train_dataset_len = len(train_dataset.imgs)
-        resize_dim = max(img_dim, 256)
+            ImageNet.train_transform())
+        assert ImageNet.num_train_samples == len(train_dataset.imgs), "not all imagenet images are present"
         test_dataset = torchvision.datasets.ImageFolder(
             os.path.join(args.dataset_dir, 'val'),
-            # Matches Torchvision's eval transforms except Torchvision uses size
-            # 256 resize for all models both here and in the train loader. Their
-            # version crashes during training on 299x299 images, e.g. inception.
-            transforms.Compose([
-                transforms.Resize(resize_dim),
-                transforms.CenterCrop(img_dim),
-                transforms.ToTensor(),
-                normalize,
-            ]))
+            ImageNet.test_transform())
 
         train_sampler, test_sampler = None, None
         if xm.xrt_world_size() > 1:
