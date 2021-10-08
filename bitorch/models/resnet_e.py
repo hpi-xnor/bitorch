@@ -49,7 +49,8 @@ class BasicBlock(Module):
             nn.Sequential: the downsampling model
         """
         return nn.Sequential(
-            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1, stride=self.stride, padding=0, bias=False),
+            nn.AvgPool2d(kernel_size=2, stride=self.stride),
+            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(self.out_channels),
         )
 
