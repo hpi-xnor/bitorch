@@ -57,7 +57,8 @@ def train_model(
     images = images.to(device)
     result_logger.log_model(model, images)
     checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
-    logging.info(f"Model summary:\n{summary(model, input_data=images, depth=10, quantization_base_class=Quantization)}")
+    summary_str = summary(model, verbose=0, input_data=images, depth=10, quantization_base_class=Quantization)
+    logging.info(f"Model summary:\n{summary_str}")
 
     # initialization of eta estimator
     total_number_of_batches = (epochs - start_epochs) * (len(train_data) + len(test_data))
