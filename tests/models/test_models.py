@@ -1,4 +1,7 @@
-from bitorch.datasets import CIFAR10, dataset_from_name
+from bitorch.datasets.mnist import MNIST
+from bitorch.datasets.cifar import CIFAR10, CIFAR100
+from bitorch.datasets.imagenet import ImageNet
+
 from bitorch.models import (
     models_by_name,
     LeNet,
@@ -18,40 +21,43 @@ import numpy as np
 import pytest
 import itertools
 
-mnist_100 = [100, 1, 28, 28]
-mnist_10 = [10, 1, 28, 28]
-cifar_100 = [100, 3, 32, 32]
-cifar_10 = [10, 3, 32, 32]
-imagenet_2 = [2, 3, 224, 224]
-imagenet_1 = [1, 3, 224, 224]
-more_channels_mnist_100 = [100, 10, 28, 28]
+ALL_DATASETS = [MNIST, CIFAR10, CIFAR100, ImageNet]
+RGB_DATASETS = [CIFAR10, CIFAR100, ImageNet]
 
 TEST_INPUT_DATA = [
-    [Resnet, {"resnet_version": [1, 2], "resnet_num_layers": [18, 34, 50]}, [mnist_10, mnist_100, cifar_10]],
-    [Resnet18_v1, {}, [mnist_10, mnist_100, cifar_10, cifar_100, imagenet_1, imagenet_2]],
-    [Resnet34_v1, {}, [mnist_10, mnist_100, cifar_10, cifar_100, imagenet_1, imagenet_2]],
-    [Resnet50_v1, {}, [mnist_10, cifar_10, imagenet_1]],
-    [Resnet18_v2, {}, [mnist_10, mnist_100, cifar_10, cifar_100, imagenet_1, imagenet_2]],
-    [Resnet34_v2, {}, [mnist_10, mnist_100, cifar_10, cifar_100, imagenet_1, imagenet_2]],
-    [Resnet50_v2, {}, [mnist_10, cifar_10, imagenet_1]],
-    [Resnet_E, {"resnete_num_layers": [18, 34]}, [mnist_10, mnist_100, cifar_10]],
-    [Resnet_E18, {}, [mnist_10, mnist_100, cifar_10, cifar_100, imagenet_1, imagenet_2]],
-    [Resnet_E34, {}, [mnist_10, mnist_100, cifar_10, cifar_100, imagenet_1, imagenet_2]],
-    [LeNet, {"lenet_quantized": [True, False]}, [mnist_10, mnist_100, more_channels_mnist_100]]
+    [Resnet, {"resnet_version": [1, 2], "resnet_num_layers": [18, 34, 50]}, ALL_DATASETS],
+    [Resnet18_v1, {}, ALL_DATASETS],
+    [Resnet34_v1, {}, ALL_DATASETS],
+    [Resnet50_v1, {}, ALL_DATASETS],
+    [Resnet18_v2, {}, ALL_DATASETS],
+    [Resnet34_v2, {}, ALL_DATASETS],
+    [Resnet50_v2, {}, ALL_DATASETS],
+    [Resnet_E, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
+    [Resnet_E18, {}, RGB_DATASETS],
+    [Resnet_E34, {}, RGB_DATASETS],
+    [LeNet, {"lenet_quantized": [True, False]}, [MNIST]],
 ]
 
 
-@pytest.mark.parametrize("model_class, kwargs, input_shapes", TEST_INPUT_DATA)
-def test_models(model_class, kwargs, input_shapes) -> None:
-    dataset = dataset_from_name("cifar10")
-    assert dataset is CIFAR10
+@pytest.mark.parametrize("model_class, model_kwargs, datasets_to_test", TEST_INPUT_DATA)
+@pytest.mark.parametrize("dataset", ALL_DATASETS)
+def test_models(model_class, model_kwargs, datasets_to_test, dataset) -> None:
     assert models_by_name[model_class.name] is model_class
+    if dataset not in datasets_to_test:
+        pytest.skip(f"Model '{model_class.name}' does not need to work with the dataset '{dataset.name}'.")
 
-    kwarg_combinations = [dict(zip(kwargs.keys(), combination)) for combination in itertools.product(*kwargs.values())]
+    all_model_kwargs_combinations = [
+        dict(zip(model_kwargs.keys(), combination)) for combination in itertools.product(*model_kwargs.values())
+    ]
 
-    for combination in kwarg_combinations:
-        for input_shape in input_shapes:
-            dataset.shape = input_shape
+    for combination in all_model_kwargs_combinations:
+        batch_sizes_to_test = [2, 10]
+        if dataset is ImageNet:
+            batch_sizes_to_test = [1, 2]
+        for batch_size in batch_sizes_to_test:
+            input_shape = list(dataset.shape)
+            input_shape[0] = batch_size
+
             model = model_class(dataset=dataset, **combination)
             input_values = torch.Tensor(np.random.uniform(0, 1.0, input_shape))
             output = model(input_values)
