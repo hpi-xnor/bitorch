@@ -12,21 +12,20 @@ class SignFunction(Function):
     """Sign Function for input binarization."""
 
     @staticmethod
-    def _sign(tensor: torch.Tensor) -> torch.Tensor:
+    def _sign(x: torch.Tensor) -> torch.Tensor:
         """Apply the sign method on the input tensor.
 
         Note: this function will assign 1 as the sign of 0.
 
         Args:
-            tensor (torch.Tensor): the tensor to calculate the sign of
+            x (torch.Tensor): the tensor to calculate the sign of
 
         Returns:
             torch.Tensor: the sign tensor
         """
 
-        sign_tensor = torch.sign(tensor)
-        sign_tensor[sign_tensor == 0] = 1
-        return sign_tensor
+        sign_tensor = torch.sign(x)
+        return torch.where(sign_tensor == 0, torch.tensor(1., device=sign_tensor.device), sign_tensor)
 
     @staticmethod
     @typing.no_type_check
@@ -62,9 +61,7 @@ class SignFunction(Function):
             torch.Tensor: the input gradient (= the clamped output gradient)
         """
         input_tensor, threshold = ctx.saved_tensors
-        # produces zeros where preactivation inputs exceeded threshold, ones otherwise
-        input_grad = (torch.abs(input_tensor) < threshold)
-        return input_grad * output_grad, None
+        return torch.where(torch.abs(input_tensor) < threshold, output_grad, torch.tensor(0., device=output_grad.device)), None
 
 
 class Sign(Quantization):
