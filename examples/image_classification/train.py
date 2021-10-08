@@ -54,6 +54,7 @@ def train_model(
 
     # some code for model visualization / storing of initial state
     images, _ = iter(train_data).next()
+    images = images.to(device)
     result_logger.log_model(model, images)
     checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
     logging.info(f"Model summary:\n{summary(model, input_data=images, depth=10, quantization_base_class=Quantization)}")
