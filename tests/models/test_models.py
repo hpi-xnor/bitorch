@@ -1,6 +1,4 @@
-from bitorch.datasets.mnist import MNIST
-from bitorch.datasets.cifar import CIFAR10, CIFAR100
-from bitorch.datasets.imagenet import ImageNet
+from bitorch.datasets import MNIST, CIFAR10, CIFAR100, ImageNet
 
 from bitorch.models import (
     models_by_name,

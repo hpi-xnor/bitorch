@@ -1,25 +1,18 @@
-from importlib import import_module
-from pathlib import Path
 from typing import List, Type
 
 from .base import BasicDataset
+from .cifar import CIFAR10, CIFAR100
+from .imagenet import ImageNet
+from .mnist import MNIST
+from ..util import build_lookup_dictionary
 
-datasets_by_name = {}
+__all__ = [
+    'BasicDataset', 'dataset_from_name', 'dataset_names',
+    'MNIST', 'CIFAR10', 'CIFAR100', 'ImageNet',
+]
 
-current_dir = Path(__file__).resolve().parent
-for file in current_dir.iterdir():
-    # grep all python files
-    if file.suffix == ".py" and file.stem != "__init__":
-        module = import_module(f"{__name__}.{file.stem}")
-        for attr_name in dir(module):
-            attr = getattr(module, attr_name)
 
-            if isinstance(attr, type) and issubclass(attr, BasicDataset) and attr != BasicDataset:
-                if attr_name in datasets_by_name:
-                    raise ImportError("Two datasets found in dataset package with same name!")
-                datasets_by_name[attr.name] = attr
-                # make dataset accessible
-                globals()[attr_name] = attr
+datasets_by_name = build_lookup_dictionary(__name__, __all__, BasicDataset)
 
 
 def dataset_from_name(name: str) -> Type[BasicDataset]:
@@ -40,7 +33,7 @@ def dataset_from_name(name: str) -> Type[BasicDataset]:
     return datasets_by_name[name]
 
 
-def dataset_names() -> List:
+def dataset_names() -> List[str]:
     """getter for list of dataset names for argparse
 
     Returns:

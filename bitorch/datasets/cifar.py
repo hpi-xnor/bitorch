@@ -7,6 +7,9 @@ from torchvision.transforms import transforms
 from .base import BasicDataset, Augmentation
 
 
+__all__ = ['CIFAR10', 'CIFAR100']
+
+
 class CIFAR(BasicDataset, ABC):
     shape = (1, 3, 32, 32)
     num_train_samples = 50000
