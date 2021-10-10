@@ -4,7 +4,11 @@ import torch
 from torch.nn import Module
 from pathlib import Path
 from typing import Union
-from tensorboardX import SummaryWriter
+
+try:
+    from tensorboardX import SummaryWriter
+except ImportError:
+    pass
 
 
 class ResultLogger():
@@ -32,6 +36,11 @@ class ResultLogger():
     def _set_tensorboard(self, tensorboard_activated: bool, output: str) -> None:
         self._tensorboard = None
         self._tensorboard_output = None
+
+        if SummaryWriter not in globals():
+            logging.warning("tensorboardX package is not installed!")
+            tensorboard_activated = False
+
         if tensorboard_activated:
             self._tensorboard_output = Path(output)
             if self._tensorboard_output.exists():

@@ -6,6 +6,10 @@ root_path = Path(__file__).resolve().parent
 
 requirements = [requirement.strip() for requirement in (root_path / 'requirements.txt').open().readlines()]
 requirements_dev = [requirement.strip() for requirement in (root_path / 'requirements-dev.txt').open().readlines()]
+requirements_optional = [
+    requirement.strip() for requirement in (root_path / 'requirements-optional.txt').open().readlines()
+]
+print("dev:", requirements_dev, "opt:", requirements_optional)
 
 setuptools.setup(
     name="bitorch",
@@ -17,6 +21,7 @@ setuptools.setup(
     install_requires=requirements,
     extras_require={
         "dev": requirements_dev,
+        "opt": requirements_optional,
     },
     classifiers=[
         "Development Status :: 1 - Planning",

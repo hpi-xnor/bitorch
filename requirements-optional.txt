@@ -1,2 +1,2 @@
-torch
-git+git://gitlab.hpi.de/hpi-xnor/bmxnet-projects/binary-torchinfo#egg=binary_torchinfo
+tensorboardX
+binary_torchinfo @ git+https://gitlab.hpi.de/hpi-xnor/bmxnet-projects/binary-torchinfo.git
