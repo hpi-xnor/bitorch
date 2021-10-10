@@ -13,11 +13,14 @@ TEST_INPUT_DATA = [
     (QConv3d, conv3d, (1, 2, 4, 4, 4), [2, 2],
         {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1}),
     (QConv1d, conv1d, (1, 2, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(0.5), "input_quantization": "sign", "padding": 1}),
+        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
+         "gradient_cancellation_threshold": 0.5, "padding": 1}),
     (QConv2d, conv2d, (1, 2, 5, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(1.0), "input_quantization": "sign", "padding": 1}),
+        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
+         "gradient_cancellation_threshold": 1.0, "padding": 1}),
     (QConv3d, conv3d, (1, 2, 4, 4, 4), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(2.0), "input_quantization": "sign", "padding": 1}),
+        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
+         "gradient_cancellation_threshold": 2.0, "padding": 1}),
 ] * 10
 
 

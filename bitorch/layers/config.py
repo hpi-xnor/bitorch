@@ -12,27 +12,27 @@ class LayerConfig(Config):
 
     name = "layer_config"
 
-    def get_quantization_function(self, quantization: Union[str, Quantization] = None) -> torch.nn.Module:
+    def get_quantization_function(self, quantization: Union[str, Quantization]) -> torch.nn.Module:
         """Returns the quanitization module specified in quantization_name.
 
         Args:
-            quantization (Union[str, Quantization], optional): quantization module or name of quantization function.
-                Defaults to None.
+            quantization (Union[str, Quantization]): quantization module or name of quantization function.
 
         Returns:
             torch.nn.Module: Quantization module
         """
-        if quantization is None:
-            return self.quantization()
-        elif isinstance(quantization, Quantization):
+        if isinstance(quantization, Quantization):
             return quantization
         elif isinstance(quantization, str):
             return quantization_from_name(quantization)()
         else:
             raise ValueError(f"Invalid quantization: {quantization}")
 
-    # default quantization to be used in layers
-    quantization = quantization_from_name("sign")
+    # default quantization to be used in layers for inputs
+    input_quantization = quantization_from_name("sign")
+
+    # default quantization to be used in layers for inputs
+    weight_quantization = quantization_from_name("sign")
 
     # toggles print / matplotlib output in debug layers
     debug_activated = False

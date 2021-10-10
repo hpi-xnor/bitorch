@@ -15,14 +15,14 @@ class WeightDoReFa(Quantization):
 
     name = "weightdorefa"
 
-    def __init__(self, bits: int = 1) -> None:
+    def __init__(self, bits: Union[int, None] = None) -> None:
         """Initiates quantization bits.
 
         Args:
-            bits (int, optional): number of bits to quantize into. Defaults to 1.
+            bits (int, optional): number of bits to quantize into. Defaults to None.
         """
         super(WeightDoReFa, self).__init__()
-        self.bits = bits
+        self.bits = bits or config.dorefa_bits
         self._max_value = 2 ** self.bits - 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
@@ -49,11 +49,11 @@ class InputDoReFa(Quantization):
 
     name = "inputdorefa"
 
-    def __init__(self, bits: Union[int, None] = 1) -> None:
+    def __init__(self, bits: Union[int, None] = None) -> None:
         """Initiates quantization bits.
 
         Args:
-            bits (int, optional): number of bits to quantize into. Defaults to 1.
+            bits (int, optional): number of bits to quantize into. Defaults to None.
         """
         super(InputDoReFa, self).__init__()
         self.bits = bits or config.dorefa_bits

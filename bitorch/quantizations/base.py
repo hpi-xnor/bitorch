@@ -10,11 +10,26 @@ class STE(Function):
     """Straight Through estimator for backward pass"""
 
     @staticmethod
+    def forward(
+            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+            input_tensor: torch.Tensor) -> torch.Tensor:
+        """just fowards the unchanged input_tensor.
+
+        Args:
+            ctx (Any): autograd context
+            input_tensor (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: the unchanged input tensor
+        """
+        return input_tensor
+
+    @staticmethod
     def backward(ctx: Any, output_gradient: torch.Tensor) -> torch.Tensor:
         """just passes the unchanged output gradient as input gradient.
 
         Args:
-            ctx (Any): autograd contexxt
+            ctx (Any): autograd context
             output_gradient (torch.Tensor): output gradient
 
         Returns:

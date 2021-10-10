@@ -22,17 +22,20 @@ def make_q_convolution(BaseClass: Type) -> Type:
                      *args,  # type: ignore
                      input_quantization: Union[str, Quantization] = None,
                      weight_quantization: Union[str, Quantization] = None,
+                     gradient_cancellation_threshold: Union[float, None] = None,
                      **kwargs) -> None:  # type: ignore
             """initialization function for quantization of inputs and weights.
 
             Args:
                 input_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                     function to apply on inputs before forwarding through the qconvolution layer. Defaults to None.
+                gradient_cancellation_threshold (Union[float, None], optional): threshold for input gradient
+                    cancellation. Disabled if threshold is None. Defaults to None.
                 weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                     function for weights. Defaults to None.
             """
             super(QConv, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
-            self.activation = QActivation(input_quantization)
+            self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
         def forward(self, input_tensor: Tensor) -> Tensor:
             """forward the input tensor through the activation and quantized convolution layer.

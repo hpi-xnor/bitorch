@@ -8,8 +8,8 @@ activation = QActivation()
 
 
 def test_qactivation():
-    assert isinstance(activation.activation, type(config.quantization()))
-    assert isinstance(QActivation("sign").activation, Sign)
-    assert isinstance(QActivation(Sign(3.0)).activation, Sign)
+    assert isinstance(activation._activation, type(config.input_quantization()))
+    assert isinstance(QActivation("sign")._activation, Sign)
+    assert isinstance(QActivation(Sign())._activation, Sign)
     with pytest.raises(ValueError):
         QActivation("iNvAlIdNaMe")

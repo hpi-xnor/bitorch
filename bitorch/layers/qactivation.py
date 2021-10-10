@@ -63,9 +63,11 @@ class QActivation(nn.Module):
         Args:
             activation (Union[str, Quantization], optional): quantization module or name of quantization function.
                 Defaults to None.
+            gradient_cancellation_threshold (Union[float, None], optional): threshold for input gradient
+                cancellation. Disabled if threshold is None. Defaults to None.
         """
         super(QActivation, self).__init__()
-        self._activation = config.get_quantization_function(activation)
+        self._activation = config.get_quantization_function(activation or config.input_quantization())
         self._gradient_cancellation_threshold = (
             gradient_cancellation_threshold or config.gradient_cancellation_threshold
         )
