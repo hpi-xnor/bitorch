@@ -1,0 +1,2 @@
+torch
+git+git://gitlab.hpi.de/hpi-xnor/bmxnet-projects/binary-torchinfo#egg=binary_torchinfo

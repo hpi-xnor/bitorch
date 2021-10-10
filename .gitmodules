@@ -1,3 +1,0 @@
-[submodule "binary_torchinfo"]
-	path = binary_torchinfo
-	url = git@gitlab.hpi.de:hpi-xnor/bmxnet-projects/binary-torchinfo.git
