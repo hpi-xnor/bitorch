@@ -2,7 +2,7 @@
 import torch
 from typing import Union
 
-from .base import Quantization
+from .base import Quantization, STE
 from .config import config
 
 
@@ -69,4 +69,4 @@ class InputDoReFa(Quantization):
             torch.Tensor: DoReFaed tensor x
         """
 
-        return torch.round(torch.clamp(x, 0, 1) * self._max_value) / self._max_value
+        return STE.apply(torch.round(torch.clamp(x, 0, 1) * self._max_value) / self._max_value)

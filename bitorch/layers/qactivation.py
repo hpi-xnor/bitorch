@@ -44,9 +44,11 @@ class GradientCancellation(Function):
             torch.Tensor: the input gradient (= the clamped output gradient)
         """
         input_tensor, threshold = ctx.saved_tensors
-        # produces zeros where preactivation inputs exceeded threshold, ones otherwise
-        input_grad = (torch.abs(input_tensor) < threshold)
-        return input_grad * output_grad, None
+        cancelled = torch.where(
+            torch.abs(input_tensor) < threshold,
+            output_grad,
+            torch.tensor(1., device=output_grad.device))
+        return cancelled, None
 
 
 class QActivation(nn.Module):

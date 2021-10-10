@@ -2,6 +2,25 @@
 
 import torch
 from torch import nn
+from torch.autograd.function import Function
+from typing import Any
+
+
+class STE(Function):
+    """Straight Through estimator for backward pass"""
+
+    @staticmethod
+    def backward(ctx: Any, output_gradient: torch.Tensor) -> torch.Tensor:
+        """just passes the unchanged output gradient as input gradient.
+
+        Args:
+            ctx (Any): autograd contexxt
+            output_gradient (torch.Tensor): output gradient
+
+        Returns:
+            torch.Tensor: the unchanged output gradient
+        """
+        return output_gradient
 
 
 class Quantization(nn.Module):

@@ -1,6 +1,6 @@
 """Sign Function Implementation"""
 import torch
-from .base import Quantization
+from .base import STE, Quantization
 
 
 class SteHeaviside(Quantization):
@@ -17,6 +17,4 @@ class SteHeaviside(Quantization):
         Returns:
             torch.Tensor: sign of tensor x
         """
-        sign_tensor = torch.sign(x)
-        sign_tensor[sign_tensor < 0] = 0
-        return sign_tensor
+        return STE.apply(torch.where(x >= 0, torch.tensor(1., device=x.device), x))
