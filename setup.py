@@ -1,15 +1,18 @@
 from pathlib import Path
+from typing import Union
 
 import setuptools
 
 root_path = Path(__file__).resolve().parent
 
-requirements = [requirement.strip() for requirement in (root_path / 'requirements.txt').open().readlines()]
-requirements_dev = [requirement.strip() for requirement in (root_path / 'requirements-dev.txt').open().readlines()]
-requirements_optional = [
-    requirement.strip() for requirement in (root_path / 'requirements-optional.txt').open().readlines()
-]
-print("dev:", requirements_dev, "opt:", requirements_optional)
+
+def get_requirements(file_path: Union[Path, str]):
+    return [requirement.strip() for requirement in (root_path / file_path).open().readlines()]
+
+
+requirements = get_requirements('requirements.txt')
+requirements_dev = get_requirements('requirements-dev.txt')
+requirements_optional = get_requirements('requirements-optional.txt')
 
 setuptools.setup(
     name="bitorch",
