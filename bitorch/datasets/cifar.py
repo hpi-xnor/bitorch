@@ -6,7 +6,6 @@ from torchvision.transforms import transforms
 
 from .base import BasicDataset, Augmentation
 
-
 __all__ = ['CIFAR10', 'CIFAR100']
 
 

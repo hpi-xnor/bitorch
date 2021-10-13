@@ -1,7 +1,9 @@
 import sys
+import typing
 from typing import Callable, List, Any, Dict
 
 
+@typing.no_type_check
 def build_lookup_dictionary(
         current_module_name: str,
         class_strings: List[str],
@@ -22,7 +24,7 @@ def build_lookup_dictionary(
     """
     assert filter_fn is not None or filter_by_superclass is not None, "one of the filter options must be given"
     if filter_fn is None:
-        def filter_fn(x):
+        def filter_fn(x: Any) -> bool:
             return isinstance(x, type) and issubclass(x, filter_by_superclass) and x != filter_by_superclass
     lookup = {}
     for class_name in class_strings:

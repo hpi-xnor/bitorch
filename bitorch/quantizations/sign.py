@@ -1,7 +1,8 @@
 """Sign Function Implementation"""
+from typing import Tuple, Union, Optional
+
 import torch
 import typing
-from typing import Tuple, Union
 from torch.autograd import Function
 
 from .base import Quantization
@@ -61,7 +62,9 @@ class SignFunction(Function):
             torch.Tensor: the input gradient (= the clamped output gradient)
         """
         input_tensor, threshold = ctx.saved_tensors
-        return torch.where(torch.abs(input_tensor) < threshold, output_grad, torch.tensor(0., device=output_grad.device)), None
+        return torch.where(
+            torch.abs(input_tensor) < threshold, output_grad, torch.tensor(0., device=output_grad.device)
+        ), None
 
 
 class Sign(Quantization):
@@ -77,7 +80,7 @@ class Sign(Quantization):
         """
         super(Sign, self).__init__()
         self.gradient_cancelation_threshold = gradient_cancelation_threshold or config.gradient_cancellation_threshold
-        self._threshold_tensor = None
+        self._threshold_tensor: Optional[torch.Tensor] = None
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.

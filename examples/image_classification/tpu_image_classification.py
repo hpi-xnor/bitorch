@@ -26,7 +26,7 @@ import torch_xla.test.test_utils as test_utils
 from examples.image_classification.utils.utils import create_optimizer, create_scheduler
 
 
-def _train_update(device, step, loss, tracker, epoch, writer):
+def _train_update(device, step, loss, tracker, epoch, writer):  # type: ignore
     test_utils.print_training_update(
         device,
         step,
@@ -37,7 +37,7 @@ def _train_update(device, step, loss, tracker, epoch, writer):
         summary_writer=writer)
 
 
-def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> None:
+def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> float:
     """trains a model on the configured image dataset with tpu.
 
     Args:
@@ -105,7 +105,7 @@ def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> Non
 
     loss_fn = nn.CrossEntropyLoss()
 
-    def train_loop_fn(loader, epoch):
+    def train_loop_fn(loader, epoch):  # type: ignore
         tracker = xm.RateTracker()
         model.train()
         for step, (data, target) in enumerate(loader):
@@ -122,7 +122,7 @@ def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> Non
                 xm.add_step_closure(
                     _train_update, args=(device, step, loss, tracker, epoch, writer))
 
-    def test_loop_fn(loader, current_epoch):
+    def test_loop_fn(loader, current_epoch):  # type: ignore
         total_samples, correct = 0, 0
         model.eval()
         for step, (data, target) in enumerate(loader):
@@ -159,7 +159,7 @@ def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> Non
     return max_accuracy
 
 
-def _mp_fn(index, args, model_kwargs):
+def _mp_fn(index, args, model_kwargs):  # type: ignore
     torch.set_default_tensor_type('torch.FloatTensor')
     main(args, index, model_kwargs)
 

@@ -12,6 +12,8 @@ import sys
 import logging
 from torch.utils.data import DataLoader
 
+sys.path.append("../../")
+
 from utils.utils import (
     create_optimizer,
     create_scheduler,
@@ -24,13 +26,10 @@ from utils.etaestimator import ETAEstimator
 from utils.arg_parser import create_argparser
 from train import train_model
 
-
-sys.path.append("../../")
-
-from bitorch.datasets.base import Augmentation  # noqa: E402
-from bitorch.models import model_from_name  # noqa: E402
-from bitorch.datasets import dataset_from_name  # noqa: E402
-from bitorch import apply_args_to_configuration  # noqa: E402
+from bitorch.datasets.base import Augmentation
+from bitorch.models import model_from_name
+from bitorch.datasets import dataset_from_name
+from bitorch import apply_args_to_configuration
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
