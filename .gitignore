@@ -145,9 +145,12 @@ cython_debug/
 # downloaded dataset files
 train/
 test/
+data/
 
 # tensorboard output files
 runs/
+tblogs/
 
 # other files
 *.csv
+

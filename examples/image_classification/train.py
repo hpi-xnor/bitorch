@@ -1,14 +1,21 @@
-from utils.checkpointmanager import CheckpointManager
-from utils.etaestimator import ETAEstimator
-from utils.resultlogger import ResultLogger
-from utils.metricscalculator import MetricsCalculator
 import torch
+import logging
 from torch.utils.data import DataLoader
 from torch.nn import Module
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
-import logging
+
+from utils.checkpointmanager import CheckpointManager
+from utils.etaestimator import ETAEstimator
+from utils.resultlogger import ResultLogger
+from utils.metricscalculator import MetricsCalculator
+from bitorch.quantizations.base import Quantization
+
+try:
+    from binary_torchinfo.torchinfo import summary
+except ImportError:
+    summary = None
 
 
 def train_model(
@@ -49,6 +56,20 @@ def train_model(
         device = "cpu"
     model = model.to(device)
 
+    # some code for model visualization / storing of initial state
+    images, _ = iter(train_data).next()
+    images = images.to(device)
+    result_logger.log_model(model, images)
+    checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
+
+    if summary is None:
+        logging.warning("Can not create a model summary because the package 'bitorchinfo' is not installed!")
+    else:
+        summary_str = summary(model, verbose=0, input_data=images, depth=10,
+                              quantization_base_class=Quantization, device=device)
+        logging.info(f"Model summary:\n{summary_str}")
+
+    # initialization of eta estimator
     total_number_of_batches = (epochs - start_epochs) * (len(train_data) + len(test_data))
     eta_estimator.set_iterations(total_number_of_batches)
     current_number_of_batches = 0
@@ -147,6 +168,7 @@ def train_model(
             top_5_accuracy=metrics.top_5_accuracy(),
         )
 
+        # checkpoint updating
         checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, epoch)
         if accuracy > best_accuracy:
             logging.info("updating best model....")
