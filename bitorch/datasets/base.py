@@ -1,12 +1,14 @@
 import logging
 import os
-from pathlib import Path
 from enum import Enum
-from typing import Optional, Tuple, Any, Union
+from pathlib import Path
+from typing import Optional, Tuple, Any
 
 import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
+
+from bitorch.datasets.dummy_dataset import DummyDataset
 
 
 class Augmentation(Enum):
@@ -72,6 +74,13 @@ class BasicDataset(Dataset):
             Tuple: the train and test dataset
         """
         return cls(True, root_directory, download, augmentation), cls(False, root_directory, download)
+
+    @classmethod
+    def get_dummy_train_and_test_loaders(cls, batch_size: int) -> Tuple[DummyDataset, DummyDataset]:
+        batch_shape = (batch_size,) + cls.shape[1:]
+        x_data = torch.ones(batch_shape)
+        y_data = torch.ones(batch_size)
+        return DummyDataset((x_data, y_data), cls.num_train_samples), DummyDataset(x_data, cls.num_val_samples)
 
     def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Path:
         """chooses the dataset root directory based on the passed argument or environment variables.

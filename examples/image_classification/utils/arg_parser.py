@@ -108,18 +108,20 @@ def add_dataset_args(parser: ArgumentParser) -> None:
     data.add_argument("--download", action="store_true", default=True,
                       help="toggles wether the dataset shall be downloaded if not present. "
                       "only has effect with the cifar10 and mnist dataset so far.")
-    parser.add_argument("--batch-size", type=int, default=128,
-                        help="batch size for training and testing (default: 128)")
-    parser.add_argument("--num-workers", type=int, default=4,
-                        help="number of workers to be used for dataloading (default: 4)")
-    parser.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
-                        help="level of augmentation to be used in data preparation (default 'none')")
+    data.add_argument("--batch-size", type=int, default=128,
+                      help="batch size for training and testing (default: 128)")
+    data.add_argument("--num-workers", type=int, default=4,
+                      help="number of workers to be used for dataloading (default: 4)")
+    data.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
+                      help="level of augmentation to be used in data preparation (default 'none')")
     data.add_argument("--nv-dali", action="store_true", default=False,
                       help="enables nv-dali dataloader, install DALI from https://www.github.com/NVIDIA/DALI")
     data.add_argument("--nv-dali-gpu-id", type=int, default=0,
                       help="choose gpu id for dali pre-processing")
     data.add_argument("--nv-dali-cpu", action="store_true", default=False,
                       help="uses dali-CPU dataloader")
+    data.add_argument("--fake-data", action="store_true",
+                      help="train with fake data")
 
 
 def create_model_argparser(model_class: object) -> ArgumentParser:

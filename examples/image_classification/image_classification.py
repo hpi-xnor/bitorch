@@ -12,8 +12,6 @@ import sys
 import logging
 from torch.utils.data import DataLoader
 
-sys.path.append("../../")
-
 from utils.utils import (
     create_optimizer,
     create_scheduler,
@@ -48,7 +46,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     eta_estimator = ETAEstimator(args.eta_file, args.log_interval)
 
     dataset = dataset_from_name(args.dataset)
-    if dataset.name == 'imagenet' and args.nv_dali:
+    if args.fake_data:
+        logging.info(f"dummy dataset: {dataset.name} (not using real data!)...")
+        train_loader, test_loader = dataset.get_dummy_train_and_test_loaders(args.batch_size)
+    elif dataset.name == 'imagenet' and args.nv_dali:
         from examples.image_classification.dali_helper import create_dali_data_loader
 
         logging.info(f"dataset: {dataset.name} (with DALI data loader)...")
@@ -61,9 +62,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         )
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                                  shuffle=True, pin_memory=True)
+                                  shuffle=True, pin_memory=True)  # type: ignore
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                                 shuffle=False, pin_memory=True)
+                                 shuffle=False, pin_memory=True)  # type: ignore
 
     model_kwargs = vars(model_args)
     logging.debug(f"got model args as dict: {model_kwargs}")
