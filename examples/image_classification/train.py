@@ -15,7 +15,7 @@ from bitorch.quantizations.base import Quantization
 try:
     from binary_torchinfo.torchinfo import summary
 except ImportError:
-    pass
+    summary = None
 
 
 def train_model(
@@ -62,12 +62,12 @@ def train_model(
     result_logger.log_model(model, images)
     checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
 
-    if "summary" in globals():
+    if summary is None:
+        logging.warning("Can not create a model summary because the package 'bitorchinfo' is not installed!")
+    else:
         summary_str = summary(model, verbose=0, input_data=images, depth=10,
                               quantization_base_class=Quantization, device=device)
         logging.info(f"Model summary:\n{summary_str}")
-    else:
-        logging.warning("binary_torchinfo package not installed, skipping model summary...")
 
     # initialization of eta estimator
     total_number_of_batches = (epochs - start_epochs) * (len(train_data) + len(test_data))

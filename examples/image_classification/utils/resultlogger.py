@@ -8,7 +8,7 @@ from typing import Union
 try:
     from tensorboardX import SummaryWriter
 except ImportError:
-    pass
+    SummaryWriter = None
 
 
 class ResultLogger():
@@ -37,19 +37,20 @@ class ResultLogger():
         self._tensorboard = None
         self._tensorboard_output = None
 
-        if SummaryWriter not in globals():
-            logging.warning("tensorboardX package is not installed!")
-            tensorboard_activated = False
+        if SummaryWriter is None:
+            logging.warning("Can not enable tensorboard logging because the package 'tensorboardX' is not installed!")
+            return
 
-        if tensorboard_activated:
-            self._tensorboard_output = Path(output)
-            if self._tensorboard_output.exists():
-                logging.warning(
-                    "tensorboard output folder already exists! this might cause unexpected result logging behaviour!")
-            self._tensorboard_output.parent.mkdir(parents=True, exist_ok=True)
-            self._tensorboard = SummaryWriter(self._tensorboard_output)
-        else:
+        if not tensorboard_activated:
             logging.warning("No tensorboard enabled!")
+            return
+
+        self._tensorboard_output = Path(output)
+        if self._tensorboard_output.exists():
+            logging.warning(
+                "tensorboard output folder already exists! this might cause unexpected result logging behaviour!")
+        self._tensorboard_output.parent.mkdir(parents=True, exist_ok=True)
+        self._tensorboard = SummaryWriter(self._tensorboard_output)
 
     def log_model(self, model: Module, example_input: torch.Tensor) -> None:
         """adds model graph to tensorboard.
