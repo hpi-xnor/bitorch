@@ -9,6 +9,11 @@ Install the package with pip:
 pip install -e . --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 
+To activate advanced logging with Tensorboard and model summary, install the optional dependencies as well:
+```bash
+pip install -e ".[opt]"
+```
+
 ## Development
 
 Install the _dev_ package with:

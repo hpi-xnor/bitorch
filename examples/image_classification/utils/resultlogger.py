@@ -1,8 +1,14 @@
 import logging
 import csv
+import torch
+from torch.nn import Module
 from pathlib import Path
 from typing import Union
-from tensorboardX import SummaryWriter
+
+try:
+    from tensorboardX import SummaryWriter
+except ImportError:
+    SummaryWriter = None
 
 
 class ResultLogger():
@@ -30,15 +36,35 @@ class ResultLogger():
     def _set_tensorboard(self, tensorboard_activated: bool, output: str) -> None:
         self._tensorboard = None
         self._tensorboard_output = None
-        if tensorboard_activated:
-            self._tensorboard_output = Path(output)
-            if self._tensorboard_output.exists():
-                logging.warning(
-                    "tensorboard output folder already exists! this might cause unexpected result logging behaviour!")
-            self._tensorboard_output.parent.mkdir(parents=True, exist_ok=True)
-            self._tensorboard = SummaryWriter(self._tensorboard_output)
-        else:
+
+        if SummaryWriter is None:
+            logging.warning("Can not enable tensorboard logging because the package 'tensorboardX' is not installed!")
+            return
+
+        if not tensorboard_activated:
             logging.warning("No tensorboard enabled!")
+            return
+
+        self._tensorboard_output = Path(output)
+        if self._tensorboard_output.exists():
+            logging.warning(
+                "tensorboard output folder already exists! this might cause unexpected result logging behaviour!")
+        self._tensorboard_output.parent.mkdir(parents=True, exist_ok=True)
+        self._tensorboard = SummaryWriter(self._tensorboard_output)
+
+    def log_model(self, model: Module, example_input: torch.Tensor) -> None:
+        """adds model graph to tensorboard.
+
+        Args:
+            model (Module): model to be visualized in tensorboard
+            example_input (torch.Tensor): an example input (e.g. train data) to infer tensor dimensions throughout the
+                model.
+        """
+        if not self._tensorboard:
+            return
+
+        self._tensorboard.add_graph(model, example_input)
+        self._tensorboard.flush()
 
     def log_result(self, tensorboard: bool = False, log: bool = True, **kwargs: dict) -> None:
         """writes the values of the kwargs into a csv file while updating its header row.

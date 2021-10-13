@@ -12,6 +12,7 @@ def get_requirements(file_path: Union[Path, str]):
 
 requirements = get_requirements('requirements.txt')
 requirements_dev = get_requirements('requirements-dev.txt')
+requirements_optional = get_requirements('requirements-optional.txt')
 
 setuptools.setup(
     name="bitorch",
@@ -23,6 +24,7 @@ setuptools.setup(
     install_requires=requirements,
     extras_require={
         "dev": requirements_dev,
+        "opt": requirements_optional,
     },
     classifiers=[
         "Development Status :: 1 - Planning",
