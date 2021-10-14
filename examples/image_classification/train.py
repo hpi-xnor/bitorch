@@ -1,16 +1,17 @@
-import torch
 import logging
-from torch.utils.data import DataLoader
+
+import torch
 from torch.nn import Module
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
 
+from bitorch.quantizations.base import Quantization
 from utils.checkpointmanager import CheckpointManager
 from utils.etaestimator import ETAEstimator
-from utils.resultlogger import ResultLogger
 from utils.metricscalculator import MetricsCalculator
-from bitorch.quantizations.base import Quantization
+from utils.resultlogger import ResultLogger
 
 try:
     from binary_torchinfo.torchinfo import summary
