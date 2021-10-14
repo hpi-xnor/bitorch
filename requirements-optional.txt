@@ -1,0 +1,2 @@
+tensorboardX
+bitorchinfo @ git+ssh://git@gitlab.hpi.de/hpi-xnor/bmxnet-projects/bitorchinfo.git
