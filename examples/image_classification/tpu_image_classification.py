@@ -166,8 +166,6 @@ def _mp_fn(index, args, model_kwargs):  # type: ignore
 
 if __name__ == '__main__':
     parser, model_parser = create_argparser()
-    parser.add_argument("--fake-data", action="store_true",
-                        help="train with fake data")
     parser.add_argument("--num-procs", default=None, type=int,
                         help="set a number of tpu processors")
     args, unparsed_model_args = parser.parse_known_args()
