@@ -1,6 +1,7 @@
 """Quantization superclass implementation"""
 
 import torch
+import typing
 from torch import nn
 from torch.autograd.function import Function
 from typing import Any
@@ -10,6 +11,7 @@ class STE(Function):
     """Straight Through estimator for backward pass"""
 
     @staticmethod
+    @typing.no_type_check
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor) -> torch.Tensor:
@@ -25,6 +27,7 @@ class STE(Function):
         return input_tensor
 
     @staticmethod
+    @typing.no_type_check
     def backward(ctx: Any, output_gradient: torch.Tensor) -> torch.Tensor:
         """just passes the unchanged output gradient as input gradient.
 

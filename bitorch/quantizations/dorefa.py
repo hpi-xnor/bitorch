@@ -1,7 +1,7 @@
 """Dorefa Function Implementation"""
 import torch
+import typing
 from typing import Any, Tuple, Union
-
 from torch.autograd.function import Function
 
 from .base import Quantization
@@ -44,6 +44,7 @@ class WeightDoReFa(Quantization):
 
 class InputDoReFaFunction(Function):
     @staticmethod
+    @typing.no_type_check
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor, bits: int) -> torch.Tensor:
@@ -63,6 +64,7 @@ class InputDoReFaFunction(Function):
         return quantized_tensor
 
     @staticmethod
+    @typing.no_type_check
     def backward(ctx: Any, output_gradient: torch.Tensor) -> Tuple[torch.Tensor, None]:
         """just passes the unchanged output gradient as input gradient (i.e. applies straight through estimator)
 

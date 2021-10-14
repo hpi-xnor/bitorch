@@ -31,7 +31,7 @@ class QLinear(Linear):
             **kwargs (keyword Argument list): keyword arguments for linear layer
         """
 
-        super(QLinear, self).__init__(*args, **kwargs)
+        super(QLinear, self).__init__(*args, **kwargs)  # type: ignore
         self.weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization())
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 

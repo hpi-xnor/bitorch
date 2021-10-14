@@ -1,10 +1,12 @@
 """Sign Function Implementation"""
 import torch
+import typing
 from .base import STE, Quantization
 
 
 class SteHeavisideFunction(STE):
     @staticmethod
+    @typing.no_type_check
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor) -> torch.Tensor:
