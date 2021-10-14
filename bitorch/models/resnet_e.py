@@ -12,7 +12,7 @@ from torch.nn import Module
 import logging
 
 from bitorch.layers import QConv2d
-from bitorch.models.common_layers import make_initial_layers
+from bitorch.models.common_layers import get_initial_layers
 
 __all__ = ['Resnet_E34', 'Resnet_E18', 'Resnet_E']
 
@@ -51,7 +51,7 @@ class BasicBlock(Module):
         return nn.Sequential(
             nn.AvgPool2d(kernel_size=2, stride=self.stride),
             nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(self.out_channels),
+            nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
 
     def _build_body(self) -> nn.Sequential:
@@ -64,7 +64,7 @@ class BasicBlock(Module):
         return nn.Sequential(
             QConv2d(self.in_channels, self.out_channels, kernel_size=3, stride=self.stride, padding=1, bias=False,
                     input_quantization="sign", weight_quantization="sign"),
-            nn.BatchNorm2d(self.out_channels),
+            nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -121,7 +121,7 @@ class SpecificResnetE(Module):
             layer_list.append(BasicBlock(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, layers: list, channels: list) -> nn.Sequential:
+    def make_feature_layers(self, layers: list, channels: list) -> List[nn.Module]:
         """builds the given layers with the specified block.
 
         Args:
@@ -135,7 +135,7 @@ class SpecificResnetE(Module):
         for idx, num_layer in enumerate(layers):
             stride = 1 if idx == 0 else 2
             feature_layers.append(self.make_layer(num_layer, channels[idx], channels[idx + 1], stride))
-        return nn.Sequential(*feature_layers)
+        return feature_layers
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor through the resnet modules
@@ -184,11 +184,11 @@ class ResNetE(SpecificResnetE):
                 f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
 
         feature_layers: List[nn.Module] = []
-        feature_layers.append(nn.BatchNorm2d(image_channels, eps=2e-5))
-        feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
-        feature_layers.append(nn.BatchNorm2d(channels[0]))
+        feature_layers.append(nn.BatchNorm2d(image_channels, eps=2e-5, momentum=0.9))
+        feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
+        feature_layers.append(nn.BatchNorm2d(channels[0], momentum=0.9))
 
-        feature_layers.append(self.make_feature_layers(layers, channels))
+        feature_layers.extend(self.make_feature_layers(layers, channels))
 
         feature_layers.append(nn.ReLU())
         feature_layers.append(nn.AdaptiveAvgPool2d(1))
@@ -218,8 +218,9 @@ class Resnet_E(Model):
                                   self._dataset.name, self._dataset.shape[1])
         logging.info(f"building ResnetE with {str(resnete_num_layers)} layers...")
 
+    @classmethod
     def create(
-            self,
+            cls,
             num_layers: int,
             classes: int = 1000,
             initial_layers: str = "imagenet",
@@ -238,10 +239,10 @@ class Resnet_E(Model):
         Returns:
             Module: resnetE model
         """
-        if num_layers not in self.resnet_spec:
+        if num_layers not in cls.resnet_spec:
             raise ValueError(f"No resnet spec for {num_layers} available!")
 
-        layers, channels = self.resnet_spec[num_layers]
+        layers, channels = cls.resnet_spec[num_layers]
 
         return ResNetE(layers, channels, classes, initial_layers, image_channels)
 

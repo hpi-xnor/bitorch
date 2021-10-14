@@ -18,7 +18,7 @@ class Model(Module):
     def add_argparse_arguments(parser: ArgumentParser) -> None:
         """allows additions to the argument parser if required, e.g. to add layer count, etc.
 
-        ! please note that the infered variable names of additional cli arguments are passed as
+        ! please note that the inferred variable names of additional cli arguments are passed as
         keyword arguments to the constructor of this class !
 
         Args:

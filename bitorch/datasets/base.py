@@ -77,10 +77,11 @@ class BasicDataset(Dataset):
 
     @classmethod
     def get_dummy_train_and_test_loaders(cls, batch_size: int) -> Tuple[DummyDataset, DummyDataset]:
-        batch_shape = (batch_size,) + cls.shape[1:]
-        x_data = torch.ones(batch_shape)
-        y_data = torch.ones(batch_size)
-        return DummyDataset((x_data, y_data), cls.num_train_samples), DummyDataset(x_data, cls.num_val_samples)
+        x_data = torch.zeros((batch_size,) + cls.shape[1:])
+        y_data = torch.zeros((batch_size,), dtype=torch.int64)
+        train_set = DummyDataset((x_data, y_data), batch_size, cls.num_train_samples)
+        val_set = DummyDataset((x_data, y_data), batch_size, cls.num_val_samples)
+        return train_set, val_set
 
     def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Path:
         """chooses the dataset root directory based on the passed argument or environment variables.

@@ -9,7 +9,7 @@ from torch import nn
 from torch.nn import Module
 
 from bitorch.layers import QConv2d
-from bitorch.models.common_layers import make_initial_layers
+from bitorch.models.common_layers import get_initial_layers
 
 
 class BasicBlockV1(Module):
@@ -310,7 +310,7 @@ class SpecificResnet(Module):
             layer_list.append(block(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, block: Module, layers: list, channels: list) -> nn.Sequential:
+    def make_feature_layers(self, block: Module, layers: list, channels: list) -> List[nn.Module]:
         """builds the given layers with the specified block.
 
         Args:
@@ -325,7 +325,7 @@ class SpecificResnet(Module):
         for idx, num_layer in enumerate(layers):
             stride = 1 if idx == 0 else 2
             feature_layers.append(self.make_layer(block, num_layer, channels[idx], channels[idx + 1], stride))
-        return nn.Sequential(*feature_layers)
+        return feature_layers
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor through the resnet modules
@@ -377,10 +377,10 @@ class ResNetV1(SpecificResnet):
 
         feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
-        feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
+        feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0]))
 
-        feature_layers.append(self.make_feature_layers(block, layers, channels))
+        feature_layers.extend(self.make_feature_layers(block, layers, channels))
 
         feature_layers.append(nn.ReLU())
         feature_layers.append(nn.AdaptiveAvgPool2d(1))
@@ -425,9 +425,9 @@ class ResNetV2(SpecificResnet):
 
         feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
-        feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
+        feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
 
-        feature_layers.append(self.make_feature_layers(block, layers, channels))
+        feature_layers.extend(self.make_feature_layers(block, layers, channels))
 
         feature_layers.append(nn.BatchNorm2d(channels[-1]))
         feature_layers.append(nn.ReLU())

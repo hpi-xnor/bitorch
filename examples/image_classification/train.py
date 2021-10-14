@@ -14,7 +14,7 @@ from utils.metricscalculator import MetricsCalculator
 from utils.resultlogger import ResultLogger
 
 try:
-    from binary_torchinfo.torchinfo import summary
+    from bitorchinfo import summary
 except ImportError:
     summary = None
 
@@ -58,8 +58,11 @@ def train_model(
     model = model.to(device)
 
     # some code for model visualization / storing of initial state
+    model.eval()
     images, _ = iter(train_data).next()
     images = images.to(device)
+    _ = model(images)
+    model.train()
     result_logger.log_model(model, images)
     checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
 
