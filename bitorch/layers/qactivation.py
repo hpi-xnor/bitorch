@@ -15,7 +15,7 @@ class GradientCancellation(Function):
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor,
-            threshold: float = 1.0) -> torch.Tensor:
+            threshold: float, activation: Quantization) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
 
         Args:
@@ -25,13 +25,14 @@ class GradientCancellation(Function):
             tensor: binarized input tensor
         """
         ctx.save_for_backward(input_tensor, torch.tensor(threshold, device=input_tensor.device))
-        return input_tensor
+        activated_input = activation(input_tensor)
+        return activated_input
 
     @staticmethod
     @typing.no_type_check
     def backward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:
+            output_grad: torch.Tensor) -> Tuple[torch.Tensor, None, None]:
         """Apply straight through estimator.
 
         This passes the output gradient as input gradient after clamping the gradient values to the range [-1, 1]
@@ -47,8 +48,8 @@ class GradientCancellation(Function):
         cancelled = torch.where(
             torch.abs(input_tensor) < threshold,
             output_grad,
-            torch.tensor(1., device=output_grad.device))
-        return cancelled, None
+            torch.tensor(0., device=output_grad.device))
+        return cancelled, None, None
 
 
 class QActivation(nn.Module):
@@ -64,7 +65,7 @@ class QActivation(nn.Module):
             activation (Union[str, Quantization], optional): quantization module or name of quantization function.
                 Defaults to None.
             gradient_cancellation_threshold (Union[float, None], optional): threshold for input gradient
-                cancellation. Disabled if threshold is None. Defaults to None.
+                cancellation. Disabled if threshold is None or 0. Defaults to None.
         """
         super(QActivation, self).__init__()
         self._activation = config.get_quantization_function(activation or config.input_quantization())
@@ -81,8 +82,7 @@ class QActivation(nn.Module):
         Returns:
             torch.Tensor: quantized input tensor.
         """
-        activated_input = self._activation(input_tensor)
-        if self._gradient_cancellation_threshold:
-            return GradientCancellation.apply(activated_input, self._gradient_cancellation_threshold)
+        if self._gradient_cancellation_threshold and self._gradient_cancellation_threshold > 0:
+            return GradientCancellation.apply(input_tensor, self._gradient_cancellation_threshold, self._activation)
         else:
-            return activated_input
+            return self._activation(input_tensor)

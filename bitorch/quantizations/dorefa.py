@@ -1,8 +1,10 @@
 """Dorefa Function Implementation"""
 import torch
-from typing import Union
+from typing import Any, Tuple, Union
 
-from .base import Quantization, STE
+from torch.autograd.function import Function
+
+from .base import Quantization
 from .config import config
 
 
@@ -40,6 +42,40 @@ class WeightDoReFa(Quantization):
         return 2.0 * (torch.round(adjusted_values * self._max_value) / self._max_value) - 1.0
 
 
+class InputDoReFaFunction(Function):
+    @staticmethod
+    def forward(
+            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+            input_tensor: torch.Tensor, bits: int) -> torch.Tensor:
+        """quantizes input tensor and forwards it.
+
+        Args:
+            ctx (Any): autograd context
+            input_tensor (torch.Tensor): input tensor
+            bits (int): number of bits to round the input tensor to
+
+        Returns:
+            torch.Tensor: the quantized input tensor
+        """
+        max_value = 2 ** bits - 1
+
+        quantized_tensor = torch.round(torch.clamp(input_tensor, 0, 1) * max_value) / max_value
+        return quantized_tensor
+
+    @staticmethod
+    def backward(ctx: Any, output_gradient: torch.Tensor) -> Tuple[torch.Tensor, None]:
+        """just passes the unchanged output gradient as input gradient (i.e. applies straight through estimator)
+
+        Args:
+            ctx (Any): autograd context
+            output_gradient (torch.Tensor): output gradient
+
+        Returns:
+            torch.Tensor: the unchanged output gradient
+        """
+        return output_gradient, None
+
+
 class InputDoReFa(Quantization):
     """Module for applying the dorefa function on inputs.
 
@@ -57,7 +93,6 @@ class InputDoReFa(Quantization):
         """
         super(InputDoReFa, self).__init__()
         self.bits = bits or config.dorefa_bits
-        self._max_value = 2 ** self.bits - 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """DoReFas the tensor to desired bit resolution.
@@ -69,4 +104,4 @@ class InputDoReFa(Quantization):
             torch.Tensor: DoReFaed tensor x
         """
 
-        return STE.apply(torch.round(torch.clamp(x, 0, 1) * self._max_value) / self._max_value)
+        return InputDoReFaFunction.apply(x, self.bits)

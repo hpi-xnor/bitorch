@@ -1,6 +1,27 @@
 """Sign Function Implementation"""
 import torch
+# from torch.autograd.function import Function
 from .base import Quantization, STE
+
+
+class SignFunction(STE):
+    @staticmethod
+    def forward(
+            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+            input_tensor: torch.Tensor) -> torch.Tensor:
+        """applies sign function
+
+        Args:
+            ctx (Any): autograd context
+            input_tensor (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: the sign tensor
+        """
+        sign_tensor = torch.sign(input_tensor)
+        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(
+            1., device=sign_tensor.device), sign_tensor)
+        return sign_tensor
 
 
 class Sign(Quantization):
@@ -17,6 +38,4 @@ class Sign(Quantization):
         Returns:
             torch.Tensor: sign of tensor x
         """
-        sign_tensor = torch.sign(x)
-        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1., device=sign_tensor.device), sign_tensor)
-        return STE.apply(sign_tensor)
+        return SignFunction.apply(x)
