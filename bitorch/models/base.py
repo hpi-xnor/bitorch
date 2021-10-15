@@ -49,7 +49,7 @@ class Model(nn.Module):
         """
         return self._model(x)
 
-    def initialize(self):
+    def initialize(self) -> None:
         """initializes model weights a little differently for BNNs."""
         for m in self._model.modules():
             if isinstance(m, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
