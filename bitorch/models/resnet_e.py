@@ -8,7 +8,6 @@ from typing import List
 import torch
 import argparse
 from torch import nn
-from torch.nn import Module
 import logging
 
 from bitorch.layers import QConv2d
@@ -17,7 +16,7 @@ from bitorch.models.common_layers import get_initial_layers
 __all__ = ['Resnet_E34', 'Resnet_E18', 'Resnet_E']
 
 
-class BasicBlock(Module):
+class BasicBlock(nn.Module):
     """BasicBlock from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     This is used for ResNetE layers.
@@ -84,7 +83,7 @@ class BasicBlock(Module):
         return x + residual
 
 
-class SpecificResnetE(Module):
+class SpecificResnetE(nn.Module):
     """Superclass for ResNet models"""
 
     def __init__(self, classes: int, channels: list) -> None:
@@ -184,7 +183,7 @@ class ResNetE(SpecificResnetE):
                 f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
 
         feature_layers: List[nn.Module] = []
-        feature_layers.append(nn.BatchNorm2d(image_channels, eps=2e-5, momentum=0.9))
+        # feature_layers.append(nn.BatchNorm2d(image_channels, eps=2e-5, momentum=0.9))
         feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0], momentum=0.9))
 
@@ -224,7 +223,7 @@ class Resnet_E(Model):
             num_layers: int,
             classes: int = 1000,
             initial_layers: str = "imagenet",
-            image_channels: int = 3) -> Module:
+            image_channels: int = 3) -> nn.Module:
         """Creates a ResNetE complying to given layer number.
 
         Args:

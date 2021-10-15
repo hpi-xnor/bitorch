@@ -53,7 +53,7 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
 
         def reset_parameters(self) -> None:
             """overwritten from _ConvNd to initialize weights"""
-            init.xavier_normal_(self.weight, gain=2.0)
+            init.xavier_normal_(self.weight)
 
         def forward(self, input: Tensor) -> Tensor:
             """forward the input tensor through the quantized convolution layer.

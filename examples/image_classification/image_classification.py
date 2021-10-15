@@ -70,6 +70,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     logging.debug(f"got model args as dict: {model_kwargs}")
 
     model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
+    model.initialize()
     logging.info(f"using {model.name} model...")
 
     optimizer = create_optimizer(args.optimizer, model, args.lr, args.momentum)

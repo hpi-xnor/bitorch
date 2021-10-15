@@ -97,6 +97,7 @@ def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> flo
 
     device = xm.xla_device()
     model = model_from_name(args.model)(**model_kwargs, dataset=dataset).to(device)  # type: ignore
+    model.initialize()
     writer = None
     if xm.is_master_ordinal():
         writer = test_utils.get_summary_writer("./tblogs")
