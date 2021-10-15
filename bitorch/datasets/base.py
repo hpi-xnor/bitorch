@@ -60,7 +60,7 @@ class BasicDataset(Dataset):
         self.augmentation_level = augmentation
         self._download = download
         self.root_directory = self.get_dataset_root_directory(root_directory)
-        self._dataset = self.get_dataset(download)
+        self.dataset = self.get_dataset(download)
 
     @classmethod
     def get_train_and_test(
@@ -158,10 +158,10 @@ class BasicDataset(Dataset):
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: data and label at the specified index
         """
-        return self._dataset[index]
+        return self.dataset[index]
 
     def __len__(self) -> int:
-        return len(self._dataset)  # type: ignore
+        return len(self.dataset)  # type: ignore
 
     def num_samples(self) -> int:
         """returns the (theoretical) dataset size."""

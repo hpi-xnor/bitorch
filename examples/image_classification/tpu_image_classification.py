@@ -3,6 +3,7 @@ import logging
 from typing import Dict
 
 from bitorch.datasets import dataset_from_name
+from bitorch.datasets.base import Augmentation
 from bitorch.datasets.imagenet import ImageNet
 from bitorch.models import model_from_name
 from examples.image_classification.utils.arg_parser import create_argparser
@@ -60,13 +61,11 @@ def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> flo
                   torch.zeros(args.batch_size, dtype=torch.int64)),
             sample_count=ImageNet.num_val_samples // args.batch_size // xm.xrt_world_size())
     else:
-        train_dataset = torchvision.datasets.ImageFolder(
-            os.path.join(args.dataset_dir, 'train'),
-            ImageNet.train_transform())
-        assert ImageNet.num_train_samples == len(train_dataset.imgs), "not all imagenet images are present"
-        test_dataset = torchvision.datasets.ImageFolder(
-            os.path.join(args.dataset_dir, 'val'),
-            ImageNet.test_transform())
+        augmentation_level = Augmentation.from_string(args.augmentation)
+        train_dataset, test_dataset = dataset.get_train_and_test(
+            root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
+        )
+        assert ImageNet.num_train_samples == len(train_dataset.dataset.imgs), "not all imagenet images are present"
 
         train_sampler, test_sampler = None, None
         if xm.xrt_world_size() > 1:
