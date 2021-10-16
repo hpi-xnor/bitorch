@@ -131,7 +131,7 @@ Classes above are internal, use classes below for debugging
 """
 
 
-class InputPrintDebug(_PrintDebug):
+class Input_Print_Debug(_PrintDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the given tensor without modification, debug output if activated
 
@@ -145,7 +145,7 @@ class InputPrintDebug(_PrintDebug):
         return x
 
 
-class InputGraphicalDebug(_GraphicalDebug):
+class Input_Graphical_Debug(_GraphicalDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the given tensor without modification, debug output if activated
 
@@ -159,14 +159,14 @@ class InputGraphicalDebug(_GraphicalDebug):
         return x
 
 
-class WeightPrintDebug(_PrintDebug):
+class Weight_Print_Debug(_PrintDebug):
     def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
         """stores given module
 
         Args:
             module (torch.nn.Module): module the weights of which shall be debugged
         """
-        super(WeightPrintDebug, self).__init__(*args, **kwargs)
+        super(Weight_Print_Debug, self).__init__(*args, **kwargs)
         self._debug_module = module
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -189,14 +189,14 @@ class WeightPrintDebug(_PrintDebug):
         return x
 
 
-class WeightGraphicalDebug(_GraphicalDebug):
+class Weight_Graphical_Debug(_GraphicalDebug):
     def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
         """stores given module
 
         Args:
             module (torch.nn.Module): module the weights of which shall be debugged
         """
-        super(WeightGraphicalDebug, self).__init__(*args, **kwargs)
+        super(Weight_Graphical_Debug, self).__init__(*args, **kwargs)
         self._debug_module = module
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

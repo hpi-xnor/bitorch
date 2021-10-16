@@ -1,24 +1,33 @@
-from .base import Model
-from pathlib import Path
-from importlib import import_module
 from typing import List, Type
 
-models_by_name = {}
+from .base import Model
+from .lenet import LeNet
+from .resnet import (
+    Resnet,
+    Resnet152_v1,
+    Resnet152_v2,
+    Resnet18_v1,
+    Resnet18_v2,
+    Resnet34_v1,
+    Resnet34_v2,
+    Resnet50_v1,
+    Resnet50_v2,
+)
+from .resnet_e import (
+    Resnet_E,
+    Resnet_E18,
+    Resnet_E34,
+)
+from ..util import build_lookup_dictionary
 
-current_dir = Path(__file__).resolve().parent
-for file in current_dir.iterdir():
-    # grep all python files
-    if file.suffix == ".py" and file.stem != "__init__":
-        module = import_module(f"{__name__}.{file.stem}")
-        for attr_name in dir(module):
-            attr = getattr(module, attr_name)
+__all__ = [
+    "Model", "LeNet", "Resnet", "Resnet152_v1", "Resnet152_v2", "Resnet18_v1",
+    "Resnet18_v2", "Resnet34_v1", "Resnet34_v2", "Resnet50_v1", "Resnet50_v2",
+    "Resnet_E", "Resnet_E18", "Resnet_E34",
+]
 
-            if isinstance(attr, type) and issubclass(attr, Model) and attr != Model:
-                if attr_name in models_by_name:
-                    raise ImportError("Two models found in model package with same name!")
-                models_by_name[attr.name] = attr
-                # make model accessible
-                globals()[attr_name] = attr
+
+models_by_name = build_lookup_dictionary(__name__, __all__, Model)
 
 
 def model_from_name(name: str) -> Type[Model]:

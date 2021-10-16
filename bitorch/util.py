@@ -1,5 +1,6 @@
-import sys
+# import sys
 import typing
+import importlib
 from typing import Callable, List, Any, Dict
 
 
@@ -27,8 +28,9 @@ def build_lookup_dictionary(
         def filter_fn(x: Any) -> bool:
             return isinstance(x, type) and issubclass(x, filter_by_superclass) and x != filter_by_superclass
     lookup = {}
+    current_module = importlib.import_module(current_module_name)
     for class_name in class_strings:
-        current_module = sys.modules.get(current_module_name, None)
+        # current_module = sys.modules.get(current_module_name, None)
         if not hasattr(current_module, class_name):
             continue
         class_ = getattr(current_module, class_name)
