@@ -1,12 +1,12 @@
 from typing import List, Type
 
 from .base import Quantization
-from .approxsign import ApproxSign
+from .approx_sign import ApproxSign
 from .dorefa import WeightDoReFa, InputDoReFa
 from .identity import Identity
 from .sign import Sign
-from .steheaviside import SteHeaviside
-from .swishsign import SwishSign
+from .ste_heaviside import SteHeaviside
+from .swish_sign import SwishSign
 from ..util import build_lookup_dictionary
 
 __all__ = [

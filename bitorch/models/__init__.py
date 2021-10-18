@@ -4,26 +4,26 @@ from .base import Model
 from .lenet import LeNet
 from .resnet import (
     Resnet,
-    Resnet152_v1,
-    Resnet152_v2,
-    Resnet18_v1,
-    Resnet18_v2,
-    Resnet34_v1,
-    Resnet34_v2,
-    Resnet50_v1,
-    Resnet50_v2,
+    Resnet152V1,
+    Resnet152V2,
+    Resnet18V1,
+    Resnet18V2,
+    Resnet34V1,
+    Resnet34V2,
+    Resnet50V1,
+    Resnet50V2,
 )
 from .resnet_e import (
-    Resnet_E,
-    Resnet_E18,
-    Resnet_E34,
+    ResnetE,
+    ResnetE18,
+    ResnetE34,
 )
 from ..util import build_lookup_dictionary
 
 __all__ = [
-    "Model", "LeNet", "Resnet", "Resnet152_v1", "Resnet152_v2", "Resnet18_v1",
-    "Resnet18_v2", "Resnet34_v1", "Resnet34_v2", "Resnet50_v1", "Resnet50_v2",
-    "Resnet_E", "Resnet_E18", "Resnet_E34",
+    "Model", "LeNet", "Resnet", "Resnet152V1", "Resnet152V2", "Resnet18V1",
+    "Resnet18V2", "Resnet34V1", "Resnet34V2", "Resnet50V1", "Resnet50V2",
+    "ResnetE", "ResnetE18", "ResnetE34",
 ]
 
 

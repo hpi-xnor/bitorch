@@ -131,7 +131,7 @@ Classes above are internal, use classes below for debugging
 """
 
 
-class Input_Print_Debug(_PrintDebug):
+class InputPrintDebug(_PrintDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the given tensor without modification, debug output if activated
 
@@ -145,7 +145,7 @@ class Input_Print_Debug(_PrintDebug):
         return x
 
 
-class Input_Graphical_Debug(_GraphicalDebug):
+class InputGraphicalDebug(_GraphicalDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the given tensor without modification, debug output if activated
 
@@ -159,14 +159,14 @@ class Input_Graphical_Debug(_GraphicalDebug):
         return x
 
 
-class Weight_Print_Debug(_PrintDebug):
+class WeightPrintDebug(_PrintDebug):
     def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
         """stores given module
 
         Args:
             module (torch.nn.Module): module the weights of which shall be debugged
         """
-        super(Weight_Print_Debug, self).__init__(*args, **kwargs)
+        super(WeightPrintDebug, self).__init__(*args, **kwargs)
         self._debug_module = module
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -189,14 +189,14 @@ class Weight_Print_Debug(_PrintDebug):
         return x
 
 
-class Weight_Graphical_Debug(_GraphicalDebug):
+class WeightGraphicalDebug(_GraphicalDebug):
     def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
         """stores given module
 
         Args:
             module (torch.nn.Module): module the weights of which shall be debugged
         """
-        super(Weight_Graphical_Debug, self).__init__(*args, **kwargs)
+        super(WeightGraphicalDebug, self).__init__(*args, **kwargs)
         self._debug_module = module
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -219,7 +219,7 @@ class Weight_Graphical_Debug(_GraphicalDebug):
         return x
 
 
-class Shape_Print_Debug(_PrintDebug):
+class ShapePrintDebug(_PrintDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """prints the shape of x, leaves x untouched
 

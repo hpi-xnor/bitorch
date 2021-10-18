@@ -505,7 +505,7 @@ class Resnet(Model):
                             help="number of layers to be used inside resnet")
 
 
-class Resnet18_v1(Resnet):
+class Resnet18V1(Resnet):
     """ResNet-18 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
@@ -513,28 +513,28 @@ class Resnet18_v1(Resnet):
     name = "resnet18v1"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet18_v1, self).__init__(1, 18, *args, **kwargs)
+        super(Resnet18V1, self).__init__(1, 18, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet34_v1(Resnet):
+class Resnet34V1(Resnet):
     """ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
     name = "resnet34v1"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet34_v1, self).__init__(1, 34, *args, **kwargs)
+        super(Resnet34V1, self).__init__(1, 34, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet50_v1(Resnet):
+class Resnet50V1(Resnet):
     """ResNet-50 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
@@ -542,14 +542,14 @@ class Resnet50_v1(Resnet):
     name = "resnet50v1"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet50_v1, self).__init__(1, 50, *args, **kwargs)
+        super(Resnet50V1, self).__init__(1, 50, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet152_v1(Resnet):
+class Resnet152V1(Resnet):
     """ResNet-152 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
@@ -557,14 +557,14 @@ class Resnet152_v1(Resnet):
     name = "resnet152v1"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet152_v1, self).__init__(1, 152, *args, **kwargs)
+        super(Resnet152V1, self).__init__(1, 152, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet18_v2(Resnet):
+class Resnet18V2(Resnet):
     """ResNet-18 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
@@ -572,14 +572,14 @@ class Resnet18_v2(Resnet):
     name = "resnet18v2"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet18_v2, self).__init__(2, 18, *args, **kwargs)
+        super(Resnet18V2, self).__init__(2, 18, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet34_v2(Resnet):
+class Resnet34V2(Resnet):
     """ResNet-34 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
@@ -587,14 +587,14 @@ class Resnet34_v2(Resnet):
     name = "resnet34v2"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet34_v2, self).__init__(2, 34, *args, **kwargs)
+        super(Resnet34V2, self).__init__(2, 34, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet50_v2(Resnet):
+class Resnet50V2(Resnet):
     """ResNet-50 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
@@ -602,14 +602,14 @@ class Resnet50_v2(Resnet):
     name = "resnet50v2"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet50_v2, self).__init__(2, 50, *args, **kwargs)
+        super(Resnet50V2, self).__init__(2, 50, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet152_v2(Resnet):
+class Resnet152V2(Resnet):
     """ResNet-152 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
@@ -617,7 +617,7 @@ class Resnet152_v2(Resnet):
     name = "resnet152v2"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet152_v2, self).__init__(2, 152, *args, **kwargs)
+        super(Resnet152V2, self).__init__(2, 152, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

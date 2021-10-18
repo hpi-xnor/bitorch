@@ -17,10 +17,10 @@ from utils.utils import (
     create_scheduler,
     set_logging,
 )
-from utils.resultlogger import ResultLogger
-from utils.checkpointmanager import CheckpointManager
-from utils.experimentcreator import ExperimentCreator
-from utils.etaestimator import ETAEstimator
+from utils.result_logger import ResultLogger
+from utils.checkpoint_manager import CheckpointManager
+from utils.experiment_creator import ExperimentCreator
+from utils.eta_estimator import ETAEstimator
 from utils.arg_parser import create_argparser
 from train import train_model
 
@@ -95,9 +95,9 @@ if __name__ == "__main__":
     model_args = model_parser.parse_args(unparsed_model_args)
 
     if args.experiment:
-        experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
-        experimentCreator.create(parser, args, model_parser, model_args)
-        experimentCreator.run_experiment_in_subprocess()
+        experiment_creator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
+        experiment_creator.create(parser, args, model_parser, model_args)
+        experiment_creator.run_experiment_in_subprocess()
         sys.exit(0)
 
     main(args, model_args)

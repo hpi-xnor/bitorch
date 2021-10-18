@@ -8,10 +8,10 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from bitorch.quantizations.base import Quantization
-from utils.checkpointmanager import CheckpointManager
-from utils.etaestimator import ETAEstimator
-from utils.metricscalculator import MetricsCalculator
-from utils.resultlogger import ResultLogger
+from utils.checkpoint_manager import CheckpointManager
+from utils.eta_estimator import ETAEstimator
+from utils.metrics_calculator import MetricsCalculator
+from utils.result_logger import ResultLogger
 
 try:
     from bitorchinfo import summary
