@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import torch
 from torch.nn import Module
@@ -32,7 +33,7 @@ def train_model(
         epochs: int = 10,
         lr: float = 0.001,
         log_interval: int = 100,
-        gpus: str = None) -> Module:
+        gpus: List[str] = None) -> Module:
     """trains the given model on the given train and test data. creates optimizer and lr scheduler with the given params.
     in each epoch validation on the test data is performed. gpu acceleration can be enabled.
 
@@ -51,9 +52,14 @@ def train_model(
     """
 
     criterion = CrossEntropyLoss()
-    if gpus:
-        device = "cuda:" + gpus
+    if gpus or isinstance(gpus, list):
+        # use all available gpus if no specific gpus are listed
+        if len(gpus) == 0:
+            gpus = list(map(str, range(torch.cuda.device_count())))
+        logging.info(f"training model on gpus: {gpus}...")
+        device = "cuda:" + ",".join(gpus)
     else:
+        logging.info("training model on cpu...")
         device = "cpu"
     model = model.to(device)
 

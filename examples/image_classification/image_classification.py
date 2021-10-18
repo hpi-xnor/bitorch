@@ -82,8 +82,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             args.checkpoint_load, model, optimizer, scheduler, args.pretrained)
     else:
         start_epoch = 0
-
-    gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
+    print("got args gpus:", args.gpus)
+    gpus = False if args.cpu or args.gpus is None else args.gpus
     train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
                 scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
                 result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
