@@ -65,7 +65,8 @@ def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> flo
         train_dataset, test_dataset = dataset.get_train_and_test(
             root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
         )
-        assert ImageNet.num_train_samples == len(train_dataset.dataset.imgs), "not all imagenet images are present"
+        assert ImageNet.num_train_samples == len(train_dataset.dataset.imgs), "imagenet train images missing"
+        assert ImageNet.num_val_samples == len(test_dataset.dataset.imgs), "imagenet val images missing"
 
         train_sampler, test_sampler = None, None
         if xm.xrt_world_size() > 1:
