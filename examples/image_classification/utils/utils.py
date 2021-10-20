@@ -99,7 +99,7 @@ def create_scheduler(
     elif scheduler_name == "exponential":
         return ExponentialLR(optimizer, lr_factor)
     elif scheduler_name == "cosine":
-        return CosineAnnealingLR(optimizer, epochs, eta_min=1e-8)
+        return CosineAnnealingLR(optimizer, epochs)
     elif not scheduler_name:
         return None
     else:
