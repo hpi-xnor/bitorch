@@ -15,7 +15,7 @@ class GradientCancellation(Function):
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor,
-            threshold: float, activation: Quantization) -> torch.Tensor:
+            threshold: float) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
 
         Args:
@@ -25,14 +25,13 @@ class GradientCancellation(Function):
             tensor: binarized input tensor
         """
         ctx.save_for_backward(input_tensor, torch.tensor(threshold, device=input_tensor.device))
-        activated_input = activation(input_tensor)
-        return activated_input
+        return input_tensor
 
     @staticmethod
     @typing.no_type_check
     def backward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            output_grad: torch.Tensor) -> Tuple[torch.Tensor, None, None]:
+            output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:
         """Apply straight through estimator.
 
         This passes the output gradient as input gradient after clamping the gradient values to the range [-1, 1]
@@ -49,7 +48,7 @@ class GradientCancellation(Function):
             torch.abs(input_tensor) < threshold,
             output_grad,
             torch.tensor(0., device=output_grad.device))
-        return cancelled, None, None
+        return cancelled, None
 
 
 class QActivation(nn.Module):
@@ -83,6 +82,5 @@ class QActivation(nn.Module):
             torch.Tensor: quantized input tensor.
         """
         if self._gradient_cancellation_threshold and self._gradient_cancellation_threshold > 0:
-            return GradientCancellation.apply(input_tensor, self._gradient_cancellation_threshold, self._activation)
-        else:
-            return self._activation(input_tensor)
+            input_tensor = GradientCancellation.apply(input_tensor, self._gradient_cancellation_threshold)
+        return self._activation(input_tensor)
