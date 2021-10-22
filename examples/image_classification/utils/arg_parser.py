@@ -89,7 +89,8 @@ def add_training_args(parser: ArgumentParser) -> None:
                        help="number of epochs to train (default: 10)")
     train.add_argument("--gpus", nargs="*",
                        help="list of GPUs to train on using CUDA. Parameter should be a list of gpu numbers, e.g. "
-                       " --gpus 0 2 to train on gpus no. 0 and no. 2. if omitted, cpu training will be enforced")
+                       " --gpus 0 2 to train on gpus no. 0 and no. 2. if omitted, cpu training will be enforced."
+                       " if no gpu numbers are passed, all available gpus will be used.")
     train.add_argument("--cpu", action="store_true", default=False,
                        help="explicitly use the cpu. overwrites gpu settings")
 

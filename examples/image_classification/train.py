@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import torch
 from torch.nn import Module
@@ -8,10 +9,10 @@ from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
 from bitorch.quantizations.base import Quantization
-from utils.checkpointmanager import CheckpointManager
-from utils.etaestimator import ETAEstimator
-from utils.metricscalculator import MetricsCalculator
-from utils.resultlogger import ResultLogger
+from utils.checkpoint_manager import CheckpointManager
+from utils.eta_estimator import ETAEstimator
+from utils.metrics_calculator import MetricsCalculator
+from utils.result_logger import ResultLogger
 
 try:
     from bitorchinfo import summary
@@ -32,7 +33,7 @@ def train_model(
         epochs: int = 10,
         lr: float = 0.001,
         log_interval: int = 100,
-        gpus: str = None) -> Module:
+        gpus: List[str] = None) -> Module:
     """trains the given model on the given train and test data. creates optimizer and lr scheduler with the given params.
     in each epoch validation on the test data is performed. gpu acceleration can be enabled.
 
@@ -51,9 +52,14 @@ def train_model(
     """
 
     criterion = CrossEntropyLoss()
-    if gpus:
-        device = "cuda:" + gpus
+    if gpus or isinstance(gpus, list):
+        # use all available gpus if no specific gpus are listed
+        if len(gpus) == 0:
+            gpus = list(map(str, range(torch.cuda.device_count())))
+        logging.info(f"training model on gpus: {gpus}...")
+        device = "cuda:" + ",".join(gpus)
     else:
+        logging.info("training model on cpu...")
         device = "cpu"
     model = model.to(device)
 

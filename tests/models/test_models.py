@@ -4,15 +4,15 @@ from bitorch.models import (
     models_by_name,
     LeNet,
     Resnet,
-    Resnet18_v1,
-    Resnet34_v1,
-    Resnet50_v1,
-    Resnet18_v2,
-    Resnet34_v2,
-    Resnet50_v2,
-    Resnet_E,
-    Resnet_E18,
-    Resnet_E34
+    Resnet18V1,
+    Resnet34V1,
+    Resnet50V1,
+    Resnet18V2,
+    Resnet34V2,
+    Resnet50V2,
+    ResnetE,
+    ResnetE18,
+    ResnetE34
 )
 import torch
 import numpy as np
@@ -24,15 +24,15 @@ RGB_DATASETS = [CIFAR10, CIFAR100, ImageNet]
 
 TEST_INPUT_DATA = [
     [Resnet, {"resnet_version": [1, 2], "resnet_num_layers": [18, 34, 50]}, ALL_DATASETS],
-    [Resnet18_v1, {}, ALL_DATASETS],
-    [Resnet34_v1, {}, ALL_DATASETS],
-    [Resnet50_v1, {}, ALL_DATASETS],
-    [Resnet18_v2, {}, ALL_DATASETS],
-    [Resnet34_v2, {}, ALL_DATASETS],
-    [Resnet50_v2, {}, ALL_DATASETS],
-    [Resnet_E, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
-    [Resnet_E18, {}, RGB_DATASETS],
-    [Resnet_E34, {}, RGB_DATASETS],
+    [Resnet18V1, {}, ALL_DATASETS],
+    [Resnet34V1, {}, ALL_DATASETS],
+    [Resnet50V1, {}, ALL_DATASETS],
+    [Resnet18V2, {}, ALL_DATASETS],
+    [Resnet34V2, {}, ALL_DATASETS],
+    [Resnet50V2, {}, ALL_DATASETS],
+    [ResnetE, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
+    [ResnetE18, {}, RGB_DATASETS],
+    [ResnetE34, {}, RGB_DATASETS],
     [LeNet, {"lenet_quantized": [True, False]}, [MNIST]],
 ]
 

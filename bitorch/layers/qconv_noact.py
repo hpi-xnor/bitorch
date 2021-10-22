@@ -10,17 +10,17 @@ from bitorch.quantizations import Quantization
 from .config import config
 
 
-def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
+def make_q_convolution_noact(base_class: Type, forward_fn: Callable) -> Type:
     """Creates a quantized version of the given convolution base class.
 
     Args:
-        BaseClass (QConv-Subclass): The base class to create a quantized version from.
+        base_class (QConv-Subclass): The base class to create a quantized version from.
         forward_fn (function): the convolution function used for this class.
 
     Returns:
         Class: the quantized version of the base class
     """
-    class QConv_NoAct(BaseClass):  # type: ignore
+    class QConv_NoAct(base_class):  # type: ignore # noqa: N801
         def __init__(self,  # type: ignore
                      *args,  # type: ignore
                      weight_quantization: Union[str, Quantization] = None,
