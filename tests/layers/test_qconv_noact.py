@@ -29,7 +29,7 @@ def test_qconv(conv_layer, conv_fn, input_shape, args, kwargs):
     grad1 = input_tensor.grad.clone()
     input_tensor.grad.zero_()
 
-    binary_weights = layer.quantize(layer.weight.clone())
+    binary_weights = layer._weight_quantize(layer.weight.clone())
 
     padding = kwargs["padding"]
     dimensionality = len(input_shape) - 2
