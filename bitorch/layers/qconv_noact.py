@@ -33,8 +33,8 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
                 padding_value (float, optional): value used for padding the input sequence. Defaults to None.
             """
             super(QConv_NoAct, self).__init__(*args, **kwargs)
-            self.quantize = config.get_quantization_function(weight_quantization or config.weight_quantization())
-            self.pad_value = pad_value or config.padding_value
+            self._weigh_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization())
+            self._pad_value = pad_value or config.padding_value
 
         def _apply_padding(self, x: Tensor) -> Tensor:
             """pads the input tensor with the given padding value
@@ -45,7 +45,7 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
             Returns:
                 Tensor: the padded tensor
             """
-            return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self.pad_value)
+            return pad(x, self._reversed_padding_repeated_twice, mode="constant", value=self._pad_value)
 
         def forward(self, input: Tensor) -> Tensor:
             """forward the input tensor through the quantized convolution layer.
@@ -58,7 +58,7 @@ def make_q_convolution_noact(BaseClass: Type, forward_fn: Callable) -> Type:
             """
             return forward_fn(  # type: ignore
                 input=self._apply_padding(input),
-                weight=self.quantize(self.weight),
+                weight=self._weigh_quantize(self.weight),
                 bias=self.bias,
                 stride=self.stride,
                 padding=0,

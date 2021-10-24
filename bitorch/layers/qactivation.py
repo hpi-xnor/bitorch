@@ -81,6 +81,6 @@ class QActivation(nn.Module):
         Returns:
             torch.Tensor: quantized input tensor.
         """
-        if self._gradient_cancellation_threshold and self._gradient_cancellation_threshold > 0:
+        if self._gradient_cancellation_threshold is not None and self._gradient_cancellation_threshold > 0:
             input_tensor = GradientCancellation.apply(input_tensor, self._gradient_cancellation_threshold)
         return self._activation(input_tensor)
