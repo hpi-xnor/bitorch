@@ -69,7 +69,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model_kwargs = vars(model_args)
     logging.debug(f"got model args as dict: {model_kwargs}")
 
-    model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
+    model_name = args.model.lower()
+    model = model_from_name(model_name)(**model_kwargs, dataset=dataset)  # type: ignore
     model.initialize()
     logging.info(f"using {model.name} model...")
 
