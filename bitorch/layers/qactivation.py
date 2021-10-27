@@ -1,5 +1,5 @@
 import typing
-from typing import Union, Tuple
+from typing import Optional, Union, Tuple
 import torch
 from torch import nn
 from torch.autograd.function import Function
@@ -57,13 +57,13 @@ class QActivation(nn.Module):
     def __init__(
             self,
             activation: Union[str, Quantization] = None,
-            gradient_cancellation_threshold: float = 0.0) -> None:
+            gradient_cancellation_threshold: Optional[float] = 0.0) -> None:
         """initialization function for fetching suitable activation function.
 
         Args:
             activation (Union[str, Quantization], optional): quantization module or name of quantization function.
                 Defaults to None.
-            gradient_cancellation_threshold (float, optional): threshold for input gradient
+            gradient_cancellation_threshold (Optional[float], optional): threshold for input gradient
                 cancellation. Disabled if threshold is 0.
         """
         super(QActivation, self).__init__()
