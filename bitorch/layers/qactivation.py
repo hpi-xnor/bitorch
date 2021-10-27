@@ -57,14 +57,14 @@ class QActivation(nn.Module):
     def __init__(
             self,
             activation: Union[str, Quantization] = None,
-            gradient_cancellation_threshold: Union[float, None] = None) -> None:
+            gradient_cancellation_threshold: float = 0.0) -> None:
         """initialization function for fetching suitable activation function.
 
         Args:
             activation (Union[str, Quantization], optional): quantization module or name of quantization function.
                 Defaults to None.
-            gradient_cancellation_threshold (Union[float, None], optional): threshold for input gradient
-                cancellation. Disabled if threshold is None or 0. Defaults to None.
+            gradient_cancellation_threshold (float, optional): threshold for input gradient
+                cancellation. Disabled if threshold is 0.
         """
         super(QActivation, self).__init__()
         self._activation = config.get_quantization_function(activation or config.input_quantization())
@@ -81,6 +81,6 @@ class QActivation(nn.Module):
         Returns:
             torch.Tensor: quantized input tensor.
         """
-        if self._gradient_cancellation_threshold is not None and self._gradient_cancellation_threshold > 0:
+        if self._gradient_cancellation_threshold > 0:
             input_tensor = GradientCancellation.apply(input_tensor, self._gradient_cancellation_threshold)
         return self._activation(input_tensor)
