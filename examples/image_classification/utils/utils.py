@@ -45,6 +45,18 @@ def set_logging(log_file: Union[None, str], log_level: str, output_stdout: bool)
         logger.addHandler(stream)
 
 
+def distributed_log(rank, log_fn_name, msg):
+    """passes logging message to logging module only for main process. avoids multiple log outputs
+
+    Args:
+        rank (int): rank of logging process
+        log_fn_name (str): name of logging function to call, e.g. "warning" to log a warning message
+        msg (str): message to log
+    """
+    if rank == 0:
+        getattr(logging, log_fn_name)(msg)
+
+
 def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Optimizer:
     """creates the specified optimizer with the given parameters
 

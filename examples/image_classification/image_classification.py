@@ -11,6 +11,7 @@ import argparse
 import sys
 import logging
 from torch.utils.data import DataLoader
+from torch import multiprocessing
 
 from utils.utils import (
     create_optimizer,
@@ -22,12 +23,27 @@ from utils.checkpoint_manager import CheckpointManager
 from utils.experiment_creator import ExperimentCreator
 from utils.eta_estimator import ETAEstimator
 from utils.arg_parser import create_argparser
-from train import train_model
+from train import train_model, train_model_distributed
 
 from bitorch.datasets.base import Augmentation
 from bitorch.models import model_from_name
 from bitorch.datasets import dataset_from_name
 from bitorch import apply_args_to_configuration
+
+
+def set_distributed_default_values(supervisor_host, supervisor_port):
+    if supervisor_host:
+        os.environ["MASTER_ADDR"] = supervisor_host
+    elif "MASTER_ADDR" not in os.environ:
+        logging.warning("No supervisor host adress provided neither via cli argument nor 'MASTER_ADDR' env"
+                        " variable! Using 127.0.0.1 as default host...")
+        os.environ["MASTER_ADDR"] = "127.0.0.1"
+    if supervisor_port:
+        os.environ["MASTER_PORT"] = supervisor_port
+    elif "MASTER_PORT" not in os.environ:
+        logging.warning("No supervisor port provided neither via cli argument nor 'MASTER_PORT' env"
+                        " variable! Using 6500 as default port...")
+        os.environ["MASTER_PORT"] = "6500"
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
@@ -69,8 +85,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model_kwargs = vars(model_args)
     logging.debug(f"got model args as dict: {model_kwargs}")
 
-    model_name = args.model.lower()
-    model = model_from_name(model_name)(**model_kwargs, dataset=dataset)  # type: ignore
+    model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
     model.initialize()
     logging.info(f"using {model.name} model...")
 
@@ -84,9 +99,23 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     else:
         start_epoch = 0
     gpus = False if args.cpu or args.gpus is None else args.gpus
-    train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
-                scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
-                result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
+
+    if args.world_size > 1 or len(args.gpus) > 1:
+        logging.info("Starting distributed model training...")
+        if args.world_size < len(args.gpus):
+            logging.warning("Total number of processes to spawn across nodes(world size) is smaller than number of"
+                            f"gpus. Setting world size to {len(args.gpus)}")
+            args.world_size = len(args.gpus)
+        set_distributed_default_values(args.supervisor_host, args.supervisor_port)
+        multiprocessing.spawn(train_model_distributed, nprocs=args.world_size,
+                              args=(
+                                  model, train_loader, test_loader, result_logger, checkpoint_manager, eta_estimator,
+                                  optimizer, scheduler, args.gpus, args.base_rank, args.world_size, start_epoch,
+                                  args.epochs, args.lr, args.log_interval))
+    else:
+        train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
+                    scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
+                    result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
 
 
 if __name__ == "__main__":

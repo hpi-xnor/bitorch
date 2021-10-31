@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import sys
 from typing import Tuple
+
 from bitorch.models import model_from_name, model_names
 from bitorch.datasets import dataset_names
 from bitorch import add_config_args
@@ -32,6 +33,19 @@ def add_logging_args(parser: ArgumentParser) -> None:
     log.add_argument("--eta-file", type=str, default=None,
                      help="path to eta file; this file will contain only the eta of the training process. this eta will"
                      " also be logged, so if eta file is ommitted, eta can still be obtained via logging output")
+
+
+def add_distributed_args(parser: ArgumentParser) -> None:
+    distributed = parser.add_argument_group("distributed", "parameters for distributed training/computing")
+    distributed.add_argument("--world-size", type=int, default=1, help="number of processes to be spawned across nodes")
+    distributed.add_argument("--base-rank", type=int, default=0, help="rank of the first process of this node. e.g. if"
+                             " this node is the supervisor node, base rank is 0. if there are three nodes with two gpus"
+                             " each in this distributed training process, the base rank of the third node would be 4"
+                             " since 4 processes are already running on the first two nodes.")
+    distributed.add_argument("--supervisor-host", type=str, default="",
+                             help="host name of distributed training supervisor node")
+    distributed.add_argument("--supervisor-port", type=str, default="",
+                             help="port of distributed training supervisor node")
 
 
 def add_checkpoint_args(parser: ArgumentParser) -> None:
@@ -174,10 +188,11 @@ def add_regular_args(parser: ArgumentParser) -> None:
     add_optimizer_args(parser)
     add_experiment_args(parser)
     add_checkpoint_args(parser)
+    add_distributed_args(parser)
 
     add_config_args(parser)
 
-    parser.add_argument("--model", type=str, choices=model_names(), required=True,
+    parser.add_argument("--model", type=str.lower, choices=model_names(), required=True,
                         help="name of the model to be trained")
 
 
