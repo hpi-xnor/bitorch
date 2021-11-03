@@ -1,7 +1,18 @@
+import os
+if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
+    import pydevd_pycharm
+    pydevd_pycharm.settrace(
+        'localhost',
+        port=int(os.environ.get('REMOTE_PYCHARM_DEBUG_PORT', "12345")),
+        stdoutToServer=True,
+        stderrToServer=True
+    )
 import argparse
 import sys
 import logging
 from torch.utils.data import DataLoader
+
+sys.path.append("../../")
 
 from utils.utils import (
     create_optimizer,
@@ -15,33 +26,20 @@ from utils.etaestimator import ETAEstimator
 from utils.arg_parser import create_argparser
 from train import train_model
 
-
-sys.path.append("../../")
-
-from bitorch.datasets.base import Augmentation  # noqa: E402
-from bitorch.models import model_from_name  # noqa: E402
-from bitorch.datasets import dataset_from_name  # noqa: E402
-from bitorch import apply_args_to_configuration  # noqa: E402
+from bitorch.datasets.base import Augmentation
+from bitorch.models import model_from_name
+from bitorch.datasets import dataset_from_name
+from bitorch import apply_args_to_configuration
 
 
-def main(
-        parser: argparse.ArgumentParser,
-        args: argparse.Namespace,
-        model_parser: argparse.ArgumentParser,
-        model_args: argparse.Namespace) -> None:
+def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     """trains a model on the configured image dataset.
 
     Args:
-        parser (argparse.ArgumentParser): parser for cli args (used for experiment creation and)
         args (argparse.Namespace): cli arguments
-        model_parser (argparse.ArgumentParser): parser for model cli args (used for experiment creation)
         model_args (argparse.Namespace): model specific cli arguments
     """
     set_logging(args.log_file, args.log_level, args.log_stdout)
-    if args.experiment:
-        experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
-        experimentCreator.create(parser, args, model_parser, model_args)
-        experimentCreator.run_experiment()
 
     apply_args_to_configuration(args)
 
@@ -53,22 +51,24 @@ def main(
     if dataset.name == 'imagenet' and args.nv_dali:
         from examples.image_classification.dali_helper import create_dali_data_loader
 
-        logging.info(f"using {dataset.name} dataset and NV-DALI data loader ...")
+        logging.info(f"dataset: {dataset.name} (with DALI data loader)...")
         train_loader, test_loader = create_dali_data_loader(args)
     else:
         augmentation_level = Augmentation.from_string(args.augmentation)
-        logging.info(f"using {dataset.name} dataset...")
-        train_dataset = dataset(train=True, directory=args.dataset_train_dir,
-                                download=args.download, augmentation=augmentation_level)  # type: ignore
-        test_dataset = dataset(train=False, directory=args.dataset_test_dir, download=args.download)
+        logging.info(f"dataset: {dataset.name}...")
+        train_dataset, test_dataset = dataset.get_train_and_test(
+            root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
+        )
 
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
-        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers)
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
+                                  shuffle=True, pin_memory=True)
+        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
+                                 shuffle=False, pin_memory=True)
 
-    model_arg_dict = vars(model_args)
-    logging.debug(f"got model args as dict: {model_arg_dict}")
+    model_kwargs = vars(model_args)
+    logging.debug(f"got model args as dict: {model_kwargs}")
 
-    model = model_from_name(args.model)(**model_arg_dict, dataset=dataset)  # type: ignore
+    model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
     logging.info(f"using {model.name} model...")
 
     optimizer = create_optimizer(args.optimizer, model, args.lr, args.momentum)
@@ -82,7 +82,7 @@ def main(
         start_epoch = 0
 
     gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
-    train_model(model, train_loader, test_loader, start_epochs=start_epoch, epochs=args.epochs, optimizer=optimizer,
+    train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
                 scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
                 result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
 
@@ -92,4 +92,10 @@ if __name__ == "__main__":
     args, unparsed_model_args = parser.parse_known_args()
     model_args = model_parser.parse_args(unparsed_model_args)
 
-    main(parser, args, model_parser, model_args)
+    if args.experiment:
+        experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
+        experimentCreator.create(parser, args, model_parser, model_args)
+        experimentCreator.run_experiment_in_subprocess()
+        sys.exit(0)
+
+    main(args, model_args)

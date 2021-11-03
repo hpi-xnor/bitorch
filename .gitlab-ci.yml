@@ -2,7 +2,7 @@ image: python:3.8
 
 before_script:
     - python --version
-    - pip install -e .[dev]
+    - pip install -e .[dev] --find-links https://download.pytorch.org/whl/torch_stable.html
     - flake8 --version
     - mypy --version
     - pytest --version

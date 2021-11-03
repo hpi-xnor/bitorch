@@ -22,7 +22,7 @@ class CheckpointManager():
             self._store_dir.mkdir(parents=True, exist_ok=True)
         else:
             self._store_dir = None  # type: ignore
-            logging.warn("No checkpoint store dir given, checkpoint storing disabled!")
+            logging.warning("No checkpoint store dir given, checkpoints will not be stored!")
         self._keep_count = keep_count
 
     def store_model_checkpoint(

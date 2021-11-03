@@ -26,7 +26,7 @@ class SwishSignFunction(SignFunction):
         Returns:
             tensor: binarized input tensor
         """
-        ctx.save_for_backward(input_tensor, torch.tensor(beta))
+        ctx.save_for_backward(input_tensor, torch.tensor(beta, device=input_tensor.device))
         return SwishSignFunction._sign(input_tensor)
 
     @staticmethod

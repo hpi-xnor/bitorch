@@ -6,7 +6,7 @@ Similar to recent versions of [torchvision](https://github.com/pytorch/vision), 
 
 Install the package with pip:
 ```bash
-pip install -e .
+pip install -e . --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 
 To activate advanced logging with Tensorboard and model summary, install the optional dependencies as well:
@@ -18,7 +18,7 @@ pip install -e ".[opt]"
 
 Install the _dev_ package with:
 ```bash
- pip install -e .[dev]
+ pip install -e .[dev] --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 Use quotes, i.e., `".[dev]"` in zsh.
 

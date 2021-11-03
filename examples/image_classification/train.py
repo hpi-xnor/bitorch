@@ -1,16 +1,17 @@
-import torch
 import logging
-from torch.utils.data import DataLoader
+
+import torch
 from torch.nn import Module
 from torch.nn.modules.loss import CrossEntropyLoss
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
+from torch.utils.data import DataLoader
 
+from bitorch.quantizations.base import Quantization
 from utils.checkpointmanager import CheckpointManager
 from utils.etaestimator import ETAEstimator
-from utils.resultlogger import ResultLogger
 from utils.metricscalculator import MetricsCalculator
-from bitorch.quantizations.base import Quantization
+from utils.resultlogger import ResultLogger
 
 try:
     from binary_torchinfo.torchinfo import summary
@@ -27,7 +28,7 @@ def train_model(
         eta_estimator: ETAEstimator,
         optimizer: Optimizer,
         scheduler: _LRScheduler,
-        start_epochs: int = 0,
+        start_epoch: int = 0,
         epochs: int = 10,
         lr: float = 0.001,
         log_interval: int = 100,
@@ -70,16 +71,15 @@ def train_model(
         logging.info(f"Model summary:\n{summary_str}")
 
     # initialization of eta estimator
-    total_number_of_batches = (epochs - start_epochs) * (len(train_data) + len(test_data))
+    total_number_of_batches = (epochs - start_epoch) * (len(train_data) + len(test_data))
     eta_estimator.set_iterations(total_number_of_batches)
     current_number_of_batches = 0
     best_accuracy = 0.0
 
     metrics = MetricsCalculator()
 
-    for epoch in range(start_epochs, epochs):
+    for epoch in range(start_epoch, epochs):
         eta_estimator.epoch_start()
-        logging.info(f"\n-------------------------- epoch {epoch + 1} --------------------------")
 
         model.train()
         metrics.clear()
@@ -97,14 +97,14 @@ def train_model(
 
                 metrics.update(y_hat, y_train, loss)
                 result_logger.tensorboard_results(
-                    category="Batches",
+                    category="Batch",
                     step=current_number_of_batches * len(x_train),
                     loss=metrics.avg_loss(),
                 )
 
             if idx % log_interval == 0 and idx > 0:
                 result_logger.tensorboard_results(
-                    category="Batches",
+                    category="Batch",
                     step=current_number_of_batches * len(x_train),
                     accuracy=metrics.accuracy(),
                     recall=metrics.recall(),
@@ -112,9 +112,13 @@ def train_model(
                     f1=metrics.f1(),
                     top_5_accuracy=metrics.top_5_accuracy(),
                 )
+                speed_in_sample_per_s = train_data.batch_size * eta_estimator.iterations_per_second()
+                lr = scheduler.get_last_lr()[0] if scheduler else lr
                 logging.info(
-                    f"Loss in epoch {epoch + 1} for batch {idx}: {metrics.avg_loss()}, batch acc: {metrics.accuracy()},"
-                    f" current lr: {scheduler.get_last_lr() if scheduler else lr}, eta: {eta_estimator.eta()}")
+                    f"epoch {epoch + 1:03d} batch {idx:4d}: loss: {metrics.avg_loss():.4f}, "
+                    f"acc: {metrics.accuracy():.4f}, current lr: {lr:.7f}, ({speed_in_sample_per_s:.1f} samples/s, "
+                    f"eta: {eta_estimator.eta()})"
+                )
 
         result_logger.tensorboard_results(
             category="Train",

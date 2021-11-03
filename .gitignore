@@ -143,8 +143,6 @@ cython_debug/
 .mypy_cache
 
 # downloaded dataset files
-train/
-test/
 data/
 
 # tensorboard output files

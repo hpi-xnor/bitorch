@@ -42,7 +42,7 @@ class SignFunction(Function):
         Returns:
             tensor: binarized input tensor
         """
-        ctx.save_for_backward(input_tensor, torch.tensor(threshold))
+        ctx.save_for_backward(input_tensor, torch.tensor(threshold, device=input_tensor.device))
         return SignFunction._sign(input_tensor)
 
     @staticmethod

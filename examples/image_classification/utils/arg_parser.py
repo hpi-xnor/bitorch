@@ -103,17 +103,15 @@ def add_dataset_args(parser: ArgumentParser) -> None:
     data = parser.add_argument_group("dataset", "parameters for the dataset used for training")
     data.add_argument("--dataset", type=str, default="cifar10", choices=dataset_names(),
                       help="name of the dataset to be used for training")
-    data.add_argument("--dataset-train-dir", type=str, default="./train",
+    data.add_argument("--dataset-dir", type=str, default=None,
                       help="path to where the train dataset is saved / shall be downloaded to")
-    data.add_argument("--dataset-test-dir", type=str, default="./test",
-                      help="path to where the test dataset is saved / shall be downloaded to")
     data.add_argument("--download", action="store_true", default=True,
                       help="toggles wether the dataset shall be downloaded if not present. "
                       "only has effect with the cifar10 and mnist dataset so far.")
     parser.add_argument("--batch-size", type=int, default=128,
                         help="batch size for training and testing (default: 128)")
-    parser.add_argument("--num-workers", type=int, default=0,
-                        help="number of workers to be used for dataloading (default: 0)")
+    parser.add_argument("--num-workers", type=int, default=4,
+                        help="number of workers to be used for dataloading (default: 4)")
     parser.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
                         help="level of augmentation to be used in data preparation (default 'none')")
     data.add_argument("--nv-dali", action="store_true", default=False,

@@ -1,7 +1,8 @@
-from .base import BasicDataset
+from importlib import import_module
 from pathlib import Path
 from typing import List, Type
-from importlib import import_module
+
+from .base import BasicDataset
 
 datasets_by_name = {}
 
