@@ -101,7 +101,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         start_epoch = 0
 
     if args.gpus is not None and len(args.gpus) == 0:
+        logging.info("no specific gpu specified! Using all available gpus...")
         args.gpus = list(map(str, range(torch.cuda.device_count())))
+        logging.info(f"Using gpus: {args.gpus}")
 
     if args.world_size > 1 or (args.gpus is not None and len(args.gpus) > 1):
         logging.info("Starting distributed model training...")
