@@ -10,6 +10,7 @@ if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
 import argparse
 import sys
 import logging
+import torch
 from torch.utils.data import DataLoader
 from torch import multiprocessing
 
@@ -98,9 +99,11 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             args.checkpoint_load, model, optimizer, scheduler, args.pretrained)
     else:
         start_epoch = 0
-    gpus = False if args.cpu or args.gpus is None else args.gpus
 
-    if args.world_size > 1 or len(args.gpus) > 1:
+    if args.gpus is not None and len(args.gpus) == 0:
+        args.gpus = list(map(str, range(torch.cuda.device_count())))
+
+    if args.world_size > 1 or (args.gpus is not None and len(args.gpus) > 1):
         logging.info("Starting distributed model training...")
         if args.world_size < len(args.gpus):
             logging.warning("Total number of processes to spawn across nodes(world size) is smaller than number of"
@@ -113,8 +116,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                                   optimizer, scheduler, args.gpus, args.base_rank, args.world_size, start_epoch,
                                   args.epochs, args.lr, args.log_interval))
     else:
+        gpu = None if args.cpu or args.gpus is None else args.gpus[0]
         train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
-                    scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
+                    scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpu=gpu,
                     result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
 
 
