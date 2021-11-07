@@ -100,6 +100,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     else:
         start_epoch = 0
 
+    logging.info(f"gpu argument: {args.gpus}")
     if args.gpus is not None and len(args.gpus) == 0:
         logging.info("no specific gpu specified! Using all available gpus...")
         args.gpus = list(map(str, range(torch.cuda.device_count())))

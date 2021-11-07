@@ -49,7 +49,7 @@ def train_model_distributed(
         rank=rank
     )
     model = model.to(f"cuda:{gpu}")
-    model = DistributedDataParallel(model, device_ids=(gpu,))
+    model = DistributedDataParallel(model, device_ids=(int(gpu),))
     train_sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
     test_sampler = DistributedSampler(test_data.dataset, num_replicas=world_size, rank=rank)
     train_data = DataLoader(train_data.dataset, batch_size=train_data.batch_size,
@@ -97,9 +97,9 @@ def train_model(
     else:
         device = "cpu"
     model = model.to(device)
-    # some code for model visualization / storing of initial state
-    images, _ = iter(train_data).next()
+
     # smoke test to see if model is able to process input data
+    images, _ = iter(train_data).next()
     model.eval()
     images = images.to(device)
     _ = model(images)
