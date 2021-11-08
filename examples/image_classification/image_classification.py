@@ -38,7 +38,7 @@ def set_distributed_default_values(supervisor_host, supervisor_port):
     elif "MASTER_ADDR" not in os.environ:
         logging.warning("No supervisor host adress provided neither via cli argument nor 'MASTER_ADDR' env"
                         " variable! Using 127.0.0.1 as default host...")
-        os.environ["MASTER_ADDR"] = "127.0.0.1"
+        os.environ["MASTER_ADDR"] = "localhost"
     if supervisor_port:
         os.environ["MASTER_PORT"] = supervisor_port
     elif "MASTER_PORT" not in os.environ:
@@ -117,7 +117,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                               args=(
                                   model, train_loader, test_loader, result_logger, checkpoint_manager, eta_estimator,
                                   optimizer, scheduler, args.gpus, args.base_rank, args.world_size, start_epoch,
-                                  args.epochs, args.lr, args.log_interval))
+                                  args.epochs, args.lr, args.log_interval, args.log_file, args.log_level, args.log_stdout))
     else:
         gpu = None if args.cpu or args.gpus is None else args.gpus[0]
         train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,

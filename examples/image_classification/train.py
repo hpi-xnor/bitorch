@@ -15,6 +15,7 @@ from utils.checkpoint_manager import CheckpointManager
 from utils.eta_estimator import ETAEstimator
 from utils.metrics_calculator import MetricsCalculator
 from utils.result_logger import ResultLogger
+from utils.utils import set_logging
 
 try:
     from bitorchinfo import summary
@@ -38,7 +39,11 @@ def train_model_distributed(
         start_epoch: int = 0,
         epochs: int = 10,
         lr: float = 0.001,
-        log_interval: int = 100) -> Module:
+        log_interval: int = 100,
+        log_file: str = None,
+        log_level: str = None,
+        log_stdout: bool = None) -> Module:
+    set_logging(log_file, log_level, log_stdout)
     rank = base_rank + process_index
     gpu = gpus[process_index]
 
@@ -49,7 +54,9 @@ def train_model_distributed(
         rank=rank
     )
     model = model.to(f"cuda:{gpu}")
-    model = DistributedDataParallel(model, device_ids=(int(gpu),))
+    
+    model._model = DistributedDataParallel(model._model, device_ids=(int(gpu),))
+    # model = DistributedDataParallel(model, device_ids=(int(gpu),))
     train_sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
     test_sampler = DistributedSampler(test_data.dataset, num_replicas=world_size, rank=rank)
     train_data = DataLoader(train_data.dataset, batch_size=train_data.batch_size,
@@ -109,12 +116,12 @@ def train_model(
         result_logger.log_model(model, images)
         checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
 
-    if summary is None:
-        logging.warning("Can not create a model summary because the package 'bitorchinfo' is not installed!")
-    else:
-        summary_str = summary(model, verbose=0, input_data=images, depth=10,
-                              quantization_base_class=Quantization, device=device)
-        logging.info(f"Model summary:\n{summary_str}")
+        if summary is None:
+            logging.warning("Can not create a model summary because the package 'bitorchinfo' is not installed!")
+        else:
+            summary_str = summary(model, verbose=0, input_data=images, depth=10,
+                                quantization_base_class=Quantization, device=device)
+            logging.info(f"Model summary:\n{summary_str}")
 
     # initialization of eta estimator
     total_number_of_batches = (epochs - start_epoch) * (len(train_data) + len(test_data))
