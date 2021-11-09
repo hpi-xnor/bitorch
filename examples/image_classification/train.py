@@ -101,10 +101,10 @@ def train_model(
     criterion = CrossEntropyLoss()
     if gpu:
         device = f"cuda:{gpu}"
+        torch.cuda.set_device(device)
     else:
         device = "cpu"
     model = model.to(device)
-    torch.cuda.set_device(device)
 
     # smoke test to see if model is able to process input data
     images, _ = iter(train_data).next()
