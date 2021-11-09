@@ -43,18 +43,18 @@ def train_model_distributed(
     gpu = gpus[process_index]
 
     distributed.init_process_group(
-        backend='nccl',
+        backend='gloo',
         init_method='env://',
         world_size=world_size,
         rank=rank
     )
     model = model.to(f"cuda:{gpu}")
-    model = DistributedDataParallel(model, device_ids=(int(gpu),))
+    model._model = DistributedDataParallel(model._model, device_ids=(int(gpu),))
     train_sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
     test_sampler = DistributedSampler(test_data.dataset, num_replicas=world_size, rank=rank)
-    train_data = DataLoader(train_data.dataset, batch_size=train_data.batch_size,
+    train_data = DataLoader(train_data.dataset, batch_size=int(train_data.batch_size / world_size),
                             shuffle=False, num_workers=0, pin_memory=True, sampler=train_sampler)
-    test_data = DataLoader(test_data.dataset, batch_size=test_data.batch_size,
+    test_data = DataLoader(test_data.dataset, batch_size=int(test_data.batch_size / world_size),
                            shuffle=False, num_workers=0, pin_memory=True, sampler=test_sampler)
     train_model(model, train_data, test_data, result_logger, checkpoint_manager, eta_estimator, optimizer, scheduler,
                 start_epoch=start_epoch, epochs=epochs, lr=lr, log_interval=log_interval, gpu=gpu, output=(rank == 0))
@@ -97,6 +97,7 @@ def train_model(
     else:
         device = "cpu"
     model = model.to(device)
+    torch.cuda.set_device(device)
 
     # smoke test to see if model is able to process input data
     images, _ = iter(train_data).next()
@@ -109,12 +110,12 @@ def train_model(
         result_logger.log_model(model, images)
         checkpoint_manager.store_model_checkpoint(model, optimizer, scheduler, 0, f"{model.name}_untrained")
 
-    if summary is None:
-        logging.warning("Can not create a model summary because the package 'bitorchinfo' is not installed!")
-    else:
-        summary_str = summary(model, verbose=0, input_data=images, depth=10,
-                              quantization_base_class=Quantization, device=device)
-        logging.info(f"Model summary:\n{summary_str}")
+        if summary is None:
+            logging.warning("Can not create a model summary because the package 'bitorchinfo' is not installed!")
+        else:
+            summary_str = summary(model, verbose=0, input_data=images, depth=10,
+                                  quantization_base_class=Quantization, device=device)
+            logging.info(f"Model summary:\n{summary_str}")
 
     # initialization of eta estimator
     total_number_of_batches = (epochs - start_epoch) * (len(train_data) + len(test_data))

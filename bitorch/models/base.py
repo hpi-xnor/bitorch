@@ -51,21 +51,19 @@ class Model(nn.Module):
 
     def initialize(self) -> None:
         """initializes model weights a little differently for BNNs."""
-        for m in self._model.modules():
-            if isinstance(m, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
-                if isinstance(m, (QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct)):
-                    # binary layers
-                    nn.init.xavier_normal_(m.weight)
-                    # nn.init.xavier_normal_(m.weight, gain=1e-2)
+        for module in self._model.modules():
+            if isinstance(module, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
+                # binary layers
+                if isinstance(module, (QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct)):
+                    nn.init.xavier_normal_(module.weight)
                 else:
-                    if m.kernel_size[0] == 7:
+                    if module.kernel_size[0] == 7:
                         # first conv layer
-                        nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+                        nn.init.kaiming_normal_(module.weight, nonlinearity='relu')
                     else:
                         # other 32-bit conv layers
-                        nn.init.xavier_normal_(m.weight)
-                    if m.bias is not None:
-                        nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.xavier_normal_(m.weight)
-                # nn.init.xavier_normal_(m.weight, gain=1e-2)
+                        nn.init.xavier_normal_(module.weight)
+                    if module.bias is not None:
+                        nn.init.constant_(module.bias, 0)
+            elif isinstance(module, nn.Linear):
+                nn.init.xavier_normal_(module.weight)

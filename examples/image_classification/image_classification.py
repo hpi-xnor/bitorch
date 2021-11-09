@@ -1,4 +1,5 @@
 import os
+
 if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
     import pydevd_pycharm
     pydevd_pycharm.settrace(
@@ -11,6 +12,7 @@ import argparse
 import sys
 import logging
 import torch
+from torch import distributed
 from torch.utils.data import DataLoader
 from torch import multiprocessing
 
@@ -118,6 +120,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                                   model, train_loader, test_loader, result_logger, checkpoint_manager, eta_estimator,
                                   optimizer, scheduler, args.gpus, args.base_rank, args.world_size, start_epoch,
                                   args.epochs, args.lr, args.log_interval))
+        logging.info("Training completed!")
+        distributed.destroy_process_group()
     else:
         gpu = None if args.cpu or args.gpus is None else args.gpus[0]
         train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,

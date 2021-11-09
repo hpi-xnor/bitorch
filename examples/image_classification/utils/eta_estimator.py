@@ -2,6 +2,7 @@ import time
 import logging
 from pathlib import Path
 from math import floor
+from typing import Union
 
 
 class ETAEstimator():
@@ -26,7 +27,7 @@ class ETAEstimator():
         self._log_interval = log_interval
         self._num_iterations = iterations
         self._current_iteration = 0
-        self._start_time = 0.0
+        self._start_time: Union[None, float] = None
         self._abs_time = 0.0
         self._epoch_duration = 0.0
         self._epoch_start = 0.0
@@ -127,13 +128,16 @@ class ETAEstimator():
         """
         if self._num_iterations == 0:
             raise ValueError("number of iterations is not specified!")
+
+        if self._start_time is not None:
+            self._current_iteration += 1
+            time_diff = time.time() - self._start_time
+            self._iterations_per_second = 1.0 / time_diff
+            self._abs_time += time_diff
+            if (self._current_iteration % self._log_interval) == 0:
+                self.summary()
         self._start_time = time.time()
 
     def __exit__(self, *args: list) -> None:
         """executed when leaving with statement. logs eta if log interval is over."""
-        self._current_iteration += 1
-        time_diff = time.time() - self._start_time
-        self._iterations_per_second = 1.0 / time_diff
-        self._abs_time += time_diff
-        if (self._current_iteration % self._log_interval) == 0:
-            self.summary()
+        ...
