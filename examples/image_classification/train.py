@@ -239,6 +239,7 @@ def train_model(
 
             logging.info(eta_estimator.summary())
             eta_estimator.epoch_end()
+            logging.info(f"epoch duration: {eta_estimator.epoch_duration()}")
 
             result_logger.tensorboard_results(
                 category="Training",
