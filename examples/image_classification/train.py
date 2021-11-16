@@ -60,9 +60,11 @@ def train_model_distributed(
     train_sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
     test_sampler = DistributedSampler(test_data.dataset, num_replicas=world_size, rank=rank)
     train_data = DataLoader(train_data.dataset, batch_size=int(train_data.batch_size / world_size),
-                            shuffle=False, num_workers=0, pin_memory=True, sampler=train_sampler)
+                            shuffle=False, num_workers=int(test_data.num_workers / world_size), pin_memory=True,
+                            sampler=train_sampler)
     test_data = DataLoader(test_data.dataset, batch_size=int(test_data.batch_size / world_size),
-                           shuffle=False, num_workers=0, pin_memory=True, sampler=test_sampler)
+                           shuffle=False, num_workers=int(test_data.num_workers / world_size), pin_memory=True,
+                           sampler=test_sampler)
     train_model(model, train_data, test_data, result_logger, checkpoint_manager, eta_estimator, optimizer, scheduler,
                 start_epoch=start_epoch, epochs=epochs, lr=lr, log_interval=log_interval, gpu=gpu, output=(rank == 0))
 

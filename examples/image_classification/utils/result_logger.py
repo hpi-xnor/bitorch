@@ -75,13 +75,13 @@ class ResultLogger():
             log (bool, optional): toggles wheather there should be a value log entry in default log files.
                 Defaults to True.
         """
-        if not self._result_file:
-            return
-
         if log:
             logging.info(f"training results: {kwargs}")
         if tensorboard:
             self.tensorboard_results(**kwargs)  # type: ignore
+
+        if not self._result_file:
+            return
 
         create_header = False
         if not self._result_file.exists():
