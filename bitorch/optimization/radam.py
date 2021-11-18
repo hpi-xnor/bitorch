@@ -63,6 +63,11 @@ class RAdam(Optimizer):
         )
         super(RAdam, self).__init__(params, defaults)
 
+    def __getstate__(self):  # for correct pickling of this class (necessary for mp.spawn)
+        optimizer_state = super(RAdam, self).__getstate__()
+        optimizer_state["degenerated_to_sgd"] = self.degenerated_to_sgd
+        return optimizer_state
+
     def step(self, closure: Callable = None) -> Optional[float]:
 
         loss = None
