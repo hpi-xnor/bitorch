@@ -40,7 +40,6 @@ class ApproxSignFunction(SignFunction):
             torch.Tensor: the input gradient
         """
         input_tensor = ctx.saved_tensors[0]
-        print("got input tensor:", input_tensor, "type:", type(input_tensor))
         # produces zeros where preactivation inputs exceeded threshold, ones otherwise
         inside_threshold = (torch.abs(input_tensor) <= 1)
         approx_sign = (2.0 - 2.0 * torch.abs(input_tensor)) * inside_threshold

@@ -3,6 +3,7 @@ import logging
 from typing import Dict
 
 from bitorch.datasets import dataset_from_name
+from bitorch.datasets.base import Augmentation
 from bitorch.datasets.imagenet import ImageNet
 from bitorch.models import model_from_name
 from examples.image_classification.utils.arg_parser import create_argparser
@@ -12,11 +13,10 @@ import os
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
+import torchvision.transforms as transforms
 import torch_xla
-import torch_xla.debug.metrics as met
 import torch_xla.distributed.parallel_loader as pl
 import torch_xla.utils.utils as xu
 import torch_xla.core.xla_model as xm
@@ -37,14 +37,15 @@ def _train_update(device, step, loss, tracker, epoch, writer):  # type: ignore
         summary_writer=writer)
 
 
-def main(args: argparse.Namespace, model_kwargs: Dict) -> float:
+def main(args: argparse.Namespace, device_index: int, model_kwargs: Dict) -> float:
     """trains a model on the configured image dataset with tpu.
 
     Args:
         args (argparse.Namespace): cli arguments
+        index (int): tpu device index
         model_kwargs (dict): model specific cli arguments as a dictionary
     """
-    print('==> Preparing data..')
+    print('==> Preparing data... ({})'.format(device_index))
     dataset = dataset_from_name(args.dataset)
     assert dataset == ImageNet, "TPU training should only be used to train imagenet."
 
@@ -59,13 +60,12 @@ def main(args: argparse.Namespace, model_kwargs: Dict) -> float:
                   torch.zeros(args.batch_size, dtype=torch.int64)),
             sample_count=ImageNet.num_val_samples // args.batch_size // xm.xrt_world_size())
     else:
-        train_dataset = torchvision.datasets.ImageFolder(
-            os.path.join(args.dataset_dir, 'train'),
-            ImageNet.train_transform())
-        assert ImageNet.num_train_samples == len(train_dataset.imgs), "not all imagenet images are present"
-        test_dataset = torchvision.datasets.ImageFolder(
-            os.path.join(args.dataset_dir, 'val'),
-            ImageNet.test_transform())
+        augmentation_level = Augmentation.from_string(args.augmentation)
+        train_dataset, test_dataset = dataset.get_train_and_test(
+            root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
+        )
+        assert ImageNet.num_train_samples == len(train_dataset.dataset.imgs), "imagenet train images missing"
+        assert ImageNet.num_val_samples == len(test_dataset.dataset.imgs), "imagenet val images missing"
 
         train_sampler, test_sampler = None, None
         if xm.xrt_world_size() > 1:
@@ -96,6 +96,7 @@ def main(args: argparse.Namespace, model_kwargs: Dict) -> float:
 
     device = xm.xla_device()
     model = model_from_name(args.model)(**model_kwargs, dataset=dataset).to(device)  # type: ignore
+    model.initialize()
     writer = None
     if xm.is_master_ordinal():
         writer = test_utils.get_summary_writer("./tblogs")
@@ -160,13 +161,11 @@ def main(args: argparse.Namespace, model_kwargs: Dict) -> float:
 
 def _mp_fn(index, args, model_kwargs):  # type: ignore
     torch.set_default_tensor_type('torch.FloatTensor')
-    main(args, model_kwargs)
+    main(args, index, model_kwargs)
 
 
 if __name__ == '__main__':
     parser, model_parser = create_argparser()
-    parser.add_argument("--fake-data", action="store_true",
-                        help="train with fake data")
     parser.add_argument("--num-procs", default=None, type=int,
                         help="set a number of tpu processors")
     args, unparsed_model_args = parser.parse_known_args()

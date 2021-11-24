@@ -12,17 +12,15 @@ import sys
 import logging
 from torch.utils.data import DataLoader
 
-sys.path.append("../../")
-
 from utils.utils import (
     create_optimizer,
     create_scheduler,
     set_logging,
 )
-from utils.resultlogger import ResultLogger
-from utils.checkpointmanager import CheckpointManager
-from utils.experimentcreator import ExperimentCreator
-from utils.etaestimator import ETAEstimator
+from utils.result_logger import ResultLogger
+from utils.checkpoint_manager import CheckpointManager
+from utils.experiment_creator import ExperimentCreator
+from utils.eta_estimator import ETAEstimator
 from utils.arg_parser import create_argparser
 from train import train_model
 
@@ -48,7 +46,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     eta_estimator = ETAEstimator(args.eta_file, args.log_interval)
 
     dataset = dataset_from_name(args.dataset)
-    if dataset.name == 'imagenet' and args.nv_dali:
+    if args.fake_data:
+        logging.info(f"dummy dataset: {dataset.name} (not using real data!)...")
+        train_loader, test_loader = dataset.get_dummy_train_and_test_loaders(args.batch_size)
+    elif dataset.name == 'imagenet' and args.nv_dali:
         from examples.image_classification.dali_helper import create_dali_data_loader
 
         logging.info(f"dataset: {dataset.name} (with DALI data loader)...")
@@ -61,14 +62,16 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         )
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                                  shuffle=True, pin_memory=True)
+                                  shuffle=True, pin_memory=True)  # type: ignore
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                                 shuffle=False, pin_memory=True)
+                                 shuffle=False, pin_memory=True)  # type: ignore
 
     model_kwargs = vars(model_args)
     logging.debug(f"got model args as dict: {model_kwargs}")
 
-    model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
+    model_name = args.model.lower()
+    model = model_from_name(model_name)(**model_kwargs, dataset=dataset)  # type: ignore
+    model.initialize()
     logging.info(f"using {model.name} model...")
 
     optimizer = create_optimizer(args.optimizer, model, args.lr, args.momentum)
@@ -80,8 +83,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             args.checkpoint_load, model, optimizer, scheduler, args.pretrained)
     else:
         start_epoch = 0
-
-    gpus = False if args.cpu or not args.gpus else ','.join(args.gpus)
+    gpus = False if args.cpu or args.gpus is None else args.gpus
     train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
                 scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpus=gpus,
                 result_logger=result_logger, checkpoint_manager=checkpoint_manager, eta_estimator=eta_estimator)
@@ -93,9 +95,9 @@ if __name__ == "__main__":
     model_args = model_parser.parse_args(unparsed_model_args)
 
     if args.experiment:
-        experimentCreator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
-        experimentCreator.create(parser, args, model_parser, model_args)
-        experimentCreator.run_experiment_in_subprocess()
+        experiment_creator = ExperimentCreator(args.experiment_name, args.experiment_dir, __file__)
+        experiment_creator.create(parser, args, model_parser, model_args)
+        experiment_creator.run_experiment_in_subprocess()
         sys.exit(0)
 
     main(args, model_args)

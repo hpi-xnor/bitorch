@@ -219,7 +219,7 @@ class WeightGraphicalDebug(_GraphicalDebug):
         return x
 
 
-class Shape_Print_Debug(_PrintDebug):
+class ShapePrintDebug(_PrintDebug):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """prints the shape of x, leaves x untouched
 

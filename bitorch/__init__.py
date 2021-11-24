@@ -1,9 +1,11 @@
-from argparse import ArgumentParser, Namespace
-from .config import Config
-from pathlib import Path
 import os
-from typing import List
+from argparse import ArgumentParser, Namespace
 from importlib import import_module
+from pathlib import Path
+from typing import List
+
+from .config import Config
+
 
 configs_by_name = {}
 
