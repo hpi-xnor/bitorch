@@ -50,10 +50,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logging.info(f"dummy dataset: {dataset.name} (not using real data!)...")
         train_loader, test_loader = dataset.get_dummy_train_and_test_loaders(args.batch_size)
     elif dataset.name == 'imagenet' and args.nv_dali:
-        from examples.image_classification.dali_helper import create_dali_data_loader
-
-        logging.info(f"dataset: {dataset.name} (with DALI data loader)...")
-        train_loader, test_loader = create_dali_data_loader(args)
+        raise RuntimeError("DALI Loader not currently supported.")
     else:
         augmentation_level = Augmentation.from_string(args.augmentation)
         logging.info(f"dataset: {dataset.name}...")
