@@ -8,16 +8,16 @@ from bitorch.layers.qactivation import QActivation
 from bitorch.layers.qconv_noact import QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
 
 
-def make_q_convolution(BaseClass: Type) -> Type:
+def make_q_convolution(base_class: Type) -> Type:
     """creates a version with preactivation function of given baseclass
 
     Args:
-        BaseClass (QConv-Subclass): The base class to add an activation layer to.
+        base_class (QConv-Subclass): The base class to add an activation layer to.
 
     Returns:
         Class: the activated version of the base class
     """
-    class QConv(BaseClass):  # type: ignore
+    class QConv(base_class):  # type: ignore
         def __init__(self,  # type: ignore
                      *args,  # type: ignore
                      input_quantization: Union[str, Quantization] = None,

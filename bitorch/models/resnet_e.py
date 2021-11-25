@@ -8,16 +8,15 @@ from typing import List
 import torch
 import argparse
 from torch import nn
-from torch.nn import Module
 import logging
 
 from bitorch.layers import QConv2d
-from bitorch.models.common_layers import make_initial_layers
+from bitorch.models.common_layers import get_initial_layers
 
-__all__ = ['Resnet_E34', 'Resnet_E18', 'Resnet_E']
+__all__ = ['ResnetE34', 'ResnetE18', 'ResnetE']
 
 
-class BasicBlock(Module):
+class BasicBlock(nn.Module):
     """BasicBlock from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     This is used for ResNetE layers.
@@ -49,8 +48,9 @@ class BasicBlock(Module):
             nn.Sequential: the downsampling model
         """
         return nn.Sequential(
-            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1, stride=self.stride, padding=0, bias=False),
-            nn.BatchNorm2d(self.out_channels),
+            nn.AvgPool2d(kernel_size=2, stride=self.stride),
+            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
 
     def _build_body(self) -> nn.Sequential:
@@ -63,7 +63,7 @@ class BasicBlock(Module):
         return nn.Sequential(
             QConv2d(self.in_channels, self.out_channels, kernel_size=3, stride=self.stride, padding=1, bias=False,
                     input_quantization="sign", weight_quantization="sign"),
-            nn.BatchNorm2d(self.out_channels),
+            nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -83,7 +83,7 @@ class BasicBlock(Module):
         return x + residual
 
 
-class SpecificResnetE(Module):
+class SpecificResnetE(nn.Module):
     """Superclass for ResNet models"""
 
     def __init__(self, classes: int, channels: list) -> None:
@@ -120,7 +120,7 @@ class SpecificResnetE(Module):
             layer_list.append(BasicBlock(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, layers: list, channels: list) -> nn.Sequential:
+    def make_feature_layers(self, layers: list, channels: list) -> List[nn.Module]:
         """builds the given layers with the specified block.
 
         Args:
@@ -134,7 +134,7 @@ class SpecificResnetE(Module):
         for idx, num_layer in enumerate(layers):
             stride = 1 if idx == 0 else 2
             feature_layers.append(self.make_layer(num_layer, channels[idx], channels[idx + 1], stride))
-        return nn.Sequential(*feature_layers)
+        return feature_layers
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor through the resnet modules
@@ -150,7 +150,7 @@ class SpecificResnetE(Module):
         return x
 
 
-class ResNetE(SpecificResnetE):
+class _ResnetE(SpecificResnetE):
     """ResNetE-18 model from
     `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
@@ -177,17 +177,17 @@ class ResNetE(SpecificResnetE):
         Raises:
             ValueError: raised if the number of channels does not match number of layer + 1
         """
-        super(ResNetE, self).__init__(classes, channels)
+        super(_ResnetE, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
                 f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
 
         feature_layers: List[nn.Module] = []
-        feature_layers.append(nn.BatchNorm2d(image_channels, eps=2e-5))
-        feature_layers.append(make_initial_layers(initial_layers, image_channels, channels[0]))
-        feature_layers.append(nn.BatchNorm2d(channels[0]))
+        # feature_layers.append(nn.BatchNorm2d(image_channels, eps=2e-5, momentum=0.9))
+        feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
+        feature_layers.append(nn.BatchNorm2d(channels[0], momentum=0.9))
 
-        feature_layers.append(self.make_feature_layers(layers, channels))
+        feature_layers.extend(self.make_feature_layers(layers, channels))
 
         feature_layers.append(nn.ReLU())
         feature_layers.append(nn.AdaptiveAvgPool2d(1))
@@ -201,7 +201,7 @@ ResNet-e specifications
 """
 
 
-class Resnet_E(Model):
+class ResnetE(Model):
 
     name = "resnete"
 
@@ -212,17 +212,18 @@ class Resnet_E(Model):
             self,
             resnete_num_layers: int,
             dataset: BasicDataset) -> None:
-        super(Resnet_E, self).__init__(dataset)
+        super(ResnetE, self).__init__(dataset)
         self._model = self.create(resnete_num_layers, self._dataset.num_classes,
                                   self._dataset.name, self._dataset.shape[1])
         logging.info(f"building ResnetE with {str(resnete_num_layers)} layers...")
 
+    @classmethod
     def create(
-            self,
+            cls,
             num_layers: int,
             classes: int = 1000,
             initial_layers: str = "imagenet",
-            image_channels: int = 3) -> Module:
+            image_channels: int = 3) -> nn.Module:
         """Creates a ResNetE complying to given layer number.
 
         Args:
@@ -237,12 +238,12 @@ class Resnet_E(Model):
         Returns:
             Module: resnetE model
         """
-        if num_layers not in self.resnet_spec:
+        if num_layers not in cls.resnet_spec:
             raise ValueError(f"No resnet spec for {num_layers} available!")
 
-        layers, channels = self.resnet_spec[num_layers]
+        layers, channels = cls.resnet_spec[num_layers]
 
-        return ResNetE(layers, channels, classes, initial_layers, image_channels)
+        return _ResnetE(layers, channels, classes, initial_layers, image_channels)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
@@ -250,7 +251,7 @@ class Resnet_E(Model):
                             help="number of layers to be used inside resnetE")
 
 
-class Resnet_E18(Resnet_E):
+class ResnetE18(ResnetE):
     """ResNetE-18 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
@@ -258,14 +259,14 @@ class Resnet_E18(Resnet_E):
     name = "resnete18"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet_E18, self).__init__(18, *args, **kwargs)
+        super(ResnetE18, self).__init__(18, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class Resnet_E34(Resnet_E):
+class ResnetE34(ResnetE):
     """ResNetE-34 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
@@ -273,7 +274,7 @@ class Resnet_E34(Resnet_E):
     name = "resnete34"
 
     def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        super(Resnet_E34, self).__init__(34, *args, **kwargs)
+        super(ResnetE34, self).__init__(34, *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

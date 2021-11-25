@@ -1,24 +1,21 @@
-from .base import Quantization
-from pathlib import Path
 from typing import List, Type
-from importlib import import_module
 
-quantizations_by_name = {}
+from .base import Quantization
+from .approx_sign import ApproxSign
+from .dorefa import WeightDoReFa, InputDoReFa
+from .identity import Identity
+from .sign import Sign
+from .ste_heaviside import SteHeaviside
+from .swish_sign import SwishSign
+from ..util import build_lookup_dictionary
 
-current_dir = Path(__file__).resolve().parent
-for file in current_dir.iterdir():
-    # grep all python files
-    if file.suffix == ".py" and file.stem != "__init__":
-        module = import_module(f"{__name__}.{file.stem}")
-        for attr_name in dir(module):
-            attr = getattr(module, attr_name)
+__all__ = [
+    "Quantization", "ApproxSign", "InputDoReFa", "WeightDoReFa", "Identity", "Sign",
+    "SteHeaviside", "SwishSign",
+]
 
-            if isinstance(attr, type) and issubclass(attr, Quantization) and attr != Quantization:
-                if attr_name in quantizations_by_name:
-                    raise ImportError("Two quantizations found in quantization package with same name!")
-                quantizations_by_name[attr.name] = attr
-                # make quantization accessible
-                globals()[attr_name] = attr
+
+quantizations_by_name = build_lookup_dictionary(__name__, __all__, Quantization)
 
 
 def quantization_from_name(name: str) -> Type[Quantization]:

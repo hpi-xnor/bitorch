@@ -4,7 +4,7 @@ from beeing changed easily via argparse e.g. for training scripts."""
 from argparse import ArgumentParser, Namespace
 
 
-class Config():
+class Config:
     """Config superclass that implements functionality to create argparse arguments for class attributes of
     subclasses."""
 

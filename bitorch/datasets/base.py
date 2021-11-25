@@ -1,12 +1,14 @@
 import logging
 import os
-from pathlib import Path
 from enum import Enum
-from typing import Optional, Tuple, Any, Union
+from pathlib import Path
+from typing import Optional, Tuple, Any
 
 import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
+
+from bitorch.datasets.dummy_dataset import DummyDataset
 
 
 class Augmentation(Enum):
@@ -58,7 +60,7 @@ class BasicDataset(Dataset):
         self.augmentation_level = augmentation
         self._download = download
         self.root_directory = self.get_dataset_root_directory(root_directory)
-        self._dataset = self.get_dataset(download)
+        self.dataset = self.get_dataset(download)
 
     @classmethod
     def get_train_and_test(
@@ -72,6 +74,14 @@ class BasicDataset(Dataset):
             Tuple: the train and test dataset
         """
         return cls(True, root_directory, download, augmentation), cls(False, root_directory, download)
+
+    @classmethod
+    def get_dummy_train_and_test_loaders(cls, batch_size: int) -> Tuple[DummyDataset, DummyDataset]:
+        x_data = torch.zeros((batch_size,) + cls.shape[1:])
+        y_data = torch.zeros((batch_size,), dtype=torch.int64)
+        train_set = DummyDataset((x_data, y_data), batch_size, cls.num_train_samples)
+        val_set = DummyDataset((x_data, y_data), batch_size, cls.num_val_samples)
+        return train_set, val_set
 
     def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Path:
         """chooses the dataset root directory based on the passed argument or environment variables.
@@ -148,10 +158,10 @@ class BasicDataset(Dataset):
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: data and label at the specified index
         """
-        return self._dataset[index]
+        return self.dataset[index]
 
     def __len__(self) -> int:
-        return len(self._dataset)  # type: ignore
+        return len(self.dataset)  # type: ignore
 
     def num_samples(self) -> int:
         """returns the (theoretical) dataset size."""

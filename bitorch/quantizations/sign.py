@@ -1,4 +1,6 @@
 """Sign Function Implementation"""
+from typing import Tuple, Union, Optional
+
 import torch
 import typing
 from .base import Quantization, STE
@@ -10,7 +12,7 @@ class SignFunction(STE):
     def forward(
             ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
             input_tensor: torch.Tensor) -> torch.Tensor:
-        """applies sign function
+        """Binarize the input tensor using the sign function
 
         Args:
             ctx (Any): autograd context

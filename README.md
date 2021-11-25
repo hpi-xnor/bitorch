@@ -1,26 +1,31 @@
 # Bitorch
 
-## Usage
+## Installation
 
 Similar to recent versions of [torchvision](https://github.com/pytorch/vision), you should be using Python 3.8 or newer.
 
-Install the package with pip:
+### Pip
+
+- Install the base requirements package with pip:
 ```bash
 pip install -e . --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
-
-To activate advanced logging with Tensorboard and model summary, install the optional dependencies as well:
+- To activate advanced logging with Tensorboard and model summary, install the optional dependencies as well:
 ```bash
 pip install -e ".[opt]"
 ```
-
-## Development
-
-Install the _dev_ package with:
+- Install the _dev_ package with:
 ```bash
- pip install -e .[dev] --find-links https://download.pytorch.org/whl/torch_stable.html
+ pip install -e ".[dev]"
 ```
-Use quotes, i.e., `".[dev]"` in zsh.
+
+### Conda
+
+Alternatively, you can install the following packages with conda:
+```bash
+conda install pytorch=1.9.0 torchvision=0.9.0 matplotlib
+conda install flake8 mypy pytest # dev packages
+```
 
 ### Code formatting and typing
 
