@@ -34,18 +34,18 @@ class GradientCancellation(Function):
             output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:
         """Apply straight through estimator.
 
-        This passes the output gradient as input gradient after clamping the gradient values to the range [-1, 1]
+        This passes the output gradient towards the input if the inputs are in the range [-1, 1].
 
         Args:
             ctx (gradient context): context
             output_grad (toch.Tensor): the tensor containing the output gradient
 
         Returns:
-            torch.Tensor: the input gradient (= the clamped output gradient)
+            torch.Tensor: the input gradient (= the masked output gradient)
         """
         input_tensor, threshold = ctx.saved_tensors
         cancelled = torch.where(
-            torch.abs(input_tensor) < threshold,
+            torch.abs(input_tensor) <= threshold,
             output_grad,
             torch.tensor(0., device=output_grad.device))
         return cancelled, None

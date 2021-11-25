@@ -8,7 +8,6 @@ from bitorch.quantizations import Sign
 activation = QActivation()
 
 TEST_DATA = [-3.0, -1.0, -0.3, 0.0, 0.3, 1.0, 3.0]
-# TEST_THRESHOLDS = [0.0]
 TEST_THRESHOLDS = [0.0, 0.5, 1.0, 2.0]
 
 
@@ -27,7 +26,7 @@ def test_qactivation(threshold):
     y.backward(x)
 
     if threshold > 0:
-        expected_gradient = torch.where(torch.abs(x) >= threshold, torch.tensor(0.), x)
+        expected_gradient = torch.where(torch.abs(x) <= threshold, x, torch.tensor(0.))
     else:
         expected_gradient = x.clone()
     assert torch.equal(expected_gradient, x.grad)
