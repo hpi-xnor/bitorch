@@ -13,11 +13,11 @@ from .qactivation import QActivation
 class QLinear(Linear):
     def __init__(
             self,
-            *args: list,
+            *args: int,
             input_quantization: Union[str, Quantization] = None,
             gradient_cancellation_threshold: Union[float, None] = None,
             weight_quantization: Union[str, Quantization] = None,
-            **kwargs: dict) -> None:
+            **kwargs: bool) -> None:
         """Applys the given quantization functions on weights and inputs before applying the linear operation.
 
         Args:
