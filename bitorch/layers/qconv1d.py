@@ -10,7 +10,7 @@ from bitorch.quantizations import Quantization
 from bitorch.layers.qactivation import QActivation
 
 
-class QConv1d_NoAct(Conv1d):
+class QConv1d_NoAct(Conv1d):  # noqa: N801
     def __init__(self,
                  *args: Any,
                  weight_quantization: Union[str, Quantization] = None,
