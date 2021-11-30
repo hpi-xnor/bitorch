@@ -1,5 +1,5 @@
 """Module containing the quantized convolution layer"""
-from typing import Union
+from typing import Union, Any
 from torch import Tensor
 from torch.nn import Conv3d, init
 from torch.nn.functional import pad, conv3d
@@ -11,11 +11,11 @@ from bitorch.layers.qactivation import QActivation
 
 class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
     def __init__(self,  # type: ignore
-                 *args,  # type: ignore
+                 *args: Any,
                  weight_quantization: Union[str, Quantization] = None,
                  pad_value: float = None,
                  bias: bool = False,
-                 **kwargs) -> None:  # type: ignore
+                 **kwargs: Any) -> None:
         """initialization function for padding and quantization.
 
         Args:
@@ -66,11 +66,11 @@ class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
 
 class QConv3d(QConv3d_NoAct):  # type: ignore
     def __init__(self,  # type: ignore
-                 *args,  # type: ignore
+                 *args: Any,
                  input_quantization: Union[str, Quantization] = None,
                  weight_quantization: Union[str, Quantization] = None,
                  gradient_cancellation_threshold: Union[float, None] = None,
-                 **kwargs) -> None:  # type: ignore
+                 **kwargs: Any) -> None:
         """initialization function for quantization of inputs and weights.
 
         Args:

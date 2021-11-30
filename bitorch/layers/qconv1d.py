@@ -67,11 +67,11 @@ class QConv1d_NoAct(Conv1d):  # noqa: N801
 
 class QConv1d(QConv1d_NoAct):  # type: ignore
     def __init__(self,  # type: ignore
-                 *args,  # type: ignore
+                 *args: Any,
                  input_quantization: Union[str, Quantization] = None,
                  weight_quantization: Union[str, Quantization] = None,
                  gradient_cancellation_threshold: Union[float, None] = None,
-                 **kwargs) -> None:  # type: ignore
+                 **kwargs: Any) -> None:
         """initialization function for quantization of inputs and weights.
 
         Args:
