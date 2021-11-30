@@ -9,10 +9,10 @@ TEST_INPUT_DATA = [
     (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
     (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
     (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
-    (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(0.5), "padding": 1}),
-    (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(1.0), "padding": 1}),
+    (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(), "padding": 1}),
+    (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(), "padding": 1}),
     (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {
-     "kernel_size": 3, "weight_quantization": Sign(2.0), "padding": 1}),
+     "kernel_size": 3, "weight_quantization": Sign(), "padding": 1}),
 ] * 10
 
 
@@ -29,7 +29,7 @@ def test_qconv(conv_layer, conv_fn, input_shape, args, kwargs):
     grad1 = input_tensor.grad.clone()
     input_tensor.grad.zero_()
 
-    binary_weights = layer.quantize(layer.weight.clone())
+    binary_weights = layer._weight_quantize(layer.weight.clone())
 
     padding = kwargs["padding"]
     dimensionality = len(input_shape) - 2

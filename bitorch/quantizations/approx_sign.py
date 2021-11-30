@@ -1,12 +1,12 @@
 """Sign Function Implementation"""
+import torch
+from torch.autograd.function import Function
+import typing
 
 from .base import Quantization
-import torch
-import typing
-from .sign import SignFunction
 
 
-class ApproxSignFunction(SignFunction):
+class ApproxSignFunction(Function):
     """ApproxSign Function for input binarization."""
 
     @staticmethod
@@ -23,7 +23,10 @@ class ApproxSignFunction(SignFunction):
             tensor: binarized input tensor
         """
         ctx.save_for_backward(input_tensor)
-        return ApproxSignFunction._sign(input_tensor)
+
+        sign_tensor = torch.sign(input_tensor)
+        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1., device=sign_tensor.device), sign_tensor)
+        return sign_tensor
 
     @staticmethod
     @typing.no_type_check
