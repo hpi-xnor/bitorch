@@ -1,15 +1,15 @@
 """Sign Function Implementation"""
 
 import torch
+from torch.autograd.function import Function
 import typing
 from typing import Tuple, Union
 
 from .base import Quantization
-from .sign import SignFunction
 from .config import config
 
 
-class SwishSignFunction(SignFunction):
+class SwishSignFunction(Function):
     """SwishSign Function for input binarization."""
 
     @staticmethod
@@ -27,7 +27,10 @@ class SwishSignFunction(SignFunction):
             tensor: binarized input tensor
         """
         ctx.save_for_backward(input_tensor, torch.tensor(beta, device=input_tensor.device))
-        return SwishSignFunction._sign(input_tensor)
+
+        sign_tensor = torch.sign(input_tensor)
+        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1., device=input_tensor.device), sign_tensor)
+        return sign_tensor
 
     @staticmethod
     @typing.no_type_check

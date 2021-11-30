@@ -13,11 +13,14 @@ TEST_INPUT_DATA = [
     (QConv3d, conv3d, (1, 2, 4, 4, 4), [2, 2],
         {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1}),
     (QConv1d, conv1d, (1, 2, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(0.5), "input_quantization": "sign", "padding": 1}),
+        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
+         "gradient_cancellation_threshold": 0.5, "padding": 1}),
     (QConv2d, conv2d, (1, 2, 5, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(1.0), "input_quantization": "sign", "padding": 1}),
+        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
+         "gradient_cancellation_threshold": 1.0, "padding": 1}),
     (QConv3d, conv3d, (1, 2, 4, 4, 4), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(2.0), "input_quantization": "sign", "padding": 1}),
+        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
+         "gradient_cancellation_threshold": 2.0, "padding": 1}),
 ] * 10
 
 
@@ -33,7 +36,7 @@ def test_qconv(conv_layer, conv_fn, input_shape, args, kwargs):
     grad1 = input_tensor.grad.clone()
     input_tensor.grad.zero_()
 
-    binary_weights = layer.quantize(layer.weight.clone())
+    binary_weights = layer._weight_quantize(layer.weight.clone())
 
     expected_tensor = layer.activation(input_tensor).requires_grad_(True)
     padding = kwargs["padding"]
