@@ -5,8 +5,7 @@ import torch
 from torch import nn
 
 from bitorch.datasets.base import BasicDataset
-from bitorch.layers.qconv import QConv1d, QConv2d, QConv3d
-from bitorch.layers.qconv_noact import QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
+from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
 
 
 class Model(nn.Module):

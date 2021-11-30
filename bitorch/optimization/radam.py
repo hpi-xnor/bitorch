@@ -63,8 +63,9 @@ class RAdam(Optimizer):
         )
         super(RAdam, self).__init__(params, defaults)
 
-    def __getstate__(self):  # for correct pickling of this class (necessary for mp.spawn)
-        optimizer_state = super(RAdam, self).__getstate__()
+    def __getstate__(self) -> dict:
+        # for correct pickling of this class (necessary for mp.spawn)
+        optimizer_state = super(RAdam, self).__getstate__()  # type: ignore
         optimizer_state["degenerated_to_sgd"] = self.degenerated_to_sgd
         return optimizer_state
 

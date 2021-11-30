@@ -34,7 +34,7 @@ from bitorch.datasets import dataset_from_name
 from bitorch import apply_args_to_configuration
 
 
-def set_distributed_default_values(supervisor_host, supervisor_port):
+def set_distributed_default_values(supervisor_host: str, supervisor_port: str) -> None:
     if supervisor_host:
         os.environ["MASTER_ADDR"] = supervisor_host
     elif "MASTER_ADDR" not in os.environ:

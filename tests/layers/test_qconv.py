@@ -1,4 +1,4 @@
-from bitorch.layers.qconv import QConv1d, QConv2d, QConv3d
+from bitorch.layers import QConv1d, QConv2d, QConv3d
 from torch.nn.functional import conv1d, conv2d, conv3d
 from bitorch.quantizations import Sign
 import pytest

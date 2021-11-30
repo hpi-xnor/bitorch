@@ -1,7 +1,7 @@
 from bitorch.datasets.base import BasicDataset
 from .base import Model
 from typing import List
-from bitorch.layers.qconv_noact import QConv2d_NoAct
+from bitorch.layers import QConv2d_NoAct
 import torch
 import argparse
 import logging

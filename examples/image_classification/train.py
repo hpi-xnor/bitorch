@@ -7,8 +7,9 @@ from torch import distributed
 from torch.nn.parallel import DistributedDataParallel
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Sampler
 from torch.utils.data.distributed import DistributedSampler
+from bitorch.models.base import Model
 
 from bitorch.quantizations.base import Quantization
 from utils.checkpoint_manager import CheckpointManager
@@ -25,7 +26,7 @@ except ImportError:
 
 def train_model_distributed(
         process_index: int,
-        model: Module,
+        model: Model,
         train_data: DataLoader,
         test_data: DataLoader,
         result_logger: ResultLogger,
@@ -33,9 +34,9 @@ def train_model_distributed(
         eta_estimator: ETAEstimator,
         optimizer: Optimizer,
         scheduler: _LRScheduler,
-        gpus: List[int] = None,
-        base_rank: int = None,
-        world_size: int = None,
+        gpus: List[int] = [],
+        base_rank: int = 0,
+        world_size: int = 0,
         start_epoch: int = 0,
         epochs: int = 10,
         lr: float = 0.001,
@@ -53,20 +54,29 @@ def train_model_distributed(
         world_size=world_size,
         rank=rank
     )
-    model = model.to(f"cuda:{gpu}")
 
-    model._model = DistributedDataParallel(model._model, device_ids=(int(gpu),))
-    # model = DistributedDataParallel(model, device_ids=(int(gpu),))
-    train_sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
-    test_sampler = DistributedSampler(test_data.dataset, num_replicas=world_size, rank=rank)
-    train_data = DataLoader(train_data.dataset, batch_size=int(train_data.batch_size / world_size),
-                            shuffle=False, num_workers=int(test_data.num_workers / world_size), pin_memory=True,
+    batch_size = int(train_data.batch_size / world_size)  # type: ignore
+    model = model.to(f"cuda:{gpu}")
+    if rank == 0:
+        logging.info(f"subprocess batch size: {batch_size}")
+        if train_data.num_workers != 0:
+            logging.warning(
+                "you are using more than one worker for dataloading. using multiple workers for dataloading WILL SLOW"
+                " DOWN THE TRAINING PROCESS. It is STRONGLY recommended to start the script with the '--num-workers 0'"
+                " option")
+
+    model._model = DistributedDataParallel(model.model(), device_ids=(int(gpu),))
+    train_sampler: Sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
+    test_sampler: Sampler = DistributedSampler(test_data.dataset, num_replicas=world_size, rank=rank)
+    train_data = DataLoader(train_data.dataset, batch_size=batch_size,
+                            shuffle=False, num_workers=test_data.num_workers, pin_memory=True,
                             sampler=train_sampler)
-    test_data = DataLoader(test_data.dataset, batch_size=int(test_data.batch_size / world_size),
-                           shuffle=False, num_workers=int(test_data.num_workers / world_size), pin_memory=True,
+    test_data = DataLoader(test_data.dataset, batch_size=batch_size,
+                           shuffle=False, num_workers=test_data.num_workers, pin_memory=True,
                            sampler=test_sampler)
-    train_model(model, train_data, test_data, result_logger, checkpoint_manager, eta_estimator, optimizer, scheduler,
-                start_epoch=start_epoch, epochs=epochs, lr=lr, log_interval=log_interval, gpu=gpu, output=(rank == 0))
+    return train_model(model, train_data, test_data, result_logger, checkpoint_manager, eta_estimator, optimizer,
+                       scheduler, start_epoch=start_epoch, epochs=epochs, lr=lr, log_interval=log_interval, gpu=gpu,
+                       output=(rank == 0))
 
 
 def train_model(
