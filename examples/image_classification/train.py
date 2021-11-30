@@ -59,11 +59,6 @@ def train_model_distributed(
     model = model.to(f"cuda:{gpu}")
     if rank == 0:
         logging.info(f"subprocess batch size: {batch_size}")
-        if train_data.num_workers != 0:
-            logging.warning(
-                "you are using more than one worker for dataloading. using multiple workers for dataloading WILL SLOW"
-                " DOWN THE TRAINING PROCESS. It is STRONGLY recommended to start the script with the '--num-workers 0'"
-                " option")
 
     model._model = DistributedDataParallel(model.model(), device_ids=(int(gpu),))
     train_sampler: Sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
