@@ -33,7 +33,7 @@ TEST_INPUT_DATA = [
     [ResnetE, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
     [ResnetE18, {}, RGB_DATASETS],
     [ResnetE34, {}, RGB_DATASETS],
-    [LeNet, {"lenet_quantized": [True, False]}, [MNIST]],
+    [LeNet, {"lenet_version": [0,1,2,3,4]}, [MNIST]],
 ]
 
 
