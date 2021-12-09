@@ -6,17 +6,29 @@ Similar to recent versions of [torchvision](https://github.com/pytorch/vision), 
 
 ### Pip
 
-- Install the base requirements package with pip:
+- Install the package with pip (we need to add the `--find-links` option for torch/torchvision):
+```bash
+pip install bitorch --find-links https://download.pytorch.org/whl/torch_stable.html
+```
+- To use advanced logging capabilities, install the optional dependencies as well:
+```bash
+pip install -e "bitorch[opt]" --find-links https://download.pytorch.org/whl/torch_stable.html
+```
+
+#### Local and Development Install Options
+
+The package can also be installed locally. First, clone this repository, then run:
 ```bash
 pip install -e . --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
+
 - To activate advanced logging with Tensorboard and model summary, install the optional dependencies as well:
 ```bash
-pip install -e ".[opt]"
+pip install -e ".[opt]" --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 - Install the _dev_ package with:
 ```bash
- pip install -e ".[dev]"
+ pip install -e ".[dev]" --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 
 ### Conda

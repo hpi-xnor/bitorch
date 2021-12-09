@@ -17,7 +17,7 @@ from utils.result_logger import ResultLogger
 try:
     from bitorchinfo import summary
 except ImportError:
-    summary = None
+    summary = None  # type: ignore
 
 
 def train_model(
