@@ -15,6 +15,7 @@ import torch
 from torch import distributed
 from torch.utils.data import DataLoader
 from torch import multiprocessing
+from torch.nn import DataParallel
 
 from utils.utils import (
     create_optimizer,
@@ -109,20 +110,27 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logging.info(f"Using gpus: {args.gpus}")
 
     if args.world_size > 1 or (args.gpus is not None and len(args.gpus) > 1):
-        logging.info("Starting distributed model training...")
-        if args.world_size < len(args.gpus):
-            logging.warning("Total number of processes to spawn across nodes(world size) is smaller than number of"
-                            f"gpus. Setting world size to {len(args.gpus)}")
-            args.world_size = len(args.gpus)
-        set_distributed_default_values(args.supervisor_host, args.supervisor_port)
-        multiprocessing.spawn(train_model_distributed, nprocs=args.world_size,
-                              args=(
-                                  model, train_loader, test_loader, result_logger, checkpoint_manager, eta_estimator,
-                                  optimizer, scheduler, args.gpus, args.base_rank, args.world_size, start_epoch,
-                                  args.epochs, args.lr, args.log_interval, args.log_file, args.log_level,
-                                  args.log_stdout))
-        logging.info("Training completed!")
-        distributed.destroy_process_group()
+        if args.distributed_mode == "ddp":
+            logging.info("Starting distributed model training...")
+            if args.world_size < len(args.gpus):
+                logging.warning("Total number of processes to spawn across nodes(world size) is smaller than number of"
+                                f"gpus. Setting world size to {len(args.gpus)}")
+                args.world_size = len(args.gpus)
+            set_distributed_default_values(args.supervisor_host, args.supervisor_port)
+            multiprocessing.spawn(train_model_distributed, nprocs=args.world_size,
+                                  args=(
+                                      model, train_loader, test_loader, result_logger, checkpoint_manager,
+                                      eta_estimator, optimizer, scheduler, args.gpus, args.base_rank, args.world_size,
+                                      start_epoch, args.epochs, args.lr, args.log_interval, args.log_file,
+                                      args.log_level, args.log_stdout))
+            logging.info("Training completed!")
+            distributed.destroy_process_group()
+        elif args.distributed_mode == "dp":
+            model = DataParallel(model, device_ids=args.gpus)
+            train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs,
+                        optimizer=optimizer, scheduler=scheduler, lr=args.lr, log_interval=args.log_interval,
+                        gpu=args.gpus[0], result_logger=result_logger, checkpoint_manager=checkpoint_manager,
+                        eta_estimator=eta_estimator)
     else:
         gpu = None if args.cpu or args.gpus is None else args.gpus[0]
         train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,

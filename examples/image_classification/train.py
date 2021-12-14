@@ -49,7 +49,7 @@ def train_model_distributed(
     gpu = gpus[process_index]
 
     distributed.init_process_group(
-        backend='gloo',
+        backend='nccl',
         init_method='env://',
         world_size=world_size,
         rank=rank

@@ -37,6 +37,8 @@ def add_logging_args(parser: ArgumentParser) -> None:
 
 def add_distributed_args(parser: ArgumentParser) -> None:
     distributed = parser.add_argument_group("distributed", "parameters for distributed training/computing")
+    distributed.add_argument("--distributed-mode", type=str, default=None,
+                             help="mode of multi gpu distribution. can be either 'ddp' or 'dp'.")
     distributed.add_argument("--world-size", type=int, default=1, help="number of processes to be spawned across nodes")
     distributed.add_argument("--base-rank", type=int, default=0, help="rank of the first process of this node. e.g. if"
                              " this node is the supervisor node, base rank is 0. if there are three nodes with two gpus"
