@@ -126,7 +126,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             logging.info("Training completed!")
             distributed.destroy_process_group()
         elif args.distributed_mode == "dp":
-            model = DataParallel(model, device_ids=[f"cuda:{gpu_id}" for gpu_id in args.gpus])
+            model._model = DataParallel(model._model, device_ids=[f"cuda:{gpu_id}" for gpu_id in args.gpus])
             train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs,
                         optimizer=optimizer, scheduler=scheduler, lr=args.lr, log_interval=args.log_interval,
                         gpu=args.gpus[0], result_logger=result_logger, checkpoint_manager=checkpoint_manager,
