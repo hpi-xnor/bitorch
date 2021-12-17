@@ -1,5 +1,6 @@
-from typing import Any, List
-import argparse
+from typing import Any, List, Tuple
+from pathlib import Path
+import logging
 
 try:
     from nvidia.dali.plugin.pytorch import DALIClassificationIterator
@@ -20,13 +21,14 @@ class HybridTrainPipe(Pipeline):
             self,
             batch_size: int,
             num_threads: int,
-            device_id: int,
+            rank: int,
+            world_size: int,
             data_dir: str,
             crop: int,
             dali_cpu: bool = True) -> None:
-        super(HybridTrainPipe, self).__init__(batch_size, num_threads, device_id, seed=12 + device_id,
+        super(HybridTrainPipe, self).__init__(batch_size, num_threads, rank, seed=12 + rank,
                                               set_affinity=True)
-        self.input = ops.FileReader(file_root=data_dir, num_shards=device_id + 1, shard_id=device_id,
+        self.input = ops.FileReader(file_root=data_dir, num_shards=world_size, shard_id=rank,
                                     random_shuffle=True)
 
         dali_device = 'cpu' if dali_cpu else 'gpu'
@@ -42,7 +44,7 @@ class HybridTrainPipe(Pipeline):
 
         self.res = ops.Resize(device=dali_device, resize_x=crop, resize_y=crop, interp_type=types.INTERP_TRIANGULAR)
 
-        self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        self.cmnp = ops.CropMirrorNormalize(device=dali_device,
                                             output_dtype=types.FLOAT,
                                             output_layout=types.NCHW,
                                             crop=(crop, crop),
@@ -70,18 +72,23 @@ class HybridValPipe(Pipeline):
             self,
             batch_size: int,
             num_threads: int,
-            device_id: int,
+            rank: int,
+            world_size: int,
             data_dir: str,
             crop: int,
-            size: int) -> None:
-        super(HybridValPipe, self).__init__(batch_size, num_threads, device_id, seed=12 + device_id, set_affinity=True)
+            size: int,
+            dali_cpu: bool = True) -> None:
+        super(HybridValPipe, self).__init__(batch_size, num_threads, rank, seed=12 + rank, set_affinity=True)
 
-        self.input = ops.FileReader(file_root=data_dir, num_shards=device_id + 1, shard_id=device_id,
+
+        dali_device = 'cpu' if dali_cpu else 'gpu'
+        decoder_device = 'cpu' if dali_cpu else 'mixed'
+        self.input = ops.FileReader(file_root=data_dir, num_shards=world_size, shard_id=rank,
                                     random_shuffle=False)
-        self.decode = ops.ImageDecoder(device='mixed', output_type=types.RGB)
+        self.decode = ops.ImageDecoder(device=decoder_device, output_type=types.RGB)
         # self.decode = ops.nvJPEGDecoder(device="mixed", output_type=types.RGB)
-        self.res = ops.Resize(device='gpu', resize_shorter=size, interp_type=types.INTERP_TRIANGULAR)
-        self.cmnp = ops.CropMirrorNormalize(device="gpu",
+        self.res = ops.Resize(device=dali_device, resize_shorter=size, interp_type=types.INTERP_TRIANGULAR)
+        self.cmnp = ops.CropMirrorNormalize(device=dali_device,
                                             output_dtype=types.FLOAT,
                                             output_layout=types.NCHW,
                                             crop=(crop, crop),
@@ -101,23 +108,29 @@ class HybridValPipe(Pipeline):
 
 
 def create_dali_data_loader(
-        args: argparse.Namespace,
+        train_dir: Path,
+        test_dir: Path,
+        dali_gpu_id: int,
+        world_size: int,
+        dali_cpu: int,
+        batch_size: int,
+        num_workers: int,
         img_crop_size: int = 224,
-        img_size_val: int = 256) -> DALIClassificationIterator:
+        img_size_val: int = 256) -> Tuple[DALIClassificationIterator, DALIClassificationIterator]:
     """creates nv-dali dataloader for image classification.
-    :param args: input args
+    :param  input args
     :param img_crop_size: image crop size
     :param img_size_val: image size for validation
     :return: data loader for training and validation
     """
-
-    pipe = HybridTrainPipe(batch_size=args.batch_size, num_threads=args.num_workers, device_id=args.nv_dali_gpu_id,
-                           data_dir=args.dataset_train_dir, crop=img_crop_size, dali_cpu=args.nv_dali_cpu)
+    logging.debug("creating dali pipelines....")
+    pipe = HybridTrainPipe(batch_size=batch_size, num_threads=num_workers, rank=dali_gpu_id, world_size=world_size,
+                           data_dir=train_dir, crop=img_crop_size, dali_cpu=dali_cpu)
     pipe.build()
     train_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")), auto_reset=True)
 
-    pipe = HybridValPipe(batch_size=args.batch_size, num_threads=args.num_workers, device_id=args.nv_dali_gpu_id,
-                         data_dir=args.dataset_test_dir, crop=img_crop_size, size=img_size_val)
+    pipe = HybridValPipe(batch_size=batch_size, num_threads=num_workers, rank=dali_gpu_id, world_size=world_size,
+                         data_dir=test_dir, crop=img_crop_size, size=img_size_val, dali_cpu=dali_cpu)
     pipe.build()
     test_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")), auto_reset=True)
 

@@ -7,7 +7,7 @@ from torch import distributed
 from torch.nn.parallel import DistributedDataParallel
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.optim.optimizer import Optimizer
-from torch.utils.data import DataLoader, Sampler
+from torch.utils.data import DataLoader, Sampler, Dataset
 from torch.utils.data.distributed import DistributedSampler
 from bitorch.models.base import Model
 
@@ -17,6 +17,7 @@ from utils.eta_estimator import ETAEstimator
 from utils.metrics_calculator import MetricsCalculator
 from utils.result_logger import ResultLogger
 from utils.utils import set_logging
+from dali_helper import create_dali_data_loader
 
 try:
     from bitorchinfo import summary
@@ -27,8 +28,8 @@ except ImportError:
 def train_model_distributed(
         process_index: int,
         model: Model,
-        train_data: DataLoader,
-        test_data: DataLoader,
+        train_dataset: Dataset,
+        test_dataset: Dataset,
         result_logger: ResultLogger,
         checkpoint_manager: CheckpointManager,
         eta_estimator: ETAEstimator,
@@ -43,7 +44,11 @@ def train_model_distributed(
         log_interval: int = 100,
         log_file: str = None,
         log_level: str = None,
-        log_stdout: bool = None) -> Module:
+        log_stdout: bool = None,
+        dali_preprocessing: bool = False,
+        dali_cpu: bool = False,
+        batch_size: int = None,
+        num_workers: int = None) -> Module:
     set_logging(log_file, log_level, log_stdout)
     rank = base_rank + process_index
     gpu = gpus[process_index]
@@ -55,20 +60,27 @@ def train_model_distributed(
         rank=rank
     )
 
-    batch_size = int(train_data.batch_size / world_size)  # type: ignore
+    batch_size = int(batch_size / world_size)  # type: ignore
+    num_workers = int(num_workers / world_size)  # type: ignore
     model = model.to(f"cuda:{gpu}")
     if rank == 0:
-        logging.info(f"subprocess batch size: {batch_size}")
+        logging.info(f"subprocess batch size: {batch_size}, worker per subprocess: {num_workers}")
 
     model._model = DistributedDataParallel(model.model(), device_ids=(int(gpu),))
-    train_sampler: Sampler = DistributedSampler(train_data.dataset, num_replicas=world_size, rank=rank)
-    test_sampler: Sampler = DistributedSampler(test_data.dataset, num_replicas=world_size, rank=rank)
-    train_data = DataLoader(train_data.dataset, batch_size=batch_size,
-                            shuffle=False, num_workers=test_data.num_workers, pin_memory=True,
-                            sampler=train_sampler)
-    test_data = DataLoader(test_data.dataset, batch_size=batch_size,
-                           shuffle=False, num_workers=test_data.num_workers, pin_memory=True,
-                           sampler=test_sampler)
+    if not dali_preprocessing:
+        train_sampler: Sampler = DistributedSampler(train_dataset, num_replicas=world_size, rank=rank)
+        test_sampler: Sampler = DistributedSampler(test_dataset, num_replicas=world_size, rank=rank)
+        train_data = DataLoader(train_dataset, batch_size=batch_size,
+                                shuffle=False, num_workers=num_workers, pin_memory=True,
+                                sampler=train_sampler)
+        test_data = DataLoader(test_dataset, batch_size=batch_size,
+                            shuffle=False, num_workers=num_workers, pin_memory=True,
+                            sampler=test_sampler)
+    else:
+        train_data, test_data = create_dali_data_loader(
+            train_dataset.get_data_dir(), test_dataset.get_data_dir(),
+            rank, world_size, dali_cpu, batch_size, num_workers
+        )
     return train_model(model, train_data, test_data, result_logger, checkpoint_manager, eta_estimator, optimizer,
                        scheduler, start_epoch=start_epoch, epochs=epochs, lr=lr, log_interval=log_interval, gpu=gpu,
                        output=(rank == 0))

@@ -1,9 +1,8 @@
-from typing import Union, Tuple
-
+from torch.utils.data import Dataset
 import torch
 
 
-class DummyDataset(object):
+class DummyDataset(Dataset):
     """An iterator that produces repeated dummy data.
     Args:
         data_sample: a data sample that should be produced at each step.
@@ -11,24 +10,14 @@ class DummyDataset(object):
         sample_count: number of `data` samples in the dummy dataset.
     """
 
-    def __init__(self, data_sample: Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]],
-                 batch_size: int, sample_count: int):
-        self._data_sample = data_sample
+    def __init__(self, data_shape: torch.Size, num_classes: int, sample_count: int):
+        self._data_sample = torch.zeros(data_shape)
+        self._class_sample = torch.zeros((num_classes,), dtype=torch.int64)
         self._sample_count = sample_count
-        self.batch_size = batch_size
-        self._count = 0
-
-    def __iter__(self) -> "DummyDataset":
-        return DummyDataset(self._data_sample, self.batch_size, self._sample_count)
-
-    def __len__(self) -> int:
+    
+    def __len__(self):
         return self._sample_count
+    
+    def __getitem__(self, idx):
+        return self._data_sample, self._class_sample
 
-    def __next__(self) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
-        return self.next()
-
-    def next(self) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
-        if self._count >= self._sample_count:
-            raise StopIteration
-        self._count += 1
-        return self._data_sample

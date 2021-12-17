@@ -122,7 +122,7 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                       help="name of the dataset to be used for training")
     data.add_argument("--dataset-dir", type=str, default=None,
                       help="path to where the train dataset is saved / shall be downloaded to")
-    data.add_argument("--download", action="store_true", default=True,
+    data.add_argument("--download", action="store_true", default=False,
                       help="toggles wether the dataset shall be downloaded if not present. "
                       "only has effect with the cifar10 and mnist dataset so far.")
     data.add_argument("--batch-size", type=int, default=128,
