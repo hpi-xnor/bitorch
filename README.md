@@ -45,8 +45,6 @@ To activate advanced logging with Tensorboard and model summary, install the opt
 pip install -e ".[opt]" --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 
-## Development
-
 Make sure the _dev_ option is used for (local) development:
 ```bash
 pip install -e ".[dev]" --find-links https://download.pytorch.org/whl/torch_stable.html
