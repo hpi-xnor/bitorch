@@ -12,7 +12,7 @@ try:
 except Exception:
     pass
 
-version = f"develop+{git_hash[:8]}"
+version = f"develop-{git_hash[:8]}"
 version_file = root_path / "version.txt"
 print("version:", version)
 if version_file.exists():
@@ -45,7 +45,7 @@ setuptools.setup(
         "opt": get_requirements('requirements-opt.txt'),
     },
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",

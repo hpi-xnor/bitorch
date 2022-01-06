@@ -1,3 +1,2 @@
 tensorboardX
 tensorboard
-bitorchinfo

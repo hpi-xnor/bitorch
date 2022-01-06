@@ -27,7 +27,7 @@ Afterwards, or if no special version is needed, install the package with pip
 pip install bitorch --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 
-To use advanced logging capabilities, install the optional dependencies as well:
+To use advanced logging capabilities with [tensorboardX](https://github.com/lanpa/tensorboardX), install the optional dependencies as well:
 ```bash
 pip install "bitorch[opt]" --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
@@ -47,7 +47,7 @@ pip install -e ".[opt]" --find-links https://download.pytorch.org/whl/torch_stab
 
 ## Development
 
-Make sure the _dev_ option is installed for (local) development:
+Make sure the _dev_ option is used for (local) development:
 ```bash
 pip install -e ".[dev]"
 ```
