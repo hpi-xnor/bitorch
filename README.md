@@ -20,9 +20,9 @@ Similar to recent versions of [torchvision](https://github.com/pytorch/vision), 
 If you wish to use a specific version of PyTorch for compatibility with certain devices or CUDA versions,
 we advise on installing the corresponding versions of `pytorch` and `torchvision` first,
 please consult [pytorch's getting started guide](https://pytorch.org/get-started/locally/).
+A good solution to use CUDA 11.x is to install the packages `"torch==1.9.0+cu111" "torchvision==0.10.0+cu111"` first.
 
-Afterwards, or if no special version is needed, install the package with pip
-(the `--find-links` option can be removed if torch and torchvision have already been installed):
+Install the package with pip (the `--find-links` option can be removed if torch and torchvision have already been installed):
 ```bash
 pip install bitorch --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
@@ -49,7 +49,7 @@ pip install -e ".[opt]" --find-links https://download.pytorch.org/whl/torch_stab
 
 Make sure the _dev_ option is used for (local) development:
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev]" --find-links https://download.pytorch.org/whl/torch_stable.html
 ```
 
 ### Code formatting and typing
