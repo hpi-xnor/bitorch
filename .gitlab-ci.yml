@@ -1,4 +1,4 @@
-image: python:3.7
+image: python:3.8
 
 before_script:
     - python --version
@@ -7,6 +7,25 @@ before_script:
     - flake8 --version
     - mypy --version
     - pytest --version
+
+test-codestyle:3.7:
+  stage: test
+  image: python:3.7
+  script:
+    - pwd
+    - ls -l
+    - python -c "import sys;print(sys.path)"
+    - flake8 --config=setup.cfg
+    - mypy --config-file mypy.ini
+
+test-units:3.7:
+  stage: test
+  image: python:3.7
+  script:
+    - pwd
+    - ls -l
+    - python -c "import sys;print(sys.path)"
+    - python -m pytest .
 
 test-codestyle:
   stage: test
