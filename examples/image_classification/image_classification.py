@@ -58,9 +58,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
         )
 
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,  # type: ignore
                                   shuffle=True, pin_memory=True)  # type: ignore
-        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
+        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,  # type: ignore
                                  shuffle=False, pin_memory=True)  # type: ignore
 
     model_kwargs = vars(model_args)

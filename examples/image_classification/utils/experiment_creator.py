@@ -182,7 +182,12 @@ class ExperimentCreator():
             logging.debug(f"copying {file_name}...")
             file_path = (self.project_root / Path(file_name)).resolve()
             if file_path.is_dir():
-                shutil.copytree(str(file_path), str(code_path / file_name), dirs_exist_ok=True)
+                python_version = list(map(int, sys.version.split()[0].split(".")))
+                if python_version[0] == 3 and python_version[1] == 7:
+                    # python3.7 does not have the dirs_exist_ok arg
+                    shutil.copytree(str(file_path), str(code_path / file_name))
+                else:
+                    shutil.copytree(str(file_path), str(code_path / file_name), dirs_exist_ok=True)  # type: ignore
             else:
                 shutil.copy(str(file_path), str(code_path / file_name))
 
