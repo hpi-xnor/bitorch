@@ -58,10 +58,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
         )
 
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,  # type: ignore
-                                  shuffle=True, pin_memory=True)  # type: ignore
-        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,  # type: ignore
-                                 shuffle=False, pin_memory=True)  # type: ignore
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size,  # type: ignore
+                                  num_workers=args.num_workers, shuffle=True, pin_memory=True)  # type: ignore
+        test_loader = DataLoader(test_dataset, batch_size=args.batch_size,  # type: ignore
+                                 num_workers=args.num_workers, shuffle=False, pin_memory=True)  # type: ignore
 
     model_kwargs = vars(model_args)
     logging.debug(f"got model args as dict: {model_kwargs}")
