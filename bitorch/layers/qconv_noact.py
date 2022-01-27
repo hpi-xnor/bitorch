@@ -38,7 +38,7 @@ def make_q_convolution_noact(base_class: Type, forward_fn: Callable) -> Type:
             kwargs["bias"] = False
             super(QConv_NoAct, self).__init__(*args, **kwargs)
             self._weight_quantize = config.get_quantization_function(
-                weight_quantization or config.weight_quantization())
+                weight_quantization or config.weight_quantization)
             self._pad_value = pad_value or config.padding_value
 
         def _apply_padding(self, x: Tensor) -> Tensor:
