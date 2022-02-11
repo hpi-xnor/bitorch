@@ -67,25 +67,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     eta_estimator = ETAEstimator(args.eta_file, args.log_interval)
 
     dataset = dataset_from_name(args.dataset)
-<<<<<<< HEAD
-=======
-    if args.fake_data:
-        logging.info(f"dummy dataset: {dataset.name} (not using real data!)...")
-        train_loader, test_loader = dataset.get_dummy_train_and_test_loaders(args.batch_size)
-    elif dataset.name == 'imagenet' and args.nv_dali:
-        raise RuntimeError("DALI Loader not currently supported.")
-    else:
-        augmentation_level = Augmentation.from_string(args.augmentation)
-        logging.info(f"dataset: {dataset.name}...")
-        train_dataset, test_dataset = dataset.get_train_and_test(
-            root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
-        )
-
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size,  # type: ignore
-                                  num_workers=args.num_workers, shuffle=True, pin_memory=True)  # type: ignore
-        test_loader = DataLoader(test_dataset, batch_size=args.batch_size,  # type: ignore
-                                 num_workers=args.num_workers, shuffle=False, pin_memory=True)  # type: ignore
->>>>>>> fix/fix_layer_quantization_type
 
     model_kwargs = vars(model_args)
     logging.debug(f"got model args as dict: {model_kwargs}")
