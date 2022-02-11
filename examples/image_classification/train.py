@@ -22,7 +22,7 @@ from dali_helper import create_dali_data_loader
 try:
     from bitorchinfo import summary
 except ImportError:
-    summary = None
+    summary = None  # type: ignore
 
 
 def train_model_distributed(

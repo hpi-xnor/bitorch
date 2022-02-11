@@ -67,7 +67,7 @@ class QActivation(nn.Module):
                 cancellation. Disabled if threshold is 0.
         """
         super(QActivation, self).__init__()
-        self._activation = config.get_quantization_function(activation or config.input_quantization())
+        self._activation = config.get_quantization_function(activation or config.input_quantization)
         self._gradient_cancellation_threshold = (
             gradient_cancellation_threshold or config.gradient_cancellation_threshold
         )
