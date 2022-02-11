@@ -92,7 +92,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logging.info(f"Using gpus: {args.gpus}")
     
 
-    if dataset.name == 'imagenet' and args.nv_dali and (not args.distributed_mode == "ddp" or len(args.gpus) <= 1):
+    if args.nv_dali and (not args.distributed_mode == "ddp" or len(args.gpus) <= 1):
+        if args.dataset != "imagenet":
+            raise ValueError("dali preprocessing is currently only supported for the imagenet dataset")
         train_dataset, test_dataset = dataset.get_train_and_test(
             root_directory=args.dataset_dir, download=args.download
         )
@@ -108,7 +110,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()
         else:
             logging.info(f"dataset: {dataset.name}...")
-            print("download outer:", args.download)
             train_dataset, test_dataset = dataset.get_train_and_test(
                 root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
             )

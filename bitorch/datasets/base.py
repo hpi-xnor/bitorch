@@ -96,10 +96,11 @@ class BasicDataset(Dataset):
         if os.environ.get("BITORCH_DATA_HOME") is not None:
             return Path(os.environ.get("BITORCH_DATA_HOME")) / self.name  # type: ignore
 
-        environment_variable_hint = \
-            f" To change this, set '{environment_variable_name}' or 'BITORCH_DATA_HOME' " \
+        environment_variable_hint = (
+            f" To change this, set '{environment_variable_name}' or 'BITORCH_DATA_HOME' "
             f"(in the latter case, the data resides in the folder '{self.name}' in BITORCH_DATA_HOME)."
-        print("download:", self._download)
+            f" Some datasets can be downloaded by adding the --download command line argument."
+        )
         if self._download:
             logging.warning("Dataset is being downloaded to the directory './data'." + environment_variable_hint)
             return Path("./data")
