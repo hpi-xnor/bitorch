@@ -13,7 +13,8 @@ TEST_THRESHOLDS = [0.0, 0.5, 1.0, 2.0]
 
 @pytest.mark.parametrize("threshold", TEST_THRESHOLDS)
 def test_qactivation(threshold):
-    assert isinstance(activation._activation, type(config.input_quantization()))
+    input_quantization = config.get_quantization_function(config.input_quantization)
+    assert isinstance(activation._activation, type(input_quantization))
     assert isinstance(QActivation("sign")._activation, Sign)
     assert isinstance(QActivation(Sign())._activation, Sign)
     with pytest.raises(ValueError):
