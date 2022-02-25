@@ -8,6 +8,7 @@ class Identity(Quantization):
     """Module that provides the identity function, which can be useful for certain training strategies"""
 
     name = "identity"
+    bitwidth = 32
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """forwards the input tensor x without quantization.

@@ -16,6 +16,7 @@ class WeightDoReFa(Quantization):
     """
 
     name = "weightdorefa"
+    bitwidth = config.dorefa_bits
 
     def __init__(self, bits: Union[int, None] = None) -> None:
         """Initiates quantization bits.
@@ -24,8 +25,8 @@ class WeightDoReFa(Quantization):
             bits (int, optional): number of bits to quantize into. Defaults to None.
         """
         super(WeightDoReFa, self).__init__()
-        self.bits = bits or config.dorefa_bits
-        self._max_value = 2 ** self.bits - 1
+        self.bitwidth = bits or config.dorefa_bits
+        self._max_value = 2 ** self.bitwidth - 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """DoReFas the tensor to desired bit resolution using weight dorefa.
@@ -86,6 +87,7 @@ class InputDoReFa(Quantization):
     """
 
     name = "inputdorefa"
+    bitwidth = config.dorefa_bits
 
     def __init__(self, bits: Union[int, None] = None) -> None:
         """Initiates quantization bits.
@@ -94,7 +96,7 @@ class InputDoReFa(Quantization):
             bits (int, optional): number of bits to quantize into. Defaults to None.
         """
         super(InputDoReFa, self).__init__()
-        self.bits = bits or config.dorefa_bits
+        self.bitwidth = bits or config.dorefa_bits
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """DoReFas the tensor to desired bit resolution.
@@ -106,4 +108,4 @@ class InputDoReFa(Quantization):
             torch.Tensor: DoReFaed tensor x
         """
 
-        return InputDoReFaFunction.apply(x, self.bits)
+        return InputDoReFaFunction.apply(x, self.bitwidth)
