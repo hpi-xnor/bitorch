@@ -13,5 +13,5 @@ from .qlinear import QLinear
 __all__ = [
     "InputGraphicalDebug", "InputPrintDebug", "WeightGraphicalDebug", "WeightPrintDebug",
     "ShapePrintDebug", "QActivation", "QConv1d", "QConv2d", "QConv3d", "QConv1d_NoAct",
-    "QConv2d_NoAct", "QConv3d_NoAct", "QLinear"
+    "QConv2d_NoAct", "QConv3d_NoAct", "QLinear", "QEmbedding", "QEmbeddingBag",
 ]
