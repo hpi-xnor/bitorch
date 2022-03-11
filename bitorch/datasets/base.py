@@ -77,6 +77,14 @@ class BasicDataset(Dataset):
 
     @classmethod
     def get_dummy_train_and_test_loaders(cls, batch_size: int) -> Tuple[DummyDataset, DummyDataset]:
+        """creates train and test dataloaders for the given dataset. containing example data to test your setup 
+
+        Args:
+            batch_size (int): batch size of dummy data
+
+        Returns:
+            Tuple[DummyDataset, DummyDataset]: the generated dataloaders with dummy data. has the same api (but limited) as torch.utils.DataLoader
+        """
         x_data = torch.zeros((batch_size,) + cls.shape[1:])
         y_data = torch.zeros((batch_size,), dtype=torch.int64)
         train_set = DummyDataset((x_data, y_data), batch_size, cls.num_train_samples)
