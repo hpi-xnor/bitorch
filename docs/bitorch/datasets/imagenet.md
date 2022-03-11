@@ -58,3 +58,8 @@ Classes
 
     `std_dev: Any`
     :
+
+    ### Methods
+
+    `get_data_dir(self) ‑> pathlib.Path`
+    :

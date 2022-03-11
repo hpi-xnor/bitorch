@@ -4,7 +4,7 @@ Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs fr
 """
 from bitorch.datasets.base import BasicDataset
 from .base import Model
-from typing import List
+from typing import List, Any
 import torch
 import argparse
 from torch import nn
@@ -258,7 +258,7 @@ class ResnetE18(ResnetE):
 
     name = "resnete18"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE18, self).__init__(18, *args, **kwargs)
 
     @staticmethod
@@ -273,7 +273,7 @@ class ResnetE34(ResnetE):
 
     name = "resnete34"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE34, self).__init__(34, *args, **kwargs)
 
     @staticmethod

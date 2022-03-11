@@ -76,19 +76,9 @@ class BasicDataset(Dataset):
         return cls(True, root_directory, download, augmentation), cls(False, root_directory, download)
 
     @classmethod
-    def get_dummy_train_and_test_loaders(cls, batch_size: int) -> Tuple[DummyDataset, DummyDataset]:
-        """creates train and test dataloaders for the given dataset. containing example data to test your setup 
-
-        Args:
-            batch_size (int): batch size of dummy data
-
-        Returns:
-            Tuple[DummyDataset, DummyDataset]: the generated dataloaders with dummy data. has the same api (but limited) as torch.utils.DataLoader
-        """
-        x_data = torch.zeros((batch_size,) + cls.shape[1:])
-        y_data = torch.zeros((batch_size,), dtype=torch.int64)
-        train_set = DummyDataset((x_data, y_data), batch_size, cls.num_train_samples)
-        val_set = DummyDataset((x_data, y_data), batch_size, cls.num_val_samples)
+    def get_dummy_train_and_test_datasets(cls) -> Tuple[DummyDataset, DummyDataset]:
+        train_set = DummyDataset(cls.shape, cls.num_classes, cls.num_train_samples)
+        val_set = DummyDataset(cls.shape, cls.num_classes, cls.num_val_samples)
         return train_set, val_set
 
     def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Path:
@@ -106,10 +96,11 @@ class BasicDataset(Dataset):
         if os.environ.get("BITORCH_DATA_HOME") is not None:
             return Path(os.environ.get("BITORCH_DATA_HOME")) / self.name  # type: ignore
 
-        environment_variable_hint = \
-            f" To change this, set '{environment_variable_name}' or 'BITORCH_DATA_HOME' " \
+        environment_variable_hint = (
+            f" To change this, set '{environment_variable_name}' or 'BITORCH_DATA_HOME' "
             f"(in the latter case, the data resides in the folder '{self.name}' in BITORCH_DATA_HOME)."
-
+            f" Some datasets can be downloaded by adding the --download command line argument."
+        )
         if self._download:
             logging.warning("Dataset is being downloaded to the directory './data'." + environment_variable_hint)
             return Path("./data")

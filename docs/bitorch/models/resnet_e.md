@@ -52,7 +52,7 @@ Classes
         Returns:
             Module: resnetE model
 
-`ResnetE18(*args, **kwargs)`
+`ResnetE18(*args: Any, **kwargs: Any)`
 :   ResNetE-18 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     
@@ -75,7 +75,7 @@ Classes
     `training: bool`
     :
 
-`ResnetE34(*args, **kwargs)`
+`ResnetE34(*args: Any, **kwargs: Any)`
 :   ResNetE-34 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     

@@ -1,3 +1,4 @@
+from typing import Any
 import torch
 from .config import config
 
@@ -160,7 +161,7 @@ class InputGraphicalDebug(_GraphicalDebug):
 
 
 class WeightPrintDebug(_PrintDebug):
-    def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, module: torch.nn.Module, *args: Any, **kwargs: Any) -> None:
         """stores given module
 
         Args:
@@ -190,7 +191,7 @@ class WeightPrintDebug(_PrintDebug):
 
 
 class WeightGraphicalDebug(_GraphicalDebug):
-    def __init__(self, module: torch.nn.Module, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, module: torch.nn.Module, *args: Any, **kwargs: Any) -> None:
         """stores given module
 
         Args:

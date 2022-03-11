@@ -294,7 +294,7 @@ Classes
         Returns:
             Module: resnet model
 
-`Resnet152V1(*args, **kwargs)`
+`Resnet152V1(*args: Any, **kwargs: Any)`
 :   ResNet-152 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     
@@ -317,7 +317,7 @@ Classes
     `training: bool`
     :
 
-`Resnet152V2(*args, **kwargs)`
+`Resnet152V2(*args: Any, **kwargs: Any)`
 :   ResNet-152 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     
@@ -340,7 +340,7 @@ Classes
     `training: bool`
     :
 
-`Resnet18V1(*args, **kwargs)`
+`Resnet18V1(*args: Any, **kwargs: Any)`
 :   ResNet-18 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     
@@ -363,7 +363,7 @@ Classes
     `training: bool`
     :
 
-`Resnet18V2(*args, **kwargs)`
+`Resnet18V2(*args: Any, **kwargs: Any)`
 :   ResNet-18 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     
@@ -386,7 +386,7 @@ Classes
     `training: bool`
     :
 
-`Resnet34V1(*args, **kwargs)`
+`Resnet34V1(*args: Any, **kwargs: Any)`
 :   ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     
@@ -409,7 +409,7 @@ Classes
     `training: bool`
     :
 
-`Resnet34V2(*args, **kwargs)`
+`Resnet34V2(*args: Any, **kwargs: Any)`
 :   ResNet-34 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     
@@ -432,7 +432,7 @@ Classes
     `training: bool`
     :
 
-`Resnet50V1(*args, **kwargs)`
+`Resnet50V1(*args: Any, **kwargs: Any)`
 :   ResNet-50 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     
@@ -455,7 +455,7 @@ Classes
     `training: bool`
     :
 
-`Resnet50V2(*args, **kwargs)`
+`Resnet50V2(*args: Any, **kwargs: Any)`
 :   ResNet-50 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     

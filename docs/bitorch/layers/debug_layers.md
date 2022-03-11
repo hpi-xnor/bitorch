@@ -188,7 +188,7 @@ Classes
         Returns:
             torch.Tensor: input tensor x
 
-`WeightGraphicalDebug(module: torch.nn.modules.module.Module, *args, **kwargs)`
+`WeightGraphicalDebug(module: torch.nn.modules.module.Module, *args: Any, **kwargs: Any)`
 :   Base class for all neural network modules.
     
     Your models should also subclass this class.
@@ -246,7 +246,7 @@ Classes
         Returns:
             torch.Tensor: the input tensor
 
-`WeightPrintDebug(module: torch.nn.modules.module.Module, *args, **kwargs)`
+`WeightPrintDebug(module: torch.nn.modules.module.Module, *args: Any, **kwargs: Any)`
 :   Base class for all neural network modules.
     
     Your models should also subclass this class.

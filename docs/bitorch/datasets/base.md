@@ -95,14 +95,8 @@ Classes
 
     ### Static methods
 
-    `get_dummy_train_and_test_loaders(batch_size: int) ‑> Tuple[bitorch.datasets.dummy_dataset.DummyDataset, bitorch.datasets.dummy_dataset.DummyDataset]`
-    :   creates train and test dataloaders for the given dataset. containing example data to test your setup 
-        
-        Args:
-            batch_size (int): batch size of dummy data
-        
-        Returns:
-            Tuple[DummyDataset, DummyDataset]: the generated dataloaders with dummy data. has the same api (but limited) as torch.utils.DataLoader
+    `get_dummy_train_and_test_datasets() ‑> Tuple[bitorch.datasets.dummy_dataset.DummyDataset, bitorch.datasets.dummy_dataset.DummyDataset]`
+    :
 
     `get_normalize_transform() ‑> torchvision.transforms.transforms.Normalize`
     :
