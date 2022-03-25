@@ -1,3 +1,4 @@
+from typing import Tuple
 from torch.autograd import Function
 from torch.nn import Module
 import torch
@@ -9,7 +10,7 @@ from .config import config
 # https://github.com/KwangHoonAn/PACT
 class PactActFn(Function):
     @staticmethod
-    def forward(ctx, input_tensor, alpha, bits):
+    def forward(ctx, input_tensor: torch.Tensor, alpha: torch.nn.Parameter, bits: int) -> torch.Tensor:  # type: ignore
         ctx.save_for_backward(input_tensor, alpha)
         # y_1 = 0.5 * ( torch.abs(x).detach() - torch.abs(x - alpha).detach() + alpha.item() )
         clamped = torch.clamp(input_tensor, min=0, max=alpha.item())
@@ -18,7 +19,7 @@ class PactActFn(Function):
         return quantized
 
     @staticmethod
-    def backward(ctx, output_gradient):
+    def backward(ctx, output_gradient: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, None]:  # type: ignore
         # Backward function, I borrowed code from
         # https://github.com/obilaniu/GradOverride/blob/master/functional.py
         # We get dL / dy_q as a gradient
@@ -46,5 +47,5 @@ class Pact(Module):
         self.alpha = torch.nn.parameter.Parameter(torch.tensor(10.))
         self.bits = bits or config.pact_bits
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return PactActFn.apply(x, self.alpha, self.bits)

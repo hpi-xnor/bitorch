@@ -15,12 +15,12 @@ class QEmbeddingBag(EmbeddingBag):
 
     def __init__(
             self,
-            *args,
+            *args: int,
             embedding_dim: int,
             weight_quantization: Union[Quantization, str] = None,
             output_quantization: Union[Quantization, str] = None,
-            **kwargs) -> None:
-        super(QEmbeddingBag, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)
+            **kwargs: int) -> None:
+        super(QEmbeddingBag, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)  # type: ignore
         """load quantization functions"""
         self.embedding_weight_quantization = config.get_quantization_function(
             weight_quantization or config.weight_quantization)
@@ -71,12 +71,12 @@ class QEmbedding(Embedding):
 
     def __init__(
             self,
-            *args,
+            *args: int,
             embedding_dim: int,
             weight_quantization: Union[Quantization, str] = None,
             output_quantization: Union[Quantization, str] = None,
-            **kwargs) -> None:
-        super(QEmbedding, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)
+            **kwargs: int) -> None:
+        super(QEmbedding, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)  # type: ignore
         """load quantization functions"""
         self.embedding_weight_quantization = config.get_quantization_function(
             weight_quantization or config.weight_quantization)
