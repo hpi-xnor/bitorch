@@ -4,3 +4,4 @@ numpy
 sklearn
 torch
 torchvision
+pytorch_lightning
