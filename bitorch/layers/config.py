@@ -43,6 +43,9 @@ class LayerConfig(Config):
     # threshold used by qactivation for gradient cancellation
     gradient_cancellation_threshold = 1.0
 
+    # bits for pact activation function
+    pact_bits = 4
+
 
 # config object, global referencable
 config = LayerConfig()
