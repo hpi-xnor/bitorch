@@ -11,7 +11,8 @@ from bitorch.layers.qactivation import QActivation
 
 
 class QConv1d_NoAct(Conv1d):  # noqa: N801
-    "Quantized 1d Convolutional Layer. Has the same api as Conv1d but lets you specify a weight quantization, that is applied before the convolutional operation."
+    """Quantized 1d Convolutional Layer. Has the same api as Conv1d but lets you specify a weight quantization, that is
+    applied before the convolutional operation."""
     def __init__(self,
                  *args: Any,
                  weight_quantization: Union[str, Quantization] = None,

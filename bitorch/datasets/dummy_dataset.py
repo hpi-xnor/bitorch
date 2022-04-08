@@ -14,10 +14,9 @@ class DummyDataset(Dataset):
         self._data_sample = torch.zeros(data_shape)
         self._class_sample = torch.zeros((num_classes,), dtype=torch.int64)
         self._sample_count = sample_count
-    
+
     def __len__(self):
         return self._sample_count
-    
+
     def __getitem__(self, idx):
         return self._data_sample, self._class_sample
-

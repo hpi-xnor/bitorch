@@ -80,7 +80,6 @@ class HybridValPipe(Pipeline):
             dali_cpu: bool = True) -> None:
         super(HybridValPipe, self).__init__(batch_size, num_threads, rank, seed=12 + rank, set_affinity=True)
 
-
         dali_device = 'cpu' if dali_cpu else 'gpu'
         decoder_device = 'cpu' if dali_cpu else 'mixed'
         self.input = ops.FileReader(file_root=data_dir, num_shards=world_size, shard_id=rank,
