@@ -5,3 +5,4 @@ sklearn
 torch
 torchvision
 pytorch_lightning
+torchmetrics

@@ -15,23 +15,19 @@ import torch
 from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import CSVLogger, TensorboardLogger
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger
 # from torch import multiprocessing
 # from torch.nn import DataParallel
 
-from utils.utils import (
-    create_optimizer,
-    create_scheduler,
-    set_logging,
-)
+from utils.utils import set_logging
 # from utils.result_logger import ResultLogger
 # from utils.checkpoint_manager import CheckpointManager
 # from utils.experiment_creator import ExperimentCreator
 # from utils.eta_estimator import ETAEstimator
-from arg_parser import create_argparser
+from utils.arg_parser import create_argparser
 # from dali_helper import create_dali_data_loader
 # from train import train_model, train_model_distributed
-from lightning_model import ModelWrapper
+from utils.lightning_model import ModelWrapper
 
 from bitorch.datasets.base import Augmentation
 from bitorch.models import model_from_name
@@ -57,7 +53,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     loggers = []
     if args.tensorboard:
-        loggers.append(TensorboardLogger(args.tensorboard_output))
+        loggers.append(TensorBoardLogger(args.tensorboard_output))
     if args.result_file is not None:
         loggers.append(CSVLogger(args.result_file))
     callbacks = []
@@ -76,19 +72,22 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
     model.initialize()
-    logging.info(f"using {model.name} model...")
-    optimizer = create_optimizer(args.optimizer, model, args.lr, args.momentum)
-    scheduler = create_scheduler(args.lr_scheduler, optimizer, args.lr_factor,
-                                 args.lr_steps, args.epochs)  # type: ignore
-    model_wrapped = ModelWrapper(model, optimizer, scheduler)
+    if args.checkpoint_load is not None and args.pretrained:
+        logging.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
+        model_wrapped = ModelWrapper.load_from_checkpoint(args.checkpoint_load)
+    else:
+        model_wrapped = ModelWrapper(
+            model, args.optimizer, args.lr, args.momentum, args.lr_scheduler, args.lr_factor, args.lr_steps, dataset.num_classes, args.max_epochs,
+        )
 
     trainer = Trainer(
+        strategy=args.strategy,
         accelerator="cpu" if args.cpu else args.accelerator,
         gpus=0 if args.cpu else args.gpus,
-        max_epochs=args.epochs,
+        max_epochs=args.max_epochs,
+        max_steps=args.max_steps,
         logger=loggers if len(loggers) > 0 else None,
         callbacks=callbacks,
-        ckpt_path=args.checkpoint_load,
         log_every_n_steps=args.log_interval,
     )
     # if args.checkpoint_load:
@@ -122,7 +121,12 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                               shuffle=True, pin_memory=True)  # type: ignore
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
                              shuffle=False, pin_memory=True)  # type: ignore
-    trainer.fit(model, train_dataloader=train_loader, validation_dataloader=test_loader)
+    trainer.fit(
+        model_wrapped,
+        train_dataloaders=train_loader,
+        val_dataloaders=test_loader,
+        ckpt_path=args.checkpoint_load if not args.pretrained else None
+    )
 
     # if args.distributed_mode == "ddp" and (args.world_size > 1 or (args.gpus is not None and len(args.gpus) > 1)):
     #     logging.info("Starting distributed model training...")

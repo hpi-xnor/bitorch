@@ -5,6 +5,7 @@ from typing import Tuple
 from bitorch.models import model_from_name, model_names
 from bitorch.datasets import dataset_names
 from bitorch import add_config_args
+from pytorch_lightning import Trainer
 
 
 def add_logging_args(parser: ArgumentParser) -> None:
@@ -101,12 +102,12 @@ def add_training_args(parser: ArgumentParser) -> None:
         parser (ArgumentParser): the main argument parser
     """
     train = parser.add_argument_group("training", "parameters for training")
-    train.add_argument("--epochs", type=int, default=10,
-                       help="number of epochs to train (default: 10)")
-    train.add_argument("--gpus", nargs="*",
-                       help="list of GPUs to train on using CUDA. Parameter should be a list of gpu numbers, e.g. "
-                       " --gpus 0 2 to train on gpus no. 0 and no. 2. if omitted, cpu training will be enforced."
-                       " if no gpu numbers are passed, all available gpus will be used.")
+    # train.add_argument("--epochs", type=int, default=10,
+    #                    help="number of epochs to train (default: 10)")
+    # train.add_argument("--gpus", nargs="*",
+    #                    help="list of GPUs to train on using CUDA. Parameter should be a list of gpu numbers, e.g. "
+    #                    " --gpus 0 2 to train on gpus no. 0 and no. 2. if omitted, cpu training will be enforced."
+    #                    " if no gpu numbers are passed, all available gpus will be used.")
     train.add_argument("--cpu", action="store_true", default=False,
                        help="explicitly use the cpu. overwrites gpu settings")
 
@@ -184,6 +185,7 @@ def add_regular_args(parser: ArgumentParser) -> None:
     Args:
         parser (ArgumentParser): parser to add the regular arguments to
     """
+    Trainer.add_argparse_args(parser)
     add_logging_args(parser)
     add_training_args(parser)
     add_dataset_args(parser)
