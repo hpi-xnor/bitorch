@@ -9,24 +9,14 @@ if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
         stderrToServer=True
     )
 import argparse
-# import sys
 import logging
 import torch
 from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger
-# from torch import multiprocessing
-# from torch.nn import DataParallel
-
 from utils.utils import set_logging
-# from utils.result_logger import ResultLogger
-# from utils.checkpoint_manager import CheckpointManager
-# from utils.experiment_creator import ExperimentCreator
-# from utils.eta_estimator import ETAEstimator
 from utils.arg_parser import create_argparser
-# from dali_helper import create_dali_data_loader
-# from train import train_model, train_model_distributed
 from utils.lightning_model import ModelWrapper
 
 from bitorch.datasets.base import Augmentation
@@ -48,7 +38,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     logging.info(f"gpu argument: {args.gpus}")
     if args.gpus is not None and len(args.gpus) == 0:
         logging.info("no specific gpu specified! Using all available gpus...")
-        args.gpus = list(map(str, range(torch.cuda.device_count())))
+        args.gpus = [str(i) for i in list(range(torch.cuda.device_count()))]
         logging.info(f"Using gpus: {args.gpus}")
 
     loggers = []
@@ -59,11 +49,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     callbacks = []
     if args.checkpoint_dir is not None:
         callbacks.append(ModelCheckpoint(args.checkpoint_dir, save_last=True,
-                         save_top_k=args.checkpoint_keep_count, monitor="top_1_acc"))
-
-    # result_logger = ResultLogger(args.result_file, args.tensorboard, args.tensorboard_output)
-    # checkpoint_manager = CheckpointManager(args.checkpoint_dir, args.checkpoint_keep_count)
-    # eta_estimator = ETAEstimator(args.eta_file, args.log_interval)
+                         save_top_k=args.checkpoint_keep_count, monitor="metrics/top1 accuracy"))
 
     dataset = dataset_from_name(args.dataset)
 
