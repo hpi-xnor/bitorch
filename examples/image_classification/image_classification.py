@@ -90,7 +90,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logging.info("no specific gpu specified! Using all available gpus...")
         args.gpus = list(map(str, range(torch.cuda.device_count())))
         logging.info(f"Using gpus: {args.gpus}")
-    
 
     if args.nv_dali and (not args.distributed_mode == "ddp" or len(args.gpus) <= 1):
         if args.dataset != "imagenet":
@@ -107,13 +106,12 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         augmentation_level = Augmentation.from_string(args.augmentation)
         if args.fake_data:
             logging.info(f"dummy dataset: {dataset.name} (not using real data!)...")
-            train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()
+            train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()  # type: ignore
         else:
             logging.info(f"dataset: {dataset.name}...")
             train_dataset, test_dataset = dataset.get_train_and_test(
                 root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
             )
-
 
     if args.distributed_mode == "ddp" and (args.world_size > 1 or (args.gpus is not None and len(args.gpus) > 1)):
         logging.info("Starting distributed model training...")
@@ -123,20 +121,22 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             args.world_size = len(args.gpus)
         set_distributed_default_values(args.supervisor_host, args.supervisor_port)
         multiprocessing.spawn(train_model_distributed, nprocs=args.world_size,
-                                args=(
-                                    model, train_dataset, test_dataset, result_logger, checkpoint_manager,
-                                    eta_estimator, optimizer, scheduler, args.gpus, args.base_rank, args.world_size,
-                                    start_epoch, args.epochs, args.lr, args.log_interval, args.log_file,
-                                    args.log_level, args.log_stdout, args.nv_dali, args.nv_dali_cpu, args.batch_size, args.num_workers))
+                              args=(
+                                  model, train_dataset, test_dataset, result_logger, checkpoint_manager,
+                                  eta_estimator, optimizer, scheduler, args.gpus, args.base_rank, args.world_size,
+                                  start_epoch, args.epochs, args.lr, args.log_interval, args.log_file,
+                                  args.log_level, args.log_stdout, args.nv_dali, args.nv_dali_cpu, args.batch_size,
+                                  args.num_workers))
         logging.info("Training completed!")
     else:
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                                shuffle=True, pin_memory=True)  # type: ignore
+                                  shuffle=True, pin_memory=True)  # type: ignore
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                                shuffle=False, pin_memory=True)  # type: ignore
+                                 shuffle=False, pin_memory=True)  # type: ignore
         if args.distributed_mode == "dp" and len(args.gpus) > 1:
             logging.info("Using DataParallel multi gpu strategy...")
-            model._model = DataParallel(model._model, device_ids=[f"cuda:{gpu_id}" for gpu_id in args.gpus])
+            model._model = DataParallel(model._model,
+                                        device_ids=[f"cuda:{gpu_id}" for gpu_id in args.gpus])  # type: ignore
         gpu = None if args.cpu or args.gpus is None else args.gpus[0]
         train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
                     scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpu=gpu,

@@ -1,12 +1,12 @@
 image: python:3.8
 
 before_script:
-    - python --version
-    - pip install --find-links https://download.pytorch.org/whl/torch_stable.html "torch==1.9.0+cu111" "torchvision==0.10.0+cu111"
-    - pip install -e .[dev]
-    - flake8 --version
-    - mypy --version
-    - pytest --version
+  - python --version
+  - pip install --find-links https://download.pytorch.org/whl/torch_stable.html "torch==1.9.0+cu111" "torchvision==0.10.0+cu111"
+  - pip install -e .[dev]
+  - flake8 --version
+  - mypy --version
+  - pytest --version
 
 test-codestyle:3.7:
   stage: test
@@ -43,3 +43,9 @@ test-units:
     - ls -l
     - python -c "import sys;print(sys.path)"
     - python -m pytest .
+
+build-doc:
+  stage: test
+  script:
+    - pip install sphinx
+    - sphinx-build -b html docs/source/ docs/build/ -a

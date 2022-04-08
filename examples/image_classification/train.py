@@ -74,8 +74,8 @@ def train_model_distributed(
                                 shuffle=False, num_workers=num_workers, pin_memory=True,
                                 sampler=train_sampler)
         test_data = DataLoader(test_dataset, batch_size=batch_size,
-                            shuffle=False, num_workers=num_workers, pin_memory=True,
-                            sampler=test_sampler)
+                               shuffle=False, num_workers=num_workers, pin_memory=True,
+                               sampler=test_sampler)
     else:
         train_data, test_data = create_dali_data_loader(
             train_dataset.get_data_dir(), test_dataset.get_data_dir(),
