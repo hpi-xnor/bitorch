@@ -123,13 +123,15 @@ def create_dali_data_loader(
     :return: data loader for training and validation
     """
     logging.debug("creating dali pipelines....")
-    pipe = HybridTrainPipe(batch_size=batch_size, num_threads=num_workers, rank=dali_gpu_id, world_size=world_size,
-                           data_dir=train_dir, crop=img_crop_size, dali_cpu=dali_cpu)
+    pipe = HybridTrainPipe(batch_size=batch_size, num_threads=num_workers, rank=dali_gpu_id,  # type: ignore
+                           world_size=world_size,  # type: ignore
+                           data_dir=train_dir, crop=img_crop_size, dali_cpu=dali_cpu)  # type: ignore
     pipe.build()
     train_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")), auto_reset=True)
 
-    pipe = HybridValPipe(batch_size=batch_size, num_threads=num_workers, rank=dali_gpu_id, world_size=world_size,
-                         data_dir=test_dir, crop=img_crop_size, size=img_size_val, dali_cpu=dali_cpu)
+    pipe = HybridValPipe(batch_size=batch_size, num_threads=num_workers, rank=dali_gpu_id,  # type: ignore
+                         world_size=world_size, data_dir=test_dir, crop=img_crop_size,  # type: ignore
+                         size=img_size_val, dali_cpu=dali_cpu)  # type: ignore
     pipe.build()
     test_loader = DALIClassificationIterator(pipe, size=int(pipe.epoch_size("Reader")), auto_reset=True)
 

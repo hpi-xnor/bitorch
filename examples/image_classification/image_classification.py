@@ -106,7 +106,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         augmentation_level = Augmentation.from_string(args.augmentation)
         if args.fake_data:
             logging.info(f"dummy dataset: {dataset.name} (not using real data!)...")
-            train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()
+            train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()  # type: ignore
         else:
             logging.info(f"dataset: {dataset.name}...")
             train_dataset, test_dataset = dataset.get_train_and_test(
@@ -135,7 +135,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                                  shuffle=False, pin_memory=True)  # type: ignore
         if args.distributed_mode == "dp" and len(args.gpus) > 1:
             logging.info("Using DataParallel multi gpu strategy...")
-            model._model = DataParallel(model._model, device_ids=[f"cuda:{gpu_id}" for gpu_id in args.gpus])
+            model._model = DataParallel(model._model,
+                                        device_ids=[f"cuda:{gpu_id}" for gpu_id in args.gpus])  # type: ignore
         gpu = None if args.cpu or args.gpus is None else args.gpus[0]
         train_model(model, train_loader, test_loader, start_epoch=start_epoch, epochs=args.epochs, optimizer=optimizer,
                     scheduler=scheduler, lr=args.lr, log_interval=args.log_interval, gpu=gpu,

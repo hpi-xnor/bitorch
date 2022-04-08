@@ -77,8 +77,8 @@ class BasicDataset(Dataset):
 
     @classmethod
     def get_dummy_train_and_test_datasets(cls) -> Tuple[DummyDataset, DummyDataset]:
-        train_set = DummyDataset(cls.shape, cls.num_classes, cls.num_train_samples)
-        val_set = DummyDataset(cls.shape, cls.num_classes, cls.num_val_samples)
+        train_set = DummyDataset(cls.shape, cls.num_classes, cls.num_train_samples)  # type: ignore
+        val_set = DummyDataset(cls.shape, cls.num_classes, cls.num_val_samples)  # type: ignore
         return train_set, val_set
 
     def get_dataset_root_directory(self, root_directory_argument: Optional[str]) -> Path:
