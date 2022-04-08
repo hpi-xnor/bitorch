@@ -1,3 +1,5 @@
+from typing import Union
+import torch
 from pytorch_lightning import LightningModule
 from torch.nn import Module, CrossEntropyLoss
 from utils.utils import create_optimizer, create_scheduler
@@ -28,7 +30,7 @@ class ModelWrapper(LightningModule):
         self.prec = Precision(num_classes=num_classes)
         self.recall = Recall(num_classes=num_classes)
 
-    def training_step(self, batch):
+    def training_step(self, batch: torch.Tensor) -> torch.Tensor:  # type: ignore
         x_train, y_train = batch
 
         y_hat = self.model(x_train)
@@ -38,7 +40,7 @@ class ModelWrapper(LightningModule):
         })
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:  # type: ignore
         x_test, y_test = batch
 
         y_hat = self.model(x_test)
@@ -54,11 +56,14 @@ class ModelWrapper(LightningModule):
             "loss/test": loss,
         }, prog_bar=True)
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Union[dict, torch.optim.Optimizer]:  # type: ignore
         logging.info(f"Using {self.hparams.optimizer} optimizer and {self.hparams.lr_scheduler} lr schedluer...")
         optimizer = create_optimizer(self.hparams.optimizer, self.model, self.hparams.lr, self.hparams.momentum)
         if self.hparams.lr_scheduler is not None:
-            scheduler = create_scheduler(self.hparams.lr_scheduler, optimizer, self.hparams.lr_factor, self.hparams.lr_steps, self.hparams.epochs)
+            scheduler = create_scheduler(
+                self.hparams.lr_scheduler, optimizer, self.hparams.lr_factor,
+                self.hparams.lr_steps, self.hparams.epochs
+            )
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": scheduler
