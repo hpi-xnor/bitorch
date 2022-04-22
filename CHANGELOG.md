@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-The format is based on [Keep a Changelog](http://keepachangelog.com/) 
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.1.1] - 2022/01/21
@@ -15,17 +15,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - basic quantized layers
-    - QActivation
-    - QConv
-    - QLinear
+  - QActivation
+  - QConv
+  - QLinear
 - several debug layers
 - resnet, lenet
 - various quantization functions
-    - approxsign
-    - dorefa
-    - sign
-    - steheaviside
-    - swishsign
+  - approxsign
+  - dorefa
+  - sign
+  - steheaviside
+  - swishsign
 - support for cifar10 and mnist
 - general training script for image classification
 - result logger for csv and tensorboard
@@ -34,3 +34,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - experiment creator
 - model visualization in logs and tensorboard
 - config classes for bitorch layers / quantizations with automated argparse argument creation
+
+### New Changes
+
+- pytorch lightning training script (which includes distributed training capability)
+- wandb metric logging
+- removed old image classification code
+- rewrote QConv implementations so that they can be pickled

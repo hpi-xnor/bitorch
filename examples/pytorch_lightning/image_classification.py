@@ -1,5 +1,4 @@
 import os
-import time
 
 if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
     import pydevd_pycharm
@@ -11,7 +10,6 @@ if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
     )
 import argparse
 import logging
-import torch
 from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
