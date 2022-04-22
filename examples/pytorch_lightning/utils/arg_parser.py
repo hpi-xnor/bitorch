@@ -31,9 +31,14 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      help="output dir for tensorboard. default to ./tblogs")
     log.add_argument("--result-file", type=str, default=None,
                      help="path to result file; train and test metrics will be logged in csv format")
-    log.add_argument("--eta-file", type=str, default=None,
-                     help="path to eta file; this file will contain only the eta of the training process. this eta will"
-                     " also be logged, so if eta file is ommitted, eta can still be obtained via logging output")
+    
+    log.add_argument("--wandb", action="store_true", default=False,
+                     help="toggles use of wandb for logging learning progress. For this to work, "
+                     "the WANDB_API_KEY environment variable must be set.")
+    log.add_argument("--wand-project", type=str, default="bitorch",
+                     help="name of wand project to be used by wandb logger")
+    log.add_argument("--wand-experiment", type=str, default=None,
+                     help="name of wand experiment to be used by wandb logger")
 
 
 def add_distributed_args(parser: ArgumentParser) -> None:
