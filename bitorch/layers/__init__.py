@@ -1,3 +1,9 @@
+"""
+This submodule contains adapted pytorch layers that use quantization functions on their weights
+and activations before forwarding them. These layers use the quantization functions specified in the
+quantization submodule.
+"""
+
 from .debug_layers import (
     InputGraphicalDebug,
     InputPrintDebug,

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - wandb metric logging
 - removed old image classification code
 - rewrote QConv implementations so that they can be pickled
+- added many documentation strings
+- added automatic documentation generation using sphinx
 
 ## [0.1.0] - 2022/01/06
 

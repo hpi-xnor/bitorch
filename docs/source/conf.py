@@ -64,3 +64,16 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+# # This is the expected signature of the handler for this event, cf doc
+# def autodoc_skip_member_handler(app, what, name, obj, skip, options):
+#     # Basic approach; you might want a regex instead
+#     print(app, what, name, obj, skip, options)
+#     return name.startswith("test_")
+
+
+# # Automatically called by sphinx at startup
+# def setup(app):
+#     # Connect the autodoc-skip-member event from apidoc to the callback
+#     app.connect('autodoc-skip-member', autodoc_skip_member_handler)
