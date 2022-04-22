@@ -41,21 +41,6 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      help="name of wand experiment to be used by wandb logger")
 
 
-def add_distributed_args(parser: ArgumentParser) -> None:
-    distributed = parser.add_argument_group("distributed", "parameters for distributed training/computing")
-    distributed.add_argument("--distributed-mode", type=str, default=None,
-                             help="mode of multi gpu distribution. can be either 'ddp' or 'dp'.")
-    distributed.add_argument("--world-size", type=int, default=1, help="number of processes to be spawned across nodes")
-    distributed.add_argument("--base-rank", type=int, default=0, help="rank of the first process of this node. e.g. if"
-                             " this node is the supervisor node, base rank is 0. if there are three nodes with two gpus"
-                             " each in this distributed training process, the base rank of the third node would be 4"
-                             " since 4 processes are already running on the first two nodes.")
-    distributed.add_argument("--supervisor-host", type=str, default="",
-                             help="host name of distributed training supervisor node")
-    distributed.add_argument("--supervisor-port", type=str, default="",
-                             help="port of distributed training supervisor node")
-
-
 def add_checkpoint_args(parser: ArgumentParser) -> None:
     checkpoint = parser.add_argument_group("checkpoints", "parameters for checkpoint storing / loading")
     checkpoint.add_argument("--checkpoint-dir", type=str, default=None,
@@ -67,15 +52,6 @@ def add_checkpoint_args(parser: ArgumentParser) -> None:
     checkpoint.add_argument("--pretrained", action="store_true", default=False,
                             help="uses the given checkpoint as a pretrained model (only for initialization)")
 
-
-def add_experiment_args(parser: ArgumentParser) -> None:
-    experiment = parser.add_argument_group("experiment", "parameters for executing current training as an experiment")
-    experiment.add_argument("--experiment", action="store_true", default=False,
-                            help="toggles whether script should run as experiment. Default is false")
-    experiment.add_argument("--experiment-dir", type=str, default="./runs",
-                            help="path to directory to create the experiment dir in.")
-    experiment.add_argument("--experiment-name", type=str, default=None,
-                            help="name of experiment. needs to be set for experiment.")
 
 
 def add_optimizer_args(parser: ArgumentParser) -> None:
@@ -100,23 +76,6 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
                            help='the optimizer to use. default is adam.')
 
 
-def add_training_args(parser: ArgumentParser) -> None:
-    """adds cli parameters for training configuration
-
-    Args:
-        parser (ArgumentParser): the main argument parser
-    """
-    train = parser.add_argument_group("training", "parameters for training")
-    # train.add_argument("--epochs", type=int, default=10,
-    #                    help="number of epochs to train (default: 10)")
-    # train.add_argument("--gpus", nargs="*",
-    #                    help="list of GPUs to train on using CUDA. Parameter should be a list of gpu numbers, e.g. "
-    #                    " --gpus 0 2 to train on gpus no. 0 and no. 2. if omitted, cpu training will be enforced."
-    #                    " if no gpu numbers are passed, all available gpus will be used.")
-    train.add_argument("--cpu", action="store_true", default=False,
-                       help="explicitly use the cpu. overwrites gpu settings")
-
-
 def add_dataset_args(parser: ArgumentParser) -> None:
     """adds cli parameters for dataset configuration
 
@@ -137,12 +96,6 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                       help="number of workers to be used for dataloading (default: 4)")
     data.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
                       help="level of augmentation to be used in data preparation (default 'none')")
-    data.add_argument("--nv-dali", action="store_true", default=False,
-                      help="enables nv-dali dataloader, install DALI from https://www.github.com/NVIDIA/DALI")
-    data.add_argument("--nv-dali-gpu-id", type=int, default=0,
-                      help="choose gpu id for dali pre-processing")
-    data.add_argument("--nv-dali-cpu", action="store_true", default=False,
-                      help="uses dali-CPU dataloader")
     data.add_argument("--fake-data", action="store_true",
                       help="train with fake data")
 
@@ -192,12 +145,9 @@ def add_regular_args(parser: ArgumentParser) -> None:
     """
     Trainer.add_argparse_args(parser)
     add_logging_args(parser)
-    add_training_args(parser)
     add_dataset_args(parser)
     add_optimizer_args(parser)
-    add_experiment_args(parser)
     add_checkpoint_args(parser)
-    add_distributed_args(parser)
 
     add_config_args(parser)
 

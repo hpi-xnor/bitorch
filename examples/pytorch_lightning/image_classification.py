@@ -36,11 +36,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     set_logging(args.log_file, args.log_level, args.log_stdout)
 
     apply_args_to_configuration(args)
-    logging.info(f"gpu argument: {args.gpus}")
-    if args.gpus is not None and len(args.gpus) == 0:
-        logging.info("no specific gpu specified! Using all available gpus...")
-        args.gpus = [str(i) for i in list(range(torch.cuda.device_count()))]
-        logging.info(f"Using gpus: {args.gpus}")
 
     loggers = []
     if args.tensorboard:
