@@ -31,7 +31,7 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      help="output dir for tensorboard. default to ./tblogs")
     log.add_argument("--result-file", type=str, default=None,
                      help="path to result file; train and test metrics will be logged in csv format")
-    
+
     log.add_argument("--wandb", action="store_true", default=False,
                      help="toggles use of wandb for logging learning progress. For this to work, "
                      "the WANDB_API_KEY environment variable must be set.")
@@ -51,7 +51,6 @@ def add_checkpoint_args(parser: ArgumentParser) -> None:
                             help="path to checkpoint file to load state from. if omitted, a new model will be trained.")
     checkpoint.add_argument("--pretrained", action="store_true", default=False,
                             help="uses the given checkpoint as a pretrained model (only for initialization)")
-
 
 
 def add_optimizer_args(parser: ArgumentParser) -> None:

@@ -44,7 +44,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         loggers.append(CSVLogger(args.result_file))  # type: ignore
     if args.wandb:
         try:
-            loggers.append(WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment))
+            loggers.append(
+                WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment))  # type: ignore
         except ModuleNotFoundError:
             logging.warning(
                 "wandb is not installed, values will not be logged via wandb. install it with "
