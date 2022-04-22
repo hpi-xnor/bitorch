@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - make package compatible with python 3.7
+- pytorch lightning training script (which includes distributed training capability)
+- wandb metric logging
+- removed old image classification code
+- rewrote QConv implementations so that they can be pickled
 
 ## [0.1.0] - 2022/01/06
 
@@ -34,10 +38,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - experiment creator
 - model visualization in logs and tensorboard
 - config classes for bitorch layers / quantizations with automated argparse argument creation
-
-### New Changes
-
-- pytorch lightning training script (which includes distributed training capability)
-- wandb metric logging
-- removed old image classification code
-- rewrote QConv implementations so that they can be pickled
