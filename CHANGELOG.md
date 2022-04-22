@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-The format is based on [Keep a Changelog](http://keepachangelog.com/) 
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.1.1] - 2022/01/21
@@ -9,23 +9,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - make package compatible with python 3.7
+- added many documentation strings
+- added automatic documentation generation using sphinx
 
 ## [0.1.0] - 2022/01/06
 
 ### Added
 
 - basic quantized layers
-    - QActivation
-    - QConv
-    - QLinear
+  - QActivation
+  - QConv
+  - QLinear
 - several debug layers
 - resnet, lenet
 - various quantization functions
-    - approxsign
-    - dorefa
-    - sign
-    - steheaviside
-    - swishsign
+  - approxsign
+  - dorefa
+  - sign
+  - steheaviside
+  - swishsign
 - support for cifar10 and mnist
 - general training script for image classification
 - result logger for csv and tensorboard
