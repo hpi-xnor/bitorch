@@ -1,5 +1,5 @@
 """
-This submodule contains several quantization methods that can be used with our quantized layers to 
+This submodule contains several quantization methods that can be used with our quantized layers to
 build quantized models.
 
 If you want to implement a new function, use the :code:`Quantization` base class as superclass.
