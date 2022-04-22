@@ -48,7 +48,13 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     if args.result_file is not None:
         loggers.append(CSVLogger(args.result_file))  # type: ignore
     if args.wandb:
-        loggers.append(WandbLogger(project=args.wand_project, log_model=True, name=args.wand_experiment))
+        try:
+            loggers.append(WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment))
+        except ModuleNotFoundError:
+            logging.warning(
+                "wandb is not installed, values will not be logged via wandb. install it with "
+                "`pip install wandb`."
+            )
     callbacks = []
     if args.checkpoint_dir is not None:
         callbacks.append(ModelCheckpoint(args.checkpoint_dir, save_last=True,

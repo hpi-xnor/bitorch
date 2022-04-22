@@ -35,9 +35,9 @@ def add_logging_args(parser: ArgumentParser) -> None:
     log.add_argument("--wandb", action="store_true", default=False,
                      help="toggles use of wandb for logging learning progress. For this to work, "
                      "the WANDB_API_KEY environment variable must be set.")
-    log.add_argument("--wand-project", type=str, default="bitorch",
+    log.add_argument("--wandb-project", type=str, default="bitorch",
                      help="name of wand project to be used by wandb logger")
-    log.add_argument("--wand-experiment", type=str, default=None,
+    log.add_argument("--wandb-experiment", type=str, default=None,
                      help="name of wand experiment to be used by wandb logger")
 
 
