@@ -1,3 +1,10 @@
+"""
+This submodule contains a number of adapted model architectures that use binary / quantized weights
+and activations.
+
+To define a new model, use the :code:`Model` base class as a super class.
+"""
+
 from typing import List, Type
 
 from .base import Model

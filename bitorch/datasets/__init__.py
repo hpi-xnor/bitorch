@@ -1,3 +1,8 @@
+"""
+This submodule contains data preparation code for some of the datasets used with our models,
+i.e. MNIST, CIFAR 10 and 100 and ImageNet.
+"""
+
 from typing import List, Type
 
 from .base import BasicDataset

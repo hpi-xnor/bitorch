@@ -1,3 +1,7 @@
+"""
+Module that contains all quantization functionalities, including special layers a selection of quantization methods,
+adapted model architectures and other tools for training a quantized neural network"""
+
 import os
 from argparse import ArgumentParser, Namespace
 from importlib import import_module
@@ -59,7 +63,8 @@ def config_names() -> List:
 
 
 def add_config_args(parser: ArgumentParser) -> None:
-    """adds all config arguments
+    """adds all arguments of sub modules config classes to an argparser.
+    This way the config arguments are automatically available as cli args.
 
     Args:
         parser (ArgumentParser): parser to add the arguments to
@@ -69,7 +74,7 @@ def add_config_args(parser: ArgumentParser) -> None:
 
 
 def apply_args_to_configuration(args: Namespace) -> None:
-    """applys the cli configurations to the config objects.
+    """applys the cli configurations to the config objects of submodules.
 
     Args:
         args (Namespace): the cli configurations
