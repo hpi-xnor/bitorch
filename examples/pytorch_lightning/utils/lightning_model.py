@@ -25,7 +25,6 @@ class ModelWrapper(LightningModule):
         self.model = model
         self.accuracy_top1 = Accuracy(num_classes=num_classes)
         self.accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
-        self.aucroc = AUROC(num_classes=num_classes)
         self.f1 = F1Score(num_classes=num_classes)
         self.prec = Precision(num_classes=num_classes)
         self.recall = Recall(num_classes=num_classes)
@@ -49,7 +48,6 @@ class ModelWrapper(LightningModule):
         self.log_dict({
             "metrics/top1 accuracy": self.accuracy_top1(y_hat, y_test),
             "metrics/top5 accuracy": self.accuracy_top5(y_hat, y_test),
-            "metrics/auc roc": self.aucroc(y_hat, y_test),
             "metrics/f1": self.f1(y_hat, y_test),
             "metrics/precision": self.prec(y_hat, y_test),
             "metrics/recall": self.recall(y_hat, y_test),
