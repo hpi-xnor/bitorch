@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - quantization bit width information to quantization functions
+- new layers:
+  - [Pact](https://arxiv.org/abs/1805.06085) activation function
+  - QEmbedding
+  - QEmbeddingBag
 
 ### Fixed
 
