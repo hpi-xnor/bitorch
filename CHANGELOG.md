@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+### Added
+
+- quantization bit width information to quantization functions
+
 ### Fixed
 
 - a bug where layer input and weight quantization functions could not be set using command line arguments
