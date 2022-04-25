@@ -8,11 +8,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- quantization bit width information to quantization functions
+- automatic documentation generation using sphinx
+- more documentation of layers and modules
+- bit-width of quantization functions is now stored
 - new layers:
   - [Pact](https://arxiv.org/abs/1805.06085) activation function
   - QEmbedding
   - QEmbeddingBag
+
+### Changed
+
+- image classification example:
+  - script now uses [pytorch lightning](https://www.pytorchlightning.ai/)
+  - it includes distributed training capability
+  - added wandb metric logging
+- QConv layers can now be pickled
 
 ### Fixed
 
@@ -23,12 +33,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - make package compatible with python 3.7
-- pytorch lightning training script (which includes distributed training capability)
-- wandb metric logging
-- removed old image classification code
-- rewrote QConv implementations so that they can be pickled
-- added many documentation strings
-- added automatic documentation generation using sphinx
 
 ## [0.1.0] - 2022/01/06
 
