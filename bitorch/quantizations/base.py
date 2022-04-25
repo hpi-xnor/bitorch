@@ -45,6 +45,7 @@ class Quantization(nn.Module):
     """superclass for quantization modules"""
 
     name = "None"
+    bitwidth = -1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """quantize the input tensor. It is recommended to use a torch.Function to also maniputlate backward behaiviour. See
