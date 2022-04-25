@@ -19,7 +19,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 
 - make package compatible with python 3.7
-- added quantization bit width information to quantization functions
 
 ## [0.1.0] - 2022/01/06
 
