@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Added
+
+- quantization bit width information to quantization functions
+- new layers:
+  - [Pact](https://arxiv.org/abs/1805.06085) activation function
+  - QEmbedding
+  - QEmbeddingBag
+
+### Fixed
+
+- a bug where layer input and weight quantization functions could not be set using command line arguments
+
 ## [0.1.1] - 2022/01/21
 
 ### Changed
