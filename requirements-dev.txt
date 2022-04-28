@@ -3,4 +3,5 @@ flake8
 mypy
 pep8-naming
 pytest
+sphinx
 twine
