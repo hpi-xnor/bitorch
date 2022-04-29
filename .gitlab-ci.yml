@@ -4,48 +4,39 @@ before_script:
   - python --version
   - pip install --find-links https://download.pytorch.org/whl/torch_stable.html "torch==1.9.0+cu111" "torchvision==0.10.0+cu111"
   - pip install -e .[dev]
-  - flake8 --version
-  - mypy --version
-  - pytest --version
+  - pwd
+  - ls -l
+  - python -c "import sys;print(sys.path)"
 
-test-codestyle:3.7:
+.codestyle:
   stage: test
-  image: python:3.7
   script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
+    - flake8 --version
+    - mypy --version
     - flake8 --config=setup.cfg
     - mypy --config-file mypy.ini
 
-test-units:3.7:
-  stage: test
+codestyle:3.7:
+  extends: .codestyle
   image: python:3.7
+
+codestyle:
+  extends: .codestyle
+
+.test:
+  stage: test
   script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
+    - pytest --version
     - python -m pytest .
 
-test-codestyle:
-  stage: test
-  script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
-    - flake8 --config=setup.cfg
-    - mypy --config-file mypy.ini
+test:3.7:
+  extends: .test
+  image: python:3.7
 
-test-units:
-  stage: test
-  script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
-    - python -m pytest .
+test:
+  extends: .test
 
-build-doc:
+test-build-doc:
   stage: test
   script:
-    - pip install sphinx
     - sphinx-build -b html docs/source/ docs/build/ -a
