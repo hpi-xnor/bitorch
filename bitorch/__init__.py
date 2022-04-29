@@ -16,8 +16,11 @@ for file in files_to_iterate:
     if file.suffix == ".py" and file.stem != "__init__":
 
         rel_path = Path(os.path.relpath(file, current_dir))
-        import_path = f"{__name__}.{str(rel_path).replace('/', '.')}"
+        rel_path = str(rel_path).replace('/', '.', str(rel_path).count('/'))
+        rel_path = str(rel_path).replace('\\', '.', str(rel_path).count('\\')) #handling of antislash directory convention for Windows systems
+        import_path = f"{__name__}.{str(rel_path)}"
         import_path = import_path[:import_path.rfind(".")]
+        print (import_path)
         module = import_module(import_path)
 
         for attr_name in dir(module):
