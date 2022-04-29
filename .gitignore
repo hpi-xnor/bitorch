@@ -154,3 +154,4 @@ tblogs/
 # other files
 *.csv
 
+docs/source/_autosummary

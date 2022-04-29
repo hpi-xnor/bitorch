@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -16,9 +17,14 @@ class ImageNet(BasicDataset):
     num_train_samples = 1281167
     num_val_samples = 50000
 
-    def get_dataset(self, download: bool) -> Dataset:
+    def get_data_dir(self) -> Path:
         split = "train" if self.is_train else "val"
         directory = self.root_directory / split
+        return directory
+
+    def get_dataset(self, download: bool) -> Dataset:
+        directory = self.get_data_dir()
+        print("got directory for imagenet:", directory)
         if download and not directory.is_dir():
             raise RuntimeError("ImageNet dataset must be downloaded and prepared manually.")
         return ImageFolder(directory, transform=self.get_transform())

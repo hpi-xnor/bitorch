@@ -1,9 +1,11 @@
 from argparse import ArgumentParser
 import sys
 from typing import Tuple
+
 from bitorch.models import model_from_name, model_names
 from bitorch.datasets import dataset_names
 from bitorch import add_config_args
+from pytorch_lightning import Trainer
 
 
 def add_logging_args(parser: ArgumentParser) -> None:
@@ -29,9 +31,14 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      help="output dir for tensorboard. default to ./tblogs")
     log.add_argument("--result-file", type=str, default=None,
                      help="path to result file; train and test metrics will be logged in csv format")
-    log.add_argument("--eta-file", type=str, default=None,
-                     help="path to eta file; this file will contain only the eta of the training process. this eta will"
-                     " also be logged, so if eta file is ommitted, eta can still be obtained via logging output")
+
+    log.add_argument("--wandb", action="store_true", default=False,
+                     help="toggles use of wandb for logging learning progress. For this to work, "
+                     "the WANDB_API_KEY environment variable must be set.")
+    log.add_argument("--wandb-project", type=str, default="bitorch",
+                     help="name of wand project to be used by wandb logger")
+    log.add_argument("--wandb-experiment", type=str, default=None,
+                     help="name of wand experiment to be used by wandb logger")
 
 
 def add_checkpoint_args(parser: ArgumentParser) -> None:
@@ -44,16 +51,6 @@ def add_checkpoint_args(parser: ArgumentParser) -> None:
                             help="path to checkpoint file to load state from. if omitted, a new model will be trained.")
     checkpoint.add_argument("--pretrained", action="store_true", default=False,
                             help="uses the given checkpoint as a pretrained model (only for initialization)")
-
-
-def add_experiment_args(parser: ArgumentParser) -> None:
-    experiment = parser.add_argument_group("experiment", "parameters for executing current training as an experiment")
-    experiment.add_argument("--experiment", action="store_true", default=False,
-                            help="toggles whether script should run as experiment. Default is false")
-    experiment.add_argument("--experiment-dir", type=str, default="./runs",
-                            help="path to directory to create the experiment dir in.")
-    experiment.add_argument("--experiment-name", type=str, default=None,
-                            help="name of experiment. needs to be set for experiment.")
 
 
 def add_optimizer_args(parser: ArgumentParser) -> None:
@@ -78,23 +75,6 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
                            help='the optimizer to use. default is adam.')
 
 
-def add_training_args(parser: ArgumentParser) -> None:
-    """adds cli parameters for training configuration
-
-    Args:
-        parser (ArgumentParser): the main argument parser
-    """
-    train = parser.add_argument_group("training", "parameters for training")
-    train.add_argument("--epochs", type=int, default=10,
-                       help="number of epochs to train (default: 10)")
-    train.add_argument("--gpus", nargs="*",
-                       help="list of GPUs to train on using CUDA. Parameter should be a list of gpu numbers, e.g. "
-                       " --gpus 0 2 to train on gpus no. 0 and no. 2. if omitted, cpu training will be enforced."
-                       " if no gpu numbers are passed, all available gpus will be used.")
-    train.add_argument("--cpu", action="store_true", default=False,
-                       help="explicitly use the cpu. overwrites gpu settings")
-
-
 def add_dataset_args(parser: ArgumentParser) -> None:
     """adds cli parameters for dataset configuration
 
@@ -106,7 +86,7 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                       help="name of the dataset to be used for training")
     data.add_argument("--dataset-dir", type=str, default=None,
                       help="path to where the train dataset is saved / shall be downloaded to")
-    data.add_argument("--download", action="store_true", default=True,
+    data.add_argument("--download", action="store_true", default=False,
                       help="toggles wether the dataset shall be downloaded if not present. "
                       "only has effect with the cifar10 and mnist dataset so far.")
     data.add_argument("--batch-size", type=int, default=128,
@@ -115,12 +95,6 @@ def add_dataset_args(parser: ArgumentParser) -> None:
                       help="number of workers to be used for dataloading (default: 4)")
     data.add_argument("--augmentation", type=str, choices=["none", "low", "medium", "high"], default="none",
                       help="level of augmentation to be used in data preparation (default 'none')")
-    data.add_argument("--nv-dali", action="store_true", default=False,
-                      help="enables nv-dali dataloader, install DALI from https://www.github.com/NVIDIA/DALI")
-    data.add_argument("--nv-dali-gpu-id", type=int, default=0,
-                      help="choose gpu id for dali pre-processing")
-    data.add_argument("--nv-dali-cpu", action="store_true", default=False,
-                      help="uses dali-CPU dataloader")
     data.add_argument("--fake-data", action="store_true",
                       help="train with fake data")
 
@@ -168,16 +142,15 @@ def add_regular_args(parser: ArgumentParser) -> None:
     Args:
         parser (ArgumentParser): parser to add the regular arguments to
     """
+    Trainer.add_argparse_args(parser)
     add_logging_args(parser)
-    add_training_args(parser)
     add_dataset_args(parser)
     add_optimizer_args(parser)
-    add_experiment_args(parser)
     add_checkpoint_args(parser)
 
     add_config_args(parser)
 
-    parser.add_argument("--model", type=str, choices=model_names(), required=True,
+    parser.add_argument("--model", type=str.lower, choices=model_names(), required=True,
                         help="name of the model to be trained")
 
 

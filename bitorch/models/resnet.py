@@ -1,7 +1,7 @@
 from bitorch.datasets.base import BasicDataset
 from .base import Model
-from typing import List
-from bitorch.layers.qconv_noact import QConv2d_NoAct
+from typing import List, Any
+from bitorch.layers import QConv2d_NoAct
 import torch
 import argparse
 import logging
@@ -512,7 +512,7 @@ class Resnet18V1(Resnet):
 
     name = "resnet18v1"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet18V1, self).__init__(1, 18, *args, **kwargs)
 
     @staticmethod
@@ -526,7 +526,7 @@ class Resnet34V1(Resnet):
     """
     name = "resnet34v1"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet34V1, self).__init__(1, 34, *args, **kwargs)
 
     @staticmethod
@@ -541,7 +541,7 @@ class Resnet50V1(Resnet):
 
     name = "resnet50v1"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet50V1, self).__init__(1, 50, *args, **kwargs)
 
     @staticmethod
@@ -556,7 +556,7 @@ class Resnet152V1(Resnet):
 
     name = "resnet152v1"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet152V1, self).__init__(1, 152, *args, **kwargs)
 
     @staticmethod
@@ -571,7 +571,7 @@ class Resnet18V2(Resnet):
 
     name = "resnet18v2"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet18V2, self).__init__(2, 18, *args, **kwargs)
 
     @staticmethod
@@ -586,7 +586,7 @@ class Resnet34V2(Resnet):
 
     name = "resnet34v2"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet34V2, self).__init__(2, 34, *args, **kwargs)
 
     @staticmethod
@@ -601,7 +601,7 @@ class Resnet50V2(Resnet):
 
     name = "resnet50v2"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet50V2, self).__init__(2, 50, *args, **kwargs)
 
     @staticmethod
@@ -616,7 +616,7 @@ class Resnet152V2(Resnet):
 
     name = "resnet152v2"
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet152V2, self).__init__(2, 152, *args, **kwargs)
 
     @staticmethod

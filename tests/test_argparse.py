@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from examples.image_classification.utils.arg_parser import add_regular_args, add_all_model_args
+from examples.pytorch_lightning.utils.arg_parser import add_regular_args, add_all_model_args
 
 # this test checks for naming conflicts by adding all arguments to one parser
 

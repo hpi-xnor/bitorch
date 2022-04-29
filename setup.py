@@ -6,20 +6,14 @@ import setuptools
 
 root_path = Path(__file__).resolve().parent
 
-git_hash = "unknown"
-try:
-    git_hash = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root_path).decode("ascii").strip()
-except Exception:
-    pass
-
-version = f"develop-{git_hash[:8]}"
+version = "unknown"
 version_file = root_path / "version.txt"
-print("version:", version)
 if version_file.exists():
     with open(root_path / "version.txt") as handle:
         version_content = handle.read().strip()
         if version_content:
             version = version_content
+print("version:", version)
 
 
 def get_requirements(file_path: Union[Path, str]):

@@ -1,6 +1,8 @@
+torch
+torchvision
 bitorchinfo
 matplotlib
 numpy
 sklearn
-torch
-torchvision
+pytorch_lightning
+torchmetrics
