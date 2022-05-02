@@ -152,6 +152,8 @@ def add_regular_args(parser: ArgumentParser) -> None:
 
     parser.add_argument("--model", type=str.lower, choices=model_names(), required=True,
                         help="name of the model to be trained")
+    parser.add_argument("--cpu", action="store_true", default=False,
+                        help="explicitly use the cpu. overwrites gpu settings")
 
 
 def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
