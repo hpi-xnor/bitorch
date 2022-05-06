@@ -24,17 +24,20 @@ from bitorch.datasets import dataset_from_name
 from bitorch import apply_args_to_configuration
 from bitorch.quantizations import Quantization
 
+USE_FVBITCORE = True
 try:
     import fvbitcore.nn as fv_nn
 except ModuleNotFoundError:
     logging.warning("fvbitcore not installed, will not calculate model flops!")
-    fv_nn = None
+    USE_FVBITCORE = False
 
+USE_WANDB = True
 try:
     from pytorch_lightning.loggers import WandbLogger
+    import wandb
 except ModuleNotFoundError:
     logging.warning("wandb not installed, will not log metrics to wandb!")
-    WandbLogger = None
+    USE_WANDB = False
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
@@ -53,7 +56,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         loggers.append(TensorBoardLogger(args.tensorboard_output))  # type: ignore
     if args.result_file is not None:
         loggers.append(CSVLogger(args.result_file))  # type: ignore
-    if WandbLogger is not None and args.wandb:
+    if USE_WANDB and args.wandb:
         try:
             loggers.append(
                 WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment))  # type: ignore
@@ -108,7 +111,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
                              shuffle=False, pin_memory=True, persistent_workers=True)  # type: ignore
 
-    if fv_nn is not None:
+    if USE_FVBITCORE:
         data_point = iter(train_loader).next()
         computational_intensity = fv_nn.FlopCountAnalysis(
             model,

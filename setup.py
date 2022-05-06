@@ -34,7 +34,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude='tests'),
     install_requires=get_requirements('requirements.txt') + [
-        "fvbitcore @ git+https://paul.mattes:4ZtbanAwdgMSgAsbbk7z@gitlab.hpi.de/paul.mattes/fvbitcore@main#egg=fvbitcore"
+        "fvbitcore @ git+https://paul.mattes:4ZtbanAwdgMSgAsbbk7z@gitlab.hpi.de/paul.mattes/fvbitcore@main#egg=fvbitcore"  # noqa: E501
     ],
     extras_require={
         "dev": get_requirements('requirements-dev.txt'),
