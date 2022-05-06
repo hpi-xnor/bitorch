@@ -1,4 +1,3 @@
 tensorboardX
 tensorboard
 wandb
-git+https://paul.mattes:4ZtbanAwdgMSgAsbbk7z@gitlab.hpi.de/paul.mattes/fvbitcore.git
