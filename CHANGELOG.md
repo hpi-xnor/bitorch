@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - a bug where layer input and weight quantization functions could not be set using command line arguments
+- a bug where modules could not be imported in OS that use different path separators than '/'
 
 ## [0.1.1] - 2022/01/21
 
