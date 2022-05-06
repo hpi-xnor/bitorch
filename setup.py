@@ -34,10 +34,10 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude='tests'),
     install_requires=get_requirements('requirements.txt'),
-    # extras_require={
-    #     "dev": get_requirements('requirements-dev.txt'),
-    #     "opt": get_requirements('requirements-opt.txt'),
-    # },
+    extras_require={
+        "dev": get_requirements('requirements-dev.txt'),
+        "opt": get_requirements('requirements-opt.txt'),
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
