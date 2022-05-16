@@ -6,4 +6,10 @@
 Getting Started
 ===================================
 
-use `sudo -su` literally everywhere
+After installing everything, you can start building a quantized model. Below you find a brief introduction into the field 
+of binary neural networks and how to work with bitorch.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+

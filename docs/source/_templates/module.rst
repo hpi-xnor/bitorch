@@ -33,7 +33,6 @@
 
    .. autosummary::
       :template: class.rst
-      :nosignatures:
    {% for item in classes %}
       {{ item }}
    {%- endfor %}

@@ -5,3 +5,6 @@ pep8-naming
 pytest
 sphinx
 twine
+nbsphinx
+myst-nb
+nbsphinx-link
