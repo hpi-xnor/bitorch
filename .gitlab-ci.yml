@@ -39,4 +39,5 @@ test:
 test-build-doc:
   stage: test
   script:
+    - apt install pandoc
     - sphinx-build -b html docs/source/ docs/build/ -a
