@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - [Pact](https://arxiv.org/abs/1805.06085) activation function
   - QEmbedding
   - QEmbeddingBag
+- fvbitcore support in the example scripts for flop and model size estimation on operation level
 
 ### Changed
 
