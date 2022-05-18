@@ -1,7 +1,3 @@
-"""
-Module that contains all quantization functionalities, including special layers a selection of quantization methods,
-adapted model architectures and other tools for training a quantized neural network"""
-
 import os
 from argparse import ArgumentParser, Namespace
 from importlib import import_module
@@ -20,8 +16,8 @@ for file in files_to_iterate:
     if file.suffix == ".py" and file.stem != "__init__":
 
         rel_path = Path(os.path.relpath(file, current_dir))
-        import_path = f"{__name__}.{str(rel_path).replace('/', '.')}"
-        import_path = import_path[:import_path.rfind(".")]
+        path_parts = list(rel_path.parent.parts) + [rel_path.stem]
+        import_path = f"{__name__}.{'.'.join(path_parts)}"
         module = import_module(import_path)
 
         for attr_name in dir(module):
@@ -63,8 +59,7 @@ def config_names() -> List:
 
 
 def add_config_args(parser: ArgumentParser) -> None:
-    """adds all arguments of sub modules config classes to an argparser.
-    This way the config arguments are automatically available as cli args.
+    """adds all config arguments
 
     Args:
         parser (ArgumentParser): parser to add the arguments to
@@ -74,7 +69,7 @@ def add_config_args(parser: ArgumentParser) -> None:
 
 
 def apply_args_to_configuration(args: Namespace) -> None:
-    """applys the cli configurations to the config objects of submodules.
+    """applys the cli configurations to the config objects.
 
     Args:
         args (Namespace): the cli configurations
