@@ -13,7 +13,7 @@ import logging
 from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, WandbLogger
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger
 from utils.utils import set_logging
 from utils.arg_parser import create_argparser
 from utils.lightning_model import ModelWrapper
@@ -22,6 +22,22 @@ from bitorch.datasets.base import Augmentation
 from bitorch.models import model_from_name
 from bitorch.datasets import dataset_from_name
 from bitorch import apply_args_to_configuration
+from bitorch.quantizations import Quantization
+
+USE_FVBITCORE = True
+try:
+    import fvbitcore.nn as fv_nn
+except ModuleNotFoundError:
+    logging.warning("fvbitcore not installed, will not calculate model flops!")
+    USE_FVBITCORE = False
+
+USE_WANDB = True
+try:
+    from pytorch_lightning.loggers import WandbLogger
+    import wandb
+except ModuleNotFoundError:
+    logging.warning("wandb not installed, will not log metrics to wandb!")
+    USE_WANDB = False
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
@@ -40,7 +56,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         loggers.append(TensorBoardLogger(args.tensorboard_output))  # type: ignore
     if args.result_file is not None:
         loggers.append(CSVLogger(args.result_file))  # type: ignore
-    if args.wandb:
+    if USE_WANDB and args.wandb:
         try:
             loggers.append(
                 WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment))  # type: ignore
@@ -94,6 +110,27 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                               shuffle=True, pin_memory=True, persistent_workers=True)  # type: ignore
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
                              shuffle=False, pin_memory=True, persistent_workers=True)  # type: ignore
+
+    if USE_FVBITCORE:
+        data_point = iter(train_loader).next()
+        computational_intensity = fv_nn.FlopCountAnalysis(
+            model,
+            inputs=data_point[0],
+            quantization_base_class=Quantization
+        )
+
+        stats, table = fv_nn.flop_count_table(computational_intensity, automatic_qmodules=True)
+        logging.info("\n" + table)
+        total_size = stats["#compressed size in bits"][""]
+        logging.info("Total size in MB: " + str(total_size / 1e6 / 8.0))
+        total_flops = stats["#speed up flops (app.)"][""]
+        logging.info("Approximated mflops: " + str(total_flops / 1e6))
+        for logger in loggers:
+            logger.log_dict({
+                "mflops": total_flops / 1e6,
+                "size in MB": total_size / 1e6 / 8.0,
+            })
+
     trainer.fit(
         model_wrapped,
         train_dataloaders=train_loader,
