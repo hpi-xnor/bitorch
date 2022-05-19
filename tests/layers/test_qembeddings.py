@@ -1,5 +1,5 @@
 from bitorch.layers.qembedding import QEmbedding, QEmbeddingBag
-from bitorch.quantizations import Sign
+from bitorch.quantizations import quantizations_by_name
 from torch.nn.functional import embedding, embedding_bag
 import pytest
 import torch
@@ -10,67 +10,68 @@ TEST_INPUT_DATA = [
     (100, 10),
     (1000, 100),
     (30000, 300),
-] * 10
+] * 3
+TEST_QUANTIZATION_FUNCTIONS = list(quantizations_by_name.values())
 
 
 @pytest.mark.parametrize("vocab_size, embedding_size", TEST_INPUT_DATA)
-def test_qembedding(vocab_size, embedding_size):
-
-    qembedding = QEmbedding(num_embeddings=vocab_size, embedding_dim=embedding_size, weight_quantization=Sign(),
-                            output_quantization=Sign(), sparse=False)
+@pytest.mark.parametrize("quantization_function", TEST_QUANTIZATION_FUNCTIONS)
+def test_qembedding(vocab_size, embedding_size, quantization_function):
+    qembedding = QEmbedding(num_embeddings=vocab_size, embedding_dim=embedding_size,
+                            weight_quantization=quantization_function(),
+                            output_quantization=quantization_function(), sparse=False)
 
     example_input = torch.zeros(vocab_size, dtype=int)
     example_input[np.random.randint(vocab_size)] = 1
-    sign = Sign()
+    quantization = quantization_function()
 
     output = qembedding(example_input)
-    assert torch.all((output == 1.0) | (output == -1.0))
 
-    binarized_embedding_table = sign(qembedding.weight)
+    binarized_embedding_table = quantization(qembedding.weight)
 
     raw_embeddings = embedding(
         example_input, binarized_embedding_table, qembedding.padding_idx,
         qembedding.max_norm, qembedding.norm_type,
         qembedding.scale_grad_by_freq, False,
     )
-    assert torch.equal(output, sign(raw_embeddings))
+    assert torch.equal(output, quantization(raw_embeddings))
 
     # now sparse tests
-
-    qembedding = QEmbedding(num_embeddings=vocab_size, embedding_dim=embedding_size, weight_quantization=Sign(),
-                            output_quantization=Sign(), sparse=True)
+    qembedding = QEmbedding(num_embeddings=vocab_size, embedding_dim=embedding_size,
+                            weight_quantization=quantization_function(),
+                            output_quantization=quantization_function(), sparse=True)
 
     example_input = torch.tensor(np.random.randint(vocab_size), dtype=int)
 
     output = qembedding(example_input)
-    assert torch.all((output == 1.0) | (output == -1.0))
 
-    binarized_embedding_table = sign(qembedding.weight)
+    binarized_embedding_table = quantization(qembedding.weight)
 
     raw_embeddings = embedding(
         example_input, binarized_embedding_table, qembedding.padding_idx,
         qembedding.max_norm, qembedding.norm_type,
         qembedding.scale_grad_by_freq, True,
     )
-    assert torch.equal(output, sign(raw_embeddings))
+    assert torch.equal(output, quantization(raw_embeddings))
 
 
 @pytest.mark.parametrize("vocab_size, embedding_size", TEST_INPUT_DATA)
-def test_qembeddingbag(vocab_size, embedding_size):
+@pytest.mark.parametrize("quantization_function", TEST_QUANTIZATION_FUNCTIONS)
+def test_qembeddingbag(vocab_size, embedding_size, quantization_function):
 
-    qembeddingbag = QEmbeddingBag(num_embeddings=vocab_size, embedding_dim=embedding_size, weight_quantization=Sign(),
-                                  output_quantization=Sign(), sparse=False, mode="mean")
+    qembeddingbag = QEmbeddingBag(num_embeddings=vocab_size, embedding_dim=embedding_size,
+                                  weight_quantization=quantization_function(),
+                                  output_quantization=quantization_function(), sparse=False, mode="mean")
 
     example_input = torch.zeros(vocab_size, dtype=int)
     for _ in range(np.random.randint(vocab_size)):
         example_input[np.random.randint(vocab_size)] = 1
     example_offset = torch.tensor((0, ), dtype=int)
-    sign = Sign()
+    quantization = quantization_function()
 
     output = qembeddingbag(example_input, example_offset)
-    assert torch.all((output == 1.0) | (output == -1.0))
 
-    binarized_embedding_table = sign(qembeddingbag.weight)
+    binarized_embedding_table = quantization(qembeddingbag.weight)
 
     # necessary for torch 1.8 compliance
     if hasattr(qembeddingbag, 'padding_idx'):
@@ -88,20 +89,19 @@ def test_qembeddingbag(vocab_size, embedding_size):
             qembeddingbag.scale_grad_by_freq, qembeddingbag.mode, False,
             None, qembeddingbag.include_last_offset,
         )
-    assert torch.equal(output, sign(raw_embeddings))
+    assert torch.equal(output, quantization(raw_embeddings))
 
     # now sparse tests
 
-    qembeddingbag = QEmbeddingBag(num_embeddings=vocab_size, embedding_dim=embedding_size, weight_quantization=Sign(),
-                                  output_quantization=Sign(), sparse=True, mode="mean")
+    qembeddingbag = QEmbeddingBag(num_embeddings=vocab_size, embedding_dim=embedding_size,
+                                  weight_quantization=quantization_function(),
+                                  output_quantization=quantization_function(), sparse=True, mode="mean")
 
     example_input = torch.tensor(np.random.randint(vocab_size, size=np.random.randint(vocab_size)), dtype=int)
-    sign = Sign()
 
     output = qembeddingbag(example_input, example_offset)
-    assert torch.all((output == 1.0) | (output == -1.0))
 
-    binarized_embedding_table = sign(qembeddingbag.weight)
+    binarized_embedding_table = quantization(qembeddingbag.weight)
 
     # necessary for torch 1.8 compliance
     if hasattr(qembeddingbag, 'padding_idx'):
@@ -119,4 +119,6 @@ def test_qembeddingbag(vocab_size, embedding_size):
             qembeddingbag.scale_grad_by_freq, qembeddingbag.mode, True,
             None, qembeddingbag.include_last_offset,
         )
-    assert torch.equal(output, sign(raw_embeddings))
+    output = torch.nan_to_num(output, nan=0.0)
+    output_raw = torch.nan_to_num(quantization(raw_embeddings), nan=0.0)
+    assert torch.equal(output, output_raw)
