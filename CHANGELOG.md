@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - it includes distributed training capability
   - added wandb metric logging
 - QConv layers can now be pickled
+- Different quantized versions of LeNet available
 
 ### Fixed
 
