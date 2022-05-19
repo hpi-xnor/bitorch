@@ -2,8 +2,7 @@ image: python:3.7
 
 before_script:
   - python --version
-  - pip install --find-links https://download.pytorch.org/whl/torch_stable.html "torch==1.9.0+cu111" "torchvision==0.10.0+cu111"
-  - pip install -e .[dev]
+  - pip install -e .[dev] --extra-index-url https://download.pytorch.org/whl/cu113
   - pwd
   - ls -l
   - python -c "import sys;print(sys.path)"
