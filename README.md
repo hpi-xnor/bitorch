@@ -54,12 +54,6 @@ To activate advanced logging with Tensorboard and model summary, install the opt
 pip install -e ".[opt]"
 ```
 
-Make sure the _dev_ option is used for (local) development:
-
-```bash
-pip install -e ".[dev]"
-```
-
 ### Dali Preprocessing
 
 If you want to use the [Nvidia dali preprocessing library](https://github.com/NVIDIA/DALI),
@@ -72,10 +66,16 @@ you need to install the `nvidia-dali-cuda110` package by running the following c
 
 ### Code formatting and typing
 
+Install the _dev_ requirements for (local) development:
+
+```bash
+pip install -e ".[dev]"
+```
+
 New code should be compatible with Python 3.X versions and be compliant with PEP8. To check the codebase, please run
 
 ```bash
-flake8 --config=setup.cfg .
+flake8
 ```
 
 The codebase has type annotations, please make sure to add type hints if required. We use `mypy` for type checking:

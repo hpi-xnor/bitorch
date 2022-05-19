@@ -1,4 +1,4 @@
-image: python:3.8
+image: python:3.7
 
 before_script:
   - python --version
@@ -13,15 +13,15 @@ before_script:
   script:
     - flake8 --version
     - mypy --version
-    - flake8 --config=setup.cfg
+    - flake8
     - mypy --config-file mypy.ini
-
-codestyle:3.7:
-  extends: .codestyle
-  image: python:3.7
 
 codestyle:
   extends: .codestyle
+
+codestyle:3.8:
+  extends: .codestyle
+  image: python:3.8
 
 .test:
   stage: test
@@ -29,12 +29,12 @@ codestyle:
     - pytest --version
     - python -m pytest .
 
-test:3.7:
-  extends: .test
-  image: python:3.7
-
 test:
   extends: .test
+
+test:3.8:
+  extends: .test
+  image: python:3.8
 
 test-build-doc:
   stage: test
