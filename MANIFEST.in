@@ -1,7 +1,0 @@
-include README.md
-include LICENSE
-include requirements*.txt
-include version.txt
-
-exclude .pytest_cache
-recursive-exclude * __pycache__
