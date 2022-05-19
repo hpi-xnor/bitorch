@@ -18,12 +18,15 @@ Our current roadmap contains:
 
 All changes are tracked in the [changelog](CHANGELOG.md).
 
+
+
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
 
    installation
-   getting_started
+   build_docs
+   Introduction_to_Bitorch
    documentation
 
 
