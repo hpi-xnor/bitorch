@@ -14,24 +14,29 @@ All changes are tracked in the [changelog](CHANGELOG.md).
 ## Installation
 
 Similar to recent versions of [torchvision](https://github.com/pytorch/vision), you should be using Python 3.8 or newer.
+Currently, the only supported installation is pip (a conda package is planned in the future).
 
 ### Pip
 
-If you wish to use a specific version of PyTorch for compatibility with certain devices or CUDA versions,
-we advise on installing the corresponding versions of `pytorch` and `torchvision` first,
+If you wish to use a *specific version* of PyTorch for compatibility with certain devices or CUDA versions,
+we advise on installing the corresponding versions of `pytorch` and `torchvision` first (or afterwards),
 please consult [pytorch's getting started guide](https://pytorch.org/get-started/locally/).
-A good solution to use CUDA 11.x is to install the packages `"torch==1.9.0+cu111" "torchvision==0.10.0+cu111"` first.
 
-Install the package with pip (the `--find-links` option can be removed if torch and torchvision have already been installed):
-
+Afterwards simply run:
 ```bash
-pip install bitorch --find-links https://download.pytorch.org/whl/torch_stable.html
+pip install bitorch
 ```
 
-To use advanced logging capabilities with [tensorboardX](https://github.com/lanpa/tensorboardX), install the optional dependencies as well:
+Note, that you can also request a specific PyTorch version directly, e.g. for CUDA 11.3:
+```bash
+pip install bitorch --extra-index-url https://download.pytorch.org/whl/cu113
+```
+
+To use advanced logging capabilities with [tensorboardX](https://github.com/lanpa/tensorboardX),
+install the optional dependencies as well:
 
 ```bash
-pip install "bitorch[opt]" --find-links https://download.pytorch.org/whl/torch_stable.html
+pip install "bitorch[opt]"
 ```
 
 #### Local and Development Install Options
@@ -40,24 +45,26 @@ The package can also be installed locally for editing and development.
 First, clone the [repository](https://github.com/hpi-xnor/bitorch), then run:
 
 ```bash
-pip install -e . --find-links https://download.pytorch.org/whl/torch_stable.html
+pip install -e .
 ```
 
 To activate advanced logging with Tensorboard and model summary, install the optional dependencies as well:
 
 ```bash
-pip install -e ".[opt]" --find-links https://download.pytorch.org/whl/torch_stable.html
+pip install -e ".[opt]"
 ```
 
 Make sure the _dev_ option is used for (local) development:
 
 ```bash
-pip install -e ".[dev]" --find-links https://download.pytorch.org/whl/torch_stable.html
+pip install -e ".[dev]"
 ```
 
 ### Dali Preprocessing
 
-If you want to use the Nvidia dali preprocessing library (currently only supported for imagenet) you need to install the `nvidia-dali-cuda110` package by running the following command:
+If you want to use the [Nvidia dali preprocessing library](https://github.com/NVIDIA/DALI),
+e.g. with CUDA 11.x, (currently only supported for imagenet)
+you need to install the `nvidia-dali-cuda110` package by running the following command:
 
 ```
  pip install --extra-index-url https://developer.download.nvidia.com/compute/redist --upgrade nvidia-dali-cuda110
