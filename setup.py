@@ -47,4 +47,12 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
     ],
     python_requires='>=3.7',
+    data_files=[
+        ('.', [
+            'version.txt',
+            'requirements.txt',
+            'requirements-dev.txt',
+            'requirements-opt.txt',
+        ]),
+    ]
 )
