@@ -32,7 +32,7 @@ class QLinear(Linear):
         """
 
         super(QLinear, self).__init__(*args, **kwargs)  # type: ignore
-        self.weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization())
+        self.weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

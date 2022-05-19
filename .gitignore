@@ -154,3 +154,10 @@ tblogs/
 # other files
 *.csv
 
+# lightning checkpoints
+*.ckpt
+
+docs/source/_autosummary
+
+# wandb output files
+wandb

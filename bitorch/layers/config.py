@@ -29,10 +29,10 @@ class LayerConfig(Config):
             raise ValueError(f"Invalid quantization: {quantization}")
 
     # default quantization to be used in layers for inputs
-    input_quantization = quantization_from_name("sign")
+    input_quantization = "sign"
 
     # default quantization to be used in layers for inputs
-    weight_quantization = quantization_from_name("sign")
+    weight_quantization = "sign"
 
     # toggles print / matplotlib output in debug layers
     debug_activated = False
@@ -42,6 +42,9 @@ class LayerConfig(Config):
 
     # threshold used by qactivation for gradient cancellation
     gradient_cancellation_threshold = 1.0
+
+    # bits for pact activation function
+    pact_bits = 4
 
 
 # config object, global referencable

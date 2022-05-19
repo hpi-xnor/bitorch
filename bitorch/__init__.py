@@ -16,8 +16,8 @@ for file in files_to_iterate:
     if file.suffix == ".py" and file.stem != "__init__":
 
         rel_path = Path(os.path.relpath(file, current_dir))
-        import_path = f"{__name__}.{str(rel_path).replace('/', '.')}"
-        import_path = import_path[:import_path.rfind(".")]
+        path_parts = list(rel_path.parent.parts) + [rel_path.stem]
+        import_path = f"{__name__}.{'.'.join(path_parts)}"
         module = import_module(import_path)
 
         for attr_name in dir(module):

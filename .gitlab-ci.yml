@@ -1,45 +1,42 @@
-image: python:3.8
+image: python:3.7
 
 before_script:
-    - python --version
-    - pip install --find-links https://download.pytorch.org/whl/torch_stable.html "torch==1.9.0+cu111" "torchvision==0.10.0+cu111"
-    - pip install -e .[dev]
+  - python --version
+  - pip install -e .[dev] --extra-index-url https://download.pytorch.org/whl/cu113
+  - pwd
+  - ls -l
+  - python -c "import sys;print(sys.path)"
+
+.codestyle:
+  stage: test
+  script:
     - flake8 --version
     - mypy --version
+    - flake8
+    - mypy --config-file mypy.ini
+
+codestyle:
+  extends: .codestyle
+
+codestyle:3.8:
+  extends: .codestyle
+  image: python:3.8
+
+.test:
+  stage: test
+  script:
     - pytest --version
-
-test-codestyle:3.7:
-  stage: test
-  image: python:3.7
-  script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
-    - flake8 --config=setup.cfg
-    - mypy --config-file mypy.ini
-
-test-units:3.7:
-  stage: test
-  image: python:3.7
-  script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
     - python -m pytest .
 
-test-codestyle:
-  stage: test
-  script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
-    - flake8 --config=setup.cfg
-    - mypy --config-file mypy.ini
+test:
+  extends: .test
 
-test-units:
+test:3.8:
+  extends: .test
+  image: python:3.8
+
+test-build-doc:
   stage: test
   script:
-    - pwd
-    - ls -l
-    - python -c "import sys;print(sys.path)"
-    - python -m pytest .
+    - apt-get update && apt-get install -y pandoc
+    - sphinx-build -b html docs/source/ docs/build/ -a
