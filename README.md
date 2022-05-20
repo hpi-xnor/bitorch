@@ -11,6 +11,9 @@ Our current roadmap contains:
 
 All changes are tracked in the [changelog](CHANGELOG.md).
 
+Please refer to [our wiki](https://bitorch.readthedocs.io/en/latest/) for a comprehensive introduction into
+the library or use the introduction notebook in `examples/notebooks`.
+
 ## Installation
 
 Similar to recent versions of [torchvision](https://github.com/pytorch/vision), you should be using Python 3.8 or newer.
@@ -18,16 +21,18 @@ Currently, the only supported installation is pip (a conda package is planned in
 
 ### Pip
 
-If you wish to use a *specific version* of PyTorch for compatibility with certain devices or CUDA versions,
+If you wish to use a _specific version_ of PyTorch for compatibility with certain devices or CUDA versions,
 we advise on installing the corresponding versions of `pytorch` and `torchvision` first (or afterwards),
 please consult [pytorch's getting started guide](https://pytorch.org/get-started/locally/).
 
 Afterwards simply run:
+
 ```bash
 pip install bitorch
 ```
 
 Note, that you can also request a specific PyTorch version directly, e.g. for CUDA 11.3:
+
 ```bash
 pip install bitorch --extra-index-url https://download.pytorch.org/whl/cu113
 ```
