@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+import torch
+
 from examples.pytorch_lightning.utils.log import LoggingProgressBar
 
 if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
@@ -130,10 +132,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                              shuffle=False, pin_memory=True, persistent_workers=True)  # type: ignore
 
     if FVBITCORE_AVAILABLE:
-        data_point = iter(train_loader).next()
+        data_point = torch.zeros(dataset.shape)
         computational_intensity = fv_nn.FlopCountAnalysis(
             model,
-            inputs=data_point[0],
+            inputs=data_point,
             quantization_base_class=Quantization
         )
 
