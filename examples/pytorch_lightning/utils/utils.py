@@ -1,12 +1,10 @@
 import logging
 from pathlib import Path
-from torch.optim import Adam, SGD
+from torch.optim import Adam, SGD, RAdam
 from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR, _LRScheduler
 from typing import Union, Optional
 from torch.nn import Module
 from torch.optim.optimizer import Optimizer
-
-from bitorch.optimization.radam import RAdam
 
 
 def set_logging(log_file: Union[None, str], log_level: str, output_stdout: bool) -> None:
@@ -65,7 +63,7 @@ def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Op
     elif name == "sgd":
         return SGD(params=model.parameters(), lr=lr, momentum=momentum)
     elif name == "radam":
-        return RAdam(params=model.parameters(), lr=lr, degenerated_to_sgd=False)
+        return RAdam(params=model.parameters(), lr=lr)
     else:
         raise ValueError(f"No optimizer with name {name} found!")
 
