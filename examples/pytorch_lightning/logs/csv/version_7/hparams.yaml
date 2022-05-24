@@ -1,0 +1,12 @@
+add_f1_prec_recall: false
+epochs: 2
+lr: 0.001
+lr_factor: 0.1
+lr_scheduler: cosine
+lr_steps:
+- 30
+- 60
+- 90
+momentum: 0.9
+num_classes: 10
+optimizer: adam

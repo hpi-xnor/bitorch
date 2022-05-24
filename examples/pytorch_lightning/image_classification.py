@@ -1,5 +1,7 @@
 import os
 
+from examples.pytorch_lightning.utils.log import LoggingProgressBar
+
 if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
     import pydevd_pycharm
     pydevd_pycharm.settrace(
@@ -13,7 +15,7 @@ import argparse
 import logging
 from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger
 from utils.utils import set_logging
 from utils.arg_parser import create_argparser
@@ -53,10 +55,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     apply_args_to_configuration(args)
 
     loggers = []
-    if args.tensorboard:
-        loggers.append(TensorBoardLogger(args.tensorboard_output))  # type: ignore
-    if args.result_file is not None:
-        loggers.append(CSVLogger(args.result_file))  # type: ignore
+    if args.tensorboard_log:
+        loggers.append(TensorBoardLogger(args.result_directory, name="tensorboard"))  # type: ignore
+    if args.csv_log:
+        loggers.append(CSVLogger(args.result_directory, name="csv"))  # type: ignore
     if WANDB_AVAILABLE and args.wandb:
         try:
             loggers.append(
@@ -70,6 +72,13 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     if args.checkpoint_dir is not None:
         callbacks.append(ModelCheckpoint(args.checkpoint_dir, save_last=True,
                          save_top_k=args.checkpoint_keep_count, monitor="metrics/top1 accuracy"))
+    if not args.enable_progress_bar:
+        # providing our own progress bar disables the default progress bar (not needed to disable later on)
+        callbacks.append(LoggingProgressBar(args.log_interval))
+
+    if len(loggers) > 0:
+        lr_monitor = LearningRateMonitor(logging_interval='step')
+        callbacks.append(lr_monitor)
 
     dataset = dataset_from_name(args.dataset)
 
@@ -126,11 +135,11 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logging.info("Total size in MB: " + str(total_size / 1e6 / 8.0))
         total_flops = stats["#speed up flops (app.)"][""]
         logging.info("Approximated mflops: " + str(total_flops / 1e6))
-        for logger in loggers:
-            logger.log_dict({
-                "mflops": total_flops / 1e6,
-                "size in MB": total_size / 1e6 / 8.0,
-            })
+        # for logger in loggers:
+        #     logger.log_dict({
+        #         "mflops": total_flops / 1e6,
+        #         "size in MB": total_size / 1e6 / 8.0,
+        #     })
 
     trainer.fit(
         model_wrapped,
