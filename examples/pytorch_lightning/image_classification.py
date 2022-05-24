@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from examples.pytorch_lightning.utils.log import LoggingProgressBar
 
@@ -54,15 +55,19 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     apply_args_to_configuration(args)
 
+    output_dir = Path(args.result_directory)
+    output_dir.mkdir(exist_ok=True)
+
     loggers = []
     if args.tensorboard_log:
-        loggers.append(TensorBoardLogger(args.result_directory, name="tensorboard"))  # type: ignore
+        loggers.append(TensorBoardLogger(output_dir, name="tensorboard"))  # type: ignore
     if args.csv_log:
-        loggers.append(CSVLogger(args.result_directory, name="csv"))  # type: ignore
-    if WANDB_AVAILABLE and args.wandb:
+        loggers.append(CSVLogger(output_dir, name="csv"))  # type: ignore
+    if WANDB_AVAILABLE and args.wandb_log:
         try:
             loggers.append(
-                WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment))  # type: ignore
+                WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment, save_dir=str(output_dir))
+            )  # type: ignore
         except ModuleNotFoundError:
             logging.warning(
                 "wandb is not installed, values will not be logged via wandb. install it with "
@@ -71,10 +76,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     callbacks = []
     if args.checkpoint_dir is not None:
         callbacks.append(ModelCheckpoint(args.checkpoint_dir, save_last=True,
-                         save_top_k=args.checkpoint_keep_count, monitor="metrics/top1 accuracy"))
-    if not args.enable_progress_bar:
-        # providing our own progress bar disables the default progress bar (not needed to disable later on)
-        callbacks.append(LoggingProgressBar(args.log_interval))
+                         save_top_k=args.checkpoint_keep_count, monitor="metrics/test-top1-accuracy"))
+
+    # providing our own progress bar disables the default progress bar (not needed to disable later on)
+    callbacks.append(LoggingProgressBar(args.log_interval))
 
     if len(loggers) > 0:
         lr_monitor = LearningRateMonitor(logging_interval='step')
@@ -104,15 +109,18 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         max_steps=args.max_steps,
         logger=loggers if len(loggers) > 0 else None,  # type: ignore
         callbacks=callbacks,  # type: ignore
-        log_every_n_steps=args.log_interval,
-        progress_bar_refresh_rate=10,
+        log_every_n_steps=args.log_interval
     )
     augmentation_level = Augmentation.from_string(args.augmentation)
+    logging.info(f"model: {args.model}")
+    logging.info(f"optimizer: {args.optimizer}")
+    logging.info(f"lr: {args.lr}")
+    logging.info(f"max_epochs: {args.max_epochs}")
     if args.fake_data:
-        logging.info(f"dummy dataset: {dataset.name} (not using real data!)...")
+        logging.info(f"dummy dataset: {dataset.name} (not using real data!)")
         train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()  # type: ignore
     else:
-        logging.info(f"dataset: {dataset.name}...")
+        logging.info(f"dataset: {dataset.name}")
         train_dataset, test_dataset = dataset.get_train_and_test(  # type: ignore
             root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
         )

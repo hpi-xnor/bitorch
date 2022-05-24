@@ -50,10 +50,10 @@ class LoggingProgressBar(ProgressBarBase):
         return self._is_enable and (current % self.refresh_rate == 0 or current == total)
 
     def on_train_start(self, trainer, pl_module):
-        logging.info("Training starting.")
+        logging.info("Starting training...")
 
     def on_train_end(self, trainer, pl_module):
-        logging.info("Training ending.")
+        logging.info("Ending training.")
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx: int, unused: int = 0) -> None:
         if not self._should_update(self.train_batch_idx, self.total_train_batches):
@@ -101,11 +101,17 @@ class LoggingProgressBar(ProgressBarBase):
 
         for key, v in metrics_dict.items():
             key = LoggingProgressBar._replace_metric_key(key)
-            v = float(v)
-            if math.isnan(v) or key in skip_keys:
+            if key in skip_keys:
                 continue
-            if key:
-                metric_list.append(f"{key}={float(v):2.2f}")
+            try:
+                v = float(v)
+                if math.isnan(v):
+                    continue
+                if key:
+                    metric_list.append(f"{key}={v:2.2f}")
+            except ValueError:
+                if key:
+                    metric_list.append(f"{key}={v}")
 
         return ", ".join(metric_list)
 

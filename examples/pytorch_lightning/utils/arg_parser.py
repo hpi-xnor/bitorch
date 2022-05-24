@@ -31,9 +31,8 @@ def add_logging_args(parser: ArgumentParser) -> None:
                      help="disables tensorboard logging")
     log.add_argument("--disable-csv-log", action="store_false", dest="csv_log",
                      help="disables csv logging")
-    log.add_argument("--wandb", action="store_true",
-                     help="toggles use of wandb for logging learning progress. For this to work, "
-                     "the WANDB_API_KEY environment variable must be set.")
+    log.add_argument("--wandb", action="store_true", dest="wandb_log",
+                     help="enables wandb logging (WANDB_API_KEY environment variable must be set)")
     log.add_argument("--wandb-project", type=str, default="bitorch",
                      help="name of wand project to be used by wandb logger")
     log.add_argument("--wandb-experiment", type=str, default=None,
