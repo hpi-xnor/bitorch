@@ -42,7 +42,7 @@ def add_logging_args(parser: ArgumentParser) -> None:
 def add_checkpoint_args(parser: ArgumentParser) -> None:
     checkpoint = parser.add_argument_group("checkpoints", "parameters for checkpoint storing / loading")
     checkpoint.add_argument("--checkpoint-dir", type=str, default=None,
-                            help="path to directory to store checkpoints in.")
+                            help="set a custom path to store checkpoints in.")
     checkpoint.add_argument("--checkpoint-keep-count", type=int, default=1,
                             help="number of checkpoints to keep.")
     checkpoint.add_argument("--checkpoint-load", type=str, default=None,
