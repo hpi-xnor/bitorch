@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict, List, Union
 
 import math
 import pytorch_lightning as pl
@@ -66,8 +66,8 @@ class LoggingProgressBar(ProgressBarBase):
         self.log_debug("Logging enabled...")
         self._is_enabled = True
 
-    def _should_update(self, current: int, total: int) -> bool:
-        return self._is_enabled and (current % self.refresh_rate == 0 or current == total)
+    def _should_update(self, current: int, total: Union[int, float]) -> bool:
+        return self._is_enabled and (current % self.refresh_rate == 0 or current == int(total))
 
     def on_train_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         self.log_info("Starting training...")
@@ -123,7 +123,7 @@ class LoggingProgressBar(ProgressBarBase):
         return metric_key.replace("accuracy", "acc")
 
     @staticmethod
-    def _format_metric_string(metrics_dict: Dict[str, str]) -> str:
+    def _format_metric_string(metrics_dict: Dict[str, Union[int, str]]) -> str:
         metric_list = []
         skip_keys = {"v_num"}
 

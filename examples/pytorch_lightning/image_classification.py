@@ -1,10 +1,4 @@
 import os
-from pathlib import Path
-
-import torch
-
-from examples.pytorch_lightning.utils.log import LoggingProgressBar
-
 if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
     import pydevd_pycharm
     pydevd_pycharm.settrace(
@@ -16,10 +10,15 @@ if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
 
 import argparse
 import logging
+from pathlib import Path
+from typing import List
+
+import torch
+
 from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
-from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase
 from utils.utils import configure_logging
 from utils.arg_parser import create_argparser
 from utils.lightning_model import ModelWrapper
@@ -29,6 +28,8 @@ from bitorch.models import model_from_name
 from bitorch.datasets import dataset_from_name
 from bitorch import apply_args_to_configuration
 from bitorch.quantizations import Quantization
+
+from examples.pytorch_lightning.utils.log import LoggingProgressBar
 
 _log = logging.getLogger()
 
@@ -63,21 +64,20 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     output_dir = Path(args.result_directory)
     output_dir.mkdir(exist_ok=True)
 
-    loggers = []
+    loggers: List[LightningLoggerBase] = []
     if args.tensorboard_log:
-        loggers.append(TensorBoardLogger(output_dir, name="tensorboard"))  # type: ignore
+        loggers.append(TensorBoardLogger(str(output_dir), name="tensorboard"))
     if args.csv_log:
-        loggers.append(CSVLogger(output_dir, name="csv"))  # type: ignore
+        loggers.append(CSVLogger(str(output_dir), name="csv"))
     if WANDB_AVAILABLE and args.wandb_log:
-        try:
-            loggers.append(
-                WandbLogger(project=args.wandb_project, log_model=True, name=args.wandb_experiment, save_dir=str(output_dir))
-            )  # type: ignore
-        except ModuleNotFoundError:
-            _log.warning(
-                "wandb is not installed, values will not be logged via wandb. install it with "
-                "`pip install wandb`."
+        loggers.append(
+            WandbLogger(
+                project=args.wandb_project,
+                log_model=True,
+                name=args.wandb_experiment,
+                save_dir=str(output_dir)
             )
+        )
     callbacks = []
     if args.checkpoint_dir is not None:
         callbacks.append(ModelCheckpoint(args.checkpoint_dir, save_last=True,
@@ -88,7 +88,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     if len(loggers) > 0:
         lr_monitor = LearningRateMonitor(logging_interval='step')
-        callbacks.append(lr_monitor)
+        callbacks.append(lr_monitor)  # type: ignore
 
     dataset = dataset_from_name(args.dataset)
 
