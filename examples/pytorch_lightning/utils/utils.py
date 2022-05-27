@@ -30,7 +30,6 @@ def configure_logging(logger: Any, log_file: Union[None, str], log_level: str, o
         log_file_path = Path(log_file)
         log_file_path.parent.mkdir(parents=True, exist_ok=True)
         file_handler = logging.FileHandler(log_file_path)
-        file_handler.setLevel(log_level)
         file_handler.setFormatter(logging_format)
         logger.addHandler(file_handler)
     else:
@@ -38,7 +37,6 @@ def configure_logging(logger: Any, log_file: Union[None, str], log_level: str, o
 
     if output_stdout:
         stream = logging.StreamHandler()
-        stream.setLevel(log_level)
         stream.setFormatter(logging_format)
         logger.addHandler(stream)
 

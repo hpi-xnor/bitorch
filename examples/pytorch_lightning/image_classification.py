@@ -29,16 +29,16 @@ from bitorch.datasets import dataset_from_name
 from bitorch import apply_args_to_configuration
 from bitorch.quantizations import Quantization
 
-from examples.pytorch_lightning.utils.log import LoggingProgressBar
+from examples.pytorch_lightning.utils.log import CommandLineLogger
 
-_log = logging.getLogger()
+logger = logging.getLogger()
 
 
 FVBITCORE_AVAILABLE = True
 try:
     import fvbitcore.nn as fv_nn
 except ModuleNotFoundError:
-    _log.warning("fvbitcore not installed, will not calculate model flops!")
+    logger.warning("fvbitcore not installed, will not calculate model flops!")
     FVBITCORE_AVAILABLE = False
 
 WANDB_AVAILABLE = True
@@ -46,7 +46,7 @@ try:
     from pytorch_lightning.loggers import WandbLogger
     import wandb
 except ModuleNotFoundError:
-    _log.warning("wandb not installed, will not log metrics to wandb!")
+    logger.warning("wandb not installed, will not log metrics to wandb!")
     WANDB_AVAILABLE = False
 
 
@@ -57,7 +57,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         args (argparse.Namespace): cli arguments
         model_args (argparse.Namespace): model specific cli arguments
     """
-    configure_logging(_log, args.log_file, args.log_level, args.log_stdout)
+    configure_logging(logger, args.log_file, args.log_level, args.log_stdout)
 
     apply_args_to_configuration(args)
 
@@ -84,7 +84,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                          save_top_k=args.checkpoint_keep_count, monitor="metrics/test-top1-accuracy"))
 
     # providing our own progress bar disables the default progress bar (not needed to disable later on)
-    callbacks.append(LoggingProgressBar(args.log_interval))
+    cmd_logger = CommandLineLogger(args.log_interval)
+    callbacks.append(cmd_logger)
+    configure_logging(cmd_logger.logger, args.log_file, args.log_level, args.log_stdout)
 
     if len(loggers) > 0:
         lr_monitor = LearningRateMonitor(logging_interval='step')
@@ -93,12 +95,12 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     dataset = dataset_from_name(args.dataset)
 
     model_kwargs = vars(model_args)
-    _log.debug(f"got model args as dict: {model_kwargs}")
+    logger.debug(f"got model args as dict: {model_kwargs}")
 
     model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
     model.initialize()
     if args.checkpoint_load is not None and args.pretrained:
-        _log.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
+        logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
         model_wrapped = ModelWrapper.load_from_checkpoint(args.checkpoint_load)
     else:
         model_wrapped = ModelWrapper(
@@ -117,15 +119,15 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         log_every_n_steps=args.log_interval
     )
     augmentation_level = Augmentation.from_string(args.augmentation)
-    _log.info(f"model: {args.model}")
-    _log.info(f"optimizer: {args.optimizer}")
-    _log.info(f"lr: {args.lr}")
-    _log.info(f"max_epochs: {args.max_epochs}")
+    logger.info(f"model: {args.model}")
+    logger.info(f"optimizer: {args.optimizer}")
+    logger.info(f"lr: {args.lr}")
+    logger.info(f"max_epochs: {args.max_epochs}")
     if args.fake_data:
-        _log.info(f"dummy dataset: {dataset.name} (not using real data!)")
+        logger.info(f"dummy dataset: {dataset.name} (not using real data!)")
         train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()  # type: ignore
     else:
-        _log.info(f"dataset: {dataset.name}")
+        logger.info(f"dataset: {dataset.name}")
         train_dataset, test_dataset = dataset.get_train_and_test(  # type: ignore
             root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
         )
@@ -143,11 +145,11 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         )
 
         stats, table = fv_nn.flop_count_table(computational_intensity, automatic_qmodules=True)
-        _log.info("\n" + table)
+        logger.info("\n" + table)
         total_size = stats["#compressed size in bits"][""]
-        _log.info("Total size in MB: " + str(total_size / 1e6 / 8.0))
+        logger.info("Total size in MB: " + str(total_size / 1e6 / 8.0))
         total_flops = stats["#speed up flops (app.)"][""]
-        _log.info("Approximated mflops: " + str(total_flops / 1e6))
+        logger.info("Approximated mflops: " + str(total_flops / 1e6))
         # for logger in loggers:
         #     logger.log_dict({
         #         "mflops": total_flops / 1e6,

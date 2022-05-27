@@ -7,7 +7,6 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ProgressBarBase
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 
-logger = logging.getLogger(__name__)
 
 TIME_INTERVALS = (
     ('w', 60 * 60 * 24 * 7),
@@ -32,7 +31,11 @@ def display_time(seconds: float, granularity: int = 2) -> str:
     return ':'.join(result[:granularity])
 
 
-class LoggingProgressBar(ProgressBarBase):
+class CommandLineLogger(ProgressBarBase):
+    """
+    This module provides a replacement for the default tqdm-based progress bar, that is more suitable for logging
+    progress in a non-interactive way, e.g. to a file.
+    """
     def __init__(self, refresh_rate: int) -> None:
         super().__init__()
         self._is_enabled = True
@@ -41,21 +44,25 @@ class LoggingProgressBar(ProgressBarBase):
         self._train_start_time: float = 0.0
         self._last_epoch_times: List[float] = []
         self._validation_times: List[float] = []
+
+        self.logger = logging.getLogger("CommandLineLogger")
+
         self.refresh_rate = refresh_rate
-        self.log_debug("Logging training progress...")
+        self.log_batch = self.log_info
+        self.log_debug("Command line logger initialized.")
 
-    @staticmethod
-    def log_debug(message: str) -> None:
-        # logger.debug(message)
-        print(message)
+    def log_debug(self, message: str) -> None:
+        if self._is_enabled:
+            self.logger.debug(message)
+            print(message)
 
-    @staticmethod
-    def log_info(message: str) -> None:
-        # logger.info(message)
-        print(message)
+    def log_info(self, message: str) -> None:
+        if self._is_enabled:
+            self.logger.info(message)
+            print(message)
 
     def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: Optional[str] = None) -> None:
-        self.log_debug(f"Logging setup... ( is root trainer: {trainer.is_global_zero} )")
+        self.log_debug(f"Command line logger setup. ( is root trainer: {trainer.is_global_zero} )")
         super().setup(trainer, pl_module, stage)
 
     def disable(self) -> None:
@@ -63,8 +70,8 @@ class LoggingProgressBar(ProgressBarBase):
         self._is_enabled = False
 
     def enable(self) -> None:
-        self.log_debug("Logging enabled...")
         self._is_enabled = True
+        self.log_debug("Logging enabled...")
 
     def _should_update(self, current: int, total: Union[int, float]) -> bool:
         return self._is_enabled and (current % self.refresh_rate == 0 or current == int(total))
@@ -103,11 +110,7 @@ class LoggingProgressBar(ProgressBarBase):
         batch_info = f"{self.train_batch_idx:4d}/{self.total_train_batches:4d} ({percent:5.1f}%)"
         metrics = self._format_metric_string(self.get_metrics(trainer, pl_module))
         eta_info = f"ETA: {eta_epoch} & {eta_train}"
-        self.train_batch(f"{epoch_info} - {batch_info} - {metrics} - {eta_info}")
-
-    @staticmethod
-    def train_batch(message: str) -> None:
-        LoggingProgressBar.log_info(message)
+        self.log_batch(f"{epoch_info} - {batch_info} - {metrics} - {eta_info}")
 
     @staticmethod
     def _replace_metric_key(metric_key: str) -> str:
@@ -128,7 +131,7 @@ class LoggingProgressBar(ProgressBarBase):
         skip_keys = {"v_num"}
 
         for key, value in metrics_dict.items():
-            key = LoggingProgressBar._replace_metric_key(key)
+            key = CommandLineLogger._replace_metric_key(key)
             if key in skip_keys:
                 continue
             try:
