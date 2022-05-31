@@ -1,4 +1,2 @@
-tensorboardX
-tensorboard
 wandb
 fvbitcore

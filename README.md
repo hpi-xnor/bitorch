@@ -22,7 +22,7 @@ If you wish to use a *specific version* of PyTorch for compatibility with certai
 we advise on installing the corresponding versions of `pytorch` and `torchvision` first (or afterwards),
 please consult [pytorch's getting started guide](https://pytorch.org/get-started/locally/).
 
-Afterwards simply run:
+Otherwise, simply run:
 ```bash
 pip install bitorch
 ```
@@ -32,8 +32,7 @@ Note, that you can also request a specific PyTorch version directly, e.g. for CU
 pip install bitorch --extra-index-url https://download.pytorch.org/whl/cu113
 ```
 
-To use advanced logging capabilities with [tensorboardX](https://github.com/lanpa/tensorboardX),
-install the optional dependencies as well:
+To use advanced logging capabilities, install the optional dependencies as well:
 
 ```bash
 pip install "bitorch[opt]"

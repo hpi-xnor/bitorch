@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - using PyTorch's implementation of RAdam
 
+### Fixed
+
+- fix error from updated protobuf package
+
 ## [0.2.0] - 2022/05/19
 
 ### Added
