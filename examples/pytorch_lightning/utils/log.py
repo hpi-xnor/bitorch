@@ -53,12 +53,12 @@ class CommandLineLogger(ProgressBarBase):
 
     def log_debug(self, message: str) -> None:
         if self._is_enabled:
-            self.logger.debug(message)
+            # self.logger.debug(message)
             print(message)
 
     def log_info(self, message: str) -> None:
         if self._is_enabled:
-            self.logger.info(message)
+            # self.logger.info(message)
             print(message)
 
     def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: Optional[str] = None) -> None:
@@ -126,14 +126,20 @@ class CommandLineLogger(ProgressBarBase):
         return metric_key.replace("accuracy", "acc")
 
     @staticmethod
-    def _format_metric_string(metrics_dict: Dict[str, Union[int, str]]) -> str:
+    def _format_metric_string(metrics_dict: Dict[str, Union[int, str]], train: bool = True) -> str:
         metric_list = []
         skip_keys = {"v_num"}
+        if train:
+            skip_keys.add("test-top1-acc")
+            skip_keys.add("test-top5-acc")
+        else:
+            skip_keys.add("train-top1-acc")
+            skip_keys.add("train-top5-acc")
 
         for key, value in metrics_dict.items():
-            key = CommandLineLogger._replace_metric_key(key)
             if key in skip_keys:
                 continue
+            key = CommandLineLogger._replace_metric_key(key)
             try:
                 f_value = float(value)
                 if math.isnan(f_value):
@@ -176,4 +182,6 @@ class CommandLineLogger(ProgressBarBase):
     def on_validation_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         self._validation_times.append(time.time() - self._validation_start_time)
         self._validation_times = self._validation_times[-3:]
-        self.log_info(f"Validation complete. ({self._format_metric_string(self.get_metrics(trainer, pl_module))})")
+        self.log_info(
+            f"Validation complete. ({self._format_metric_string(self.get_metrics(trainer, pl_module), train=False)})"
+        )

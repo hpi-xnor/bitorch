@@ -56,6 +56,7 @@ def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Op
     Returns:
         Optimizer: the model optimizer
     """
+    name = name.lower()
     if name == "adam":
         return Adam(params=model.parameters(), lr=lr)
     elif name == "sgd":

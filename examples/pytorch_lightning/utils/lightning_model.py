@@ -1,27 +1,25 @@
+import logging
+from argparse import Namespace
 from typing import Union
+
 import torch
 from pytorch_lightning import LightningModule
 from torch.nn import Module, CrossEntropyLoss
-from utils.utils import create_optimizer, create_scheduler
-from torchmetrics import Accuracy, F1Score, Precision, Recall, AUROC
-import logging
+from torchmetrics import Accuracy, F1Score, Precision, Recall
+
+from .unused_args import clean_hyperparameters
+from .utils import create_optimizer, create_scheduler
 
 
 class ModelWrapper(LightningModule):
     def __init__(
             self,
             model: Module,
-            optimizer: str,
-            lr: float,
-            momentum: float,
-            lr_scheduler: str,
-            lr_factor: float,
-            lr_steps: list,
             num_classes: int,
-            epochs: int,
+            args: Namespace,
             add_f1_prec_recall: bool = False) -> None:
         super().__init__()
-        self.save_hyperparameters(ignore=["model"])
+        self.save_hyperparameters(clean_hyperparameters(args))
         self.loss_function = CrossEntropyLoss()
         self.model = model
         self.train_accuracy_top1 = Accuracy(num_classes=num_classes)
@@ -76,7 +74,7 @@ class ModelWrapper(LightningModule):
         if self.hparams.lr_scheduler is not None:
             scheduler = create_scheduler(
                 self.hparams.lr_scheduler, optimizer, self.hparams.lr_factor,
-                self.hparams.lr_steps, self.hparams.epochs
+                self.hparams.lr_steps, self.hparams.max_epochs
             )
             return {
                 "optimizer": optimizer,

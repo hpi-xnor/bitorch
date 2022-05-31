@@ -103,10 +103,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
         model_wrapped = ModelWrapper.load_from_checkpoint(args.checkpoint_load)
     else:
-        model_wrapped = ModelWrapper(
-            model, args.optimizer, args.lr, args.momentum, args.lr_scheduler, args.lr_factor, args.lr_steps,
-            dataset.num_classes, args.max_epochs,
-        )
+        model_wrapped = ModelWrapper(model, dataset.num_classes, args)
 
     trainer = Trainer(
         strategy=args.strategy,
