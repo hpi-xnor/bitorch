@@ -1,16 +1,27 @@
 """Module containting the quantized linear layer"""
 
 from typing import Union
+
 import torch
 from torch.nn import Linear
 from torch.nn.functional import linear
 
-from bitorch.quantizations import Quantization
 from .config import config
+from .layer_registry import LayerRegistry, _LayerImplementation
 from .qactivation import QActivation
+from ..quantizations import Quantization
+from ..runtime_mode import RuntimeMode, runtime_mode_type
+
+_registry = LayerRegistry("QLinear")
 
 
-class QLinear(Linear):
+class QLinearImplementation(_LayerImplementation):
+    def __init__(self, supports_modes: runtime_mode_type) -> None:
+        super().__init__(_registry, supports_modes)
+
+
+@QLinearImplementation(RuntimeMode.DEFAULT)
+class QLinearDefault(Linear):
     def __init__(
             self,
             *args: int,
@@ -31,7 +42,7 @@ class QLinear(Linear):
             **kwargs (keyword Argument list): keyword arguments for linear layer
         """
 
-        super(QLinear, self).__init__(*args, **kwargs)  # type: ignore
+        super().__init__(*args, **kwargs)  # type: ignore
         self.weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
@@ -46,3 +57,6 @@ class QLinear(Linear):
         """
 
         return linear(self.activation(x), self.weight_quantize(self.weight), self.bias)
+
+
+QLinear = QLinearDefault

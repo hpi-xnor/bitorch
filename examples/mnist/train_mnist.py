@@ -121,15 +121,15 @@ def main():
                         help='learning rate (default: 1.0)')
     parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
                         help='Learning rate step gamma (default: 0.7)')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
+    parser.add_argument('--no-cuda', action='store_true',
                         help='disables CUDA training')
-    parser.add_argument('--dry-run', action='store_true', default=False,
+    parser.add_argument('--dry-run', action='store_true',
                         help='quickly check a single pass')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--save-model', action='store_true', default=False,
+    parser.add_argument('--save-model', action='store_true',
                         help='For Saving the current Model')
     args = parser.parse_args()
 

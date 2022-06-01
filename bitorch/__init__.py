@@ -5,6 +5,10 @@ from pathlib import Path
 from typing import List
 
 from .config import Config
+from .runtime_mode import RuntimeMode
+
+
+mode: RuntimeMode = RuntimeMode.DEFAULT
 
 
 configs_by_name = {}
