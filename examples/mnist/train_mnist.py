@@ -3,43 +3,49 @@ Adapted from official PyTorch example: https://github.com/pytorch/examples/blob/
 """
 
 from __future__ import print_function
+
 import argparse
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
-from bitorch import datasets as bitorch_datasets
 import bitorch.layers as qnn
+from bitorch import datasets as bitorch_datasets, RuntimeMode
+from bitorch.datasets import MNIST
+from bitorch.models import Model
+
+from bitorch_inference_engine.layers.qlinear import QLinearInf
 
 
-class QuantizedMLP(nn.Module):
+class QuantizedMLP(Model):
     def __init__(self, num_hidden_units_1=128, num_hidden_units_2=64):
-        super().__init__()
-        self.flatten = nn.Flatten()
-        self.fc1 = qnn.QLinear(784, num_hidden_units_1)
-        self.act1 = nn.PReLU()
-        self.bn1 = nn.BatchNorm1d(num_hidden_units_1)
+        super().__init__(dataset=MNIST)
+        self._model.flatten = nn.Flatten()
+        self._model.fc1 = qnn.QLinear(784, num_hidden_units_1)
+        self._model.act1 = nn.PReLU()
+        self._model.bn1 = nn.BatchNorm1d(num_hidden_units_1)
 
-        self.fc2 = qnn.QLinear(num_hidden_units_1, num_hidden_units_2)
-        self.act2 = nn.PReLU()
-        self.bn2 = nn.BatchNorm1d(num_hidden_units_2)
+        self._model.fc2 = qnn.QLinear(num_hidden_units_1, num_hidden_units_2)
+        self._model.act2 = nn.PReLU()
+        self._model.bn2 = nn.BatchNorm1d(num_hidden_units_2)
 
-        self.fc3 = qnn.QLinear(num_hidden_units_2, 10)
+        self._model.fc3 = qnn.QLinear(num_hidden_units_2, 10)
 
     def forward(self, x):
-        x = self.flatten(x)
+        x = self._model.flatten(x)
 
-        x = self.fc1(x)
-        x = self.act1(x)
-        x = self.bn1(x)
+        x = self._model.fc1(x)
+        x = self._model.act1(x)
+        x = self._model.bn1(x)
 
-        x = self.fc2(x)
-        x = self.act2(x)
-        x = self.bn2(x)
+        x = self._model.fc2(x)
+        x = self._model.act2(x)
+        x = self._model.bn2(x)
 
-        x = self.fc3(x)
+        x = self._model.fc3(x)
         output = F.log_softmax(x, dim=1)
         return output
 
@@ -137,7 +143,7 @@ def main():
 
     torch.manual_seed(args.seed)
 
-    device = torch.device("cuda" if use_cuda else "cpu")
+    device = torch.device("cuda:0" if use_cuda else "cpu")
 
     train_kwargs = {'batch_size': args.batch_size}
     test_kwargs = {'batch_size': args.test_batch_size}
@@ -155,6 +161,7 @@ def main():
 
     if args.model == "mlp":
         model = QuantizedMLP().to(device)
+        print(model)
     else:
         model = Net().to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
@@ -164,6 +171,9 @@ def main():
         train(args, model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
         scheduler.step()
+
+    inference_model = model.convert(RuntimeMode.INFERENCE_AUTO, device=device)
+    test(inference_model, device, test_loader)
 
     if args.save_model:
         torch.save(model.state_dict(), "mnist_cnn.pt")

@@ -32,7 +32,7 @@ Note, that you can also request a specific PyTorch version directly, e.g. for CU
 pip install bitorch --extra-index-url https://download.pytorch.org/whl/cu113
 ```
 
-To use advanced logging capabilities, install the optional dependencies as well:
+If you want to be able to run the examples, install the optional dependencies as well:
 
 ```bash
 pip install "bitorch[opt]"

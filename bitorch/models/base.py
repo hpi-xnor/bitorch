@@ -4,8 +4,11 @@ from typing import Union, Type
 import torch
 from torch import nn
 
+import bitorch
+from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
+from ..layers.qlinear import q_linear_registry, QLinear
 
 
 class Model(nn.Module):
@@ -66,3 +69,14 @@ class Model(nn.Module):
                         nn.init.constant_(module.bias, 0)
             elif isinstance(module, nn.Linear):
                 nn.init.xavier_normal_(module.weight)
+
+    def convert(self, new_mode: RuntimeMode, device=None):
+        for module in self._model.modules():
+            if module in q_linear_registry:
+                print("Converting:", module, "...")
+                bitorch.mode = new_mode
+                new_module = QLinear(module.in_features, module.out_features, device=device)
+                new_module.weight = module.weight
+                if hasattr(module, "bias"):
+                    new_module.bias = module.bias
+                print("    ... to", new_module)

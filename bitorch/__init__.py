@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import List
 
 from .config import Config
-from .runtime_mode import RuntimeMode
-
+from .runtime_mode import RuntimeMode, runtime_mode_type
 
 mode: RuntimeMode = RuntimeMode.DEFAULT
 

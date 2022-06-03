@@ -51,14 +51,14 @@ def test_bitorch_default_mode():
 
 
 @pytest.fixture()
-def set_train_mode():
-    bitorch.mode = RuntimeMode.TRAIN
+def set_inference_mode():
+    bitorch.mode = RuntimeMode.INFERENCE_AUTO
     yield None
     bitorch.mode = RuntimeMode.DEFAULT
 
 
-def test_set_bitorch_mode(set_train_mode):
-    assert bitorch.mode == RuntimeMode.TRAIN
+def test_set_bitorch_mode(set_inference_mode):
+    assert bitorch.mode == RuntimeMode.INFERENCE_AUTO
 
 
 @pytest.fixture()
@@ -70,5 +70,5 @@ def reset_modes():
 
 def test_setting_different_modes(reset_modes):
     assert bitorch.mode == RuntimeMode.DEFAULT
-    bitorch.mode = RuntimeMode.TRAIN
-    assert bitorch.mode == RuntimeMode.TRAIN
+    bitorch.mode = RuntimeMode.INFERENCE_AUTO
+    assert bitorch.mode == RuntimeMode.INFERENCE_AUTO

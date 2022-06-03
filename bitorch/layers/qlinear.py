@@ -6,18 +6,19 @@ import torch
 from torch.nn import Linear
 from torch.nn.functional import linear
 
+from bitorch import RuntimeMode, runtime_mode_type
+from bitorch.quantizations import Quantization
 from .config import config
-from .layer_registry import LayerRegistry, _LayerImplementation
+from .extensions.layer_implementation import LayerImplementation, LayerRegistry
 from .qactivation import QActivation
-from ..quantizations import Quantization
-from ..runtime_mode import RuntimeMode, runtime_mode_type
-
-_registry = LayerRegistry("QLinear")
 
 
-class QLinearImplementation(_LayerImplementation):
+q_linear_registry = LayerRegistry("QLinear")
+
+
+class QLinearImplementation(LayerImplementation):
     def __init__(self, supports_modes: runtime_mode_type) -> None:
-        super().__init__(_registry, supports_modes)
+        super().__init__(q_linear_registry, supports_modes)
 
 
 @QLinearImplementation(RuntimeMode.DEFAULT)
@@ -41,7 +42,6 @@ class QLinearDefault(Linear):
                 function. Defaults to None.
             **kwargs (keyword Argument list): keyword arguments for linear layer
         """
-
         super().__init__(*args, **kwargs)  # type: ignore
         self.weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
