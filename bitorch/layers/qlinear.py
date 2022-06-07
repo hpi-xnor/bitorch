@@ -17,7 +17,7 @@ q_linear_registry = LayerRegistry("QLinear")
 
 
 class QLinearImplementation(LayerImplementation):
-    def __init__(self, supports_modes: runtime_mode_type, compatibility_function: Optional[Callable] = None) -> None:
+    def __init__(self, supports_modes: runtime_mode_type) -> None:
         super().__init__(q_linear_registry, supports_modes)
 
 
