@@ -1,9 +1,12 @@
 from typing import Any
 
 
-class SwitchableLayer:
+class LayerContainer:
     def __init__(self, impl_class: Any, *args: Any, **kwargs: Any) -> None:
         self._layer_implementation = impl_class(*args, **kwargs)
+
+    def replace_layer_implementation(self, new_implementation: Any) -> None:
+        self._layer_implementation = new_implementation
 
     def __getattr__(self, item: Any) -> Any:
         if item == "_layer_implementation":

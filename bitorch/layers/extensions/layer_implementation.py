@@ -1,12 +1,27 @@
 from abc import ABC
-from typing import Any, Union, Set, Optional
+from dataclasses import dataclass
+from typing import Any, Union, Set, Optional, Dict, Tuple
 
 import bitorch
 from bitorch import runtime_mode_type, RuntimeMode
-from .switchable_layer import SwitchableLayer
+from .switchable_layer import LayerContainer
+
+
+@dataclass(eq=False, frozen=True)
+class LayerRecipe:
+    """Class to store args and kwargs used to create a particular layer. Allows to create other versions later on."""
+    # registry: "LayerRegistry"
+    container: "LayerContainer"
+    args: Tuple[Any]
+    kwargs: Dict[str, Any]
 
 
 class LayerImplementation(ABC):
+    """
+    Superclass for storing different implementations of a common layer.
+
+    It registers all decorated classes in the given registry and
+    """
     def __init__(self, registry: "LayerRegistry", supports_modes: runtime_mode_type) -> None:
         self.registry = registry
         assert RuntimeMode.is_combined_mode(supports_modes), f"invalid mode {supports_modes} given"
@@ -15,7 +30,7 @@ class LayerImplementation(ABC):
         self.class_: Any = None
         self.class_name = ""
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Union["LayerImplementation", SwitchableLayer]:
+    def __call__(self, *args: Any, **kwargs: Any) -> Union["LayerImplementation", LayerContainer]:
         if not self.__initialized:
             # this function is called once when @Decorator is used, we need to initialize this object correctly
             self.__initialized = True
@@ -28,8 +43,12 @@ class LayerImplementation(ABC):
         correct_layer_implementation = self.registry.get_layer()
         if self == correct_layer_implementation:
             # this class provides the correct implementation for the current mode (recursion stop)
-            return SwitchableLayer(self.class_, *args, **kwargs)
-            # return self.class_(*args, **kwargs)
+            if self.registry.is_replacing:
+                return self.class_(*args, **kwargs)
+            else:
+                layer_container = LayerContainer(self.class_, *args, **kwargs)
+                self.registry.add_recipe(LayerRecipe(container=layer_container, args=args, kwargs=kwargs))
+                return layer_container
         # call this method again but on the correct base class
         return correct_layer_implementation(*args, **kwargs)
 
@@ -39,6 +58,19 @@ class LayerRegistry:
         self.name = name
         self._class = None
         self.registered_layers: Set[LayerImplementation] = set()
+        self.instance_recipes: Set[LayerRecipe] = set()
+        self.is_replacing = False
+
+    def get_replacement(self, *args: Any, **kwargs: Any) -> Any:
+        self.is_replacing = True
+        replacement_layer = self.get_layer()(*args, **kwargs)
+        self.is_replacing = False
+        return replacement_layer
+
+    def add_recipe(self, new_recipe: LayerRecipe) -> None:
+        if self.is_replacing:
+            return
+        self.instance_recipes.add(new_recipe)
 
     def __contains__(self, item: Any) -> bool:
         return item.__class__ in map(lambda x: x.class_, self.registered_layers)

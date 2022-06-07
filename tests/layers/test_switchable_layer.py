@@ -2,7 +2,7 @@ import pytest
 import torch
 from torch import nn
 
-from bitorch.layers.extensions.switchable_layer import SwitchableLayer
+from bitorch.layers.extensions.switchable_layer import LayerContainer
 
 
 class Layer(nn.Module):
@@ -25,7 +25,7 @@ class Layer(nn.Module):
 @pytest.mark.parametrize("test_wrapped_layer", [False, True])
 def test_switchable_layer(test_wrapped_layer):
     if test_wrapped_layer:
-        layer = SwitchableLayer(Layer, 42)
+        layer = LayerContainer(Layer, 42)
     else:
         layer = Layer(42)
     assert layer.x == 42
@@ -37,7 +37,7 @@ def test_switchable_layer(test_wrapped_layer):
     def test_class_assertions(layer_):
         assert isinstance(layer_, nn.Module)
         assert isinstance(layer_, Layer)
-        assert test_wrapped_layer == isinstance(layer_, SwitchableLayer)
+        assert test_wrapped_layer == isinstance(layer_, LayerContainer)
 
     test_class_assertions(layer)
 

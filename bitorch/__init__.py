@@ -2,13 +2,30 @@ import os
 from argparse import ArgumentParser, Namespace
 from importlib import import_module
 from pathlib import Path
-from typing import List
+from typing import List, Type, Optional
 
 from .config import Config
 from .runtime_mode import RuntimeMode, runtime_mode_type
 
 mode: RuntimeMode = RuntimeMode.DEFAULT
 
+
+class _ModeSetter(object):
+    def __init__(self, new_mode: RuntimeMode) -> None:
+        self._previous_mode = mode
+        self._new_mode = new_mode
+
+    def __enter__(self) -> "_ModeSetter":
+        global mode
+        mode = self._new_mode
+        return self
+
+    def __exit__(self, exc_type: Type[BaseException], exc_val: Optional[BaseException], exc_tb) -> None:
+        global mode
+        mode = self._previous_mode
+
+
+change_mode = _ModeSetter
 
 configs_by_name = {}
 

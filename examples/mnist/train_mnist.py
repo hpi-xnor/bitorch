@@ -24,7 +24,7 @@ class QuantizedMLP(Model):
     def __init__(self, num_hidden_units_1=128, num_hidden_units_2=64):
         super().__init__(dataset=MNIST)
         self._model.flatten = nn.Flatten()
-        self._model.fc1 = qnn.QLinear(784, num_hidden_units_1)
+        self._model.fc1 = nn.Linear(784, num_hidden_units_1)
         self._model.act1 = nn.PReLU()
         self._model.bn1 = nn.BatchNorm1d(num_hidden_units_1)
 
@@ -172,7 +172,7 @@ def main():
         test(model, device, test_loader)
         scheduler.step()
 
-    inference_model = model.convert(RuntimeMode.INFERENCE_AUTO, device=device)
+    inference_model = model.convert(RuntimeMode.INFERENCE_AUTO, device=device, verbose=True)
     test(inference_model, device, test_loader)
 
     if args.save_model:
