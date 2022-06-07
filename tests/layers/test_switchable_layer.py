@@ -5,14 +5,18 @@ from torch import nn
 from bitorch.layers.extensions.switchable_layer import LayerContainer
 
 
+class Foo:
+    pass
+
+
 class Layer(nn.Module):
     def __init__(self, x=10):
         super().__init__()
         self.x = x
+        self.foo = Foo()
 
-    def foo(self):
-        assert isinstance(self.x, int)
-        return "foo"
+    def get_foo(self):
+        return self.foo
 
     @property
     def self_property(self):
@@ -37,6 +41,8 @@ def test_switchable_layer(test_wrapped_layer):
     def test_class_assertions(layer_):
         assert isinstance(layer_, nn.Module)
         assert isinstance(layer_, Layer)
+        assert isinstance(layer_.foo, Foo)
+        assert isinstance(layer_.get_foo(), Foo)
         assert test_wrapped_layer == isinstance(layer_, LayerContainer)
 
     test_class_assertions(layer)

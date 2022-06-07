@@ -12,7 +12,7 @@ class LayerRecipe:
     """Class to store args and kwargs used to create a particular layer. Allows to create other versions later on."""
     # registry: "LayerRegistry"
     container: "LayerContainer"
-    args: Tuple[Any]
+    args: Tuple[Any, ...]
     kwargs: Dict[str, Any]
 
 

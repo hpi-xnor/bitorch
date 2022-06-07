@@ -2,6 +2,7 @@ import os
 from argparse import ArgumentParser, Namespace
 from importlib import import_module
 from pathlib import Path
+from types import TracebackType
 from typing import List, Type, Optional
 
 from .config import Config
@@ -20,7 +21,12 @@ class _ModeSetter(object):
         mode = self._new_mode
         return self
 
-    def __exit__(self, exc_type: Type[BaseException], exc_val: Optional[BaseException], exc_tb) -> None:
+    def __exit__(
+            self,
+            exc_type: Optional[Type[BaseException]],
+            exc_val: Optional[BaseException],
+            exc_tb: Optional[TracebackType]
+    ) -> None:
         global mode
         mode = self._previous_mode
 

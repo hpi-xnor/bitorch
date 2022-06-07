@@ -15,12 +15,27 @@ class LayerContainer:
         if attr_value == self._layer_implementation:
             return self
         if callable(attr_value):
-            def patch_function(*args, **kwargs):
-                fn_return_val = attr_value(*args, **kwargs)
-                if fn_return_val == self._layer_implementation:
-                    return self
-                return fn_return_val
-            return patch_function
+            # dirty patch functions and classes
+            # they should return this LayerContainer instead of themselves
+            # required for e.g. pytorch's .to(device) function
+            other = self
+
+            class Patch:
+                def __call__(self, *args: Any, **kwargs: Any) -> Any:
+                    fn_return_val = attr_value(*args, **kwargs)
+                    if fn_return_val == other._layer_implementation:
+                        return other
+                    return fn_return_val
+
+                def __getattr__(self, item_: Any) -> Any:
+                    return getattr(attr_value, item_)
+
+                # needed for tests:
+                @property  # type: ignore[misc]
+                def __class__(self) -> Any:
+                    return attr_value.__class__
+
+            return Patch()
         return attr_value
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:

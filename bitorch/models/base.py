@@ -71,7 +71,7 @@ class Model(nn.Module):
             elif isinstance(module, nn.Linear):
                 nn.init.xavier_normal_(module.weight)
 
-    def convert(self, new_mode: RuntimeMode, device=None, verbose=False):
+    def convert(self, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> "Model":
         with bitorch.change_mode(new_mode):
             for registry in (q_linear_registry, ):
                 for recipe in registry.instance_recipes:
