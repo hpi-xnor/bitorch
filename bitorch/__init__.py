@@ -2,36 +2,12 @@ import os
 from argparse import ArgumentParser, Namespace
 from importlib import import_module
 from pathlib import Path
-from types import TracebackType
-from typing import List, Type, Optional
+from typing import List
 
 from .config import Config
-from .runtime_mode import RuntimeMode, runtime_mode_type
+from .runtime_mode import RuntimeMode, runtime_mode_type, change_mode, pause_wrapping
 
 mode: RuntimeMode = RuntimeMode.DEFAULT
-
-
-class _ModeSetter(object):
-    def __init__(self, new_mode: RuntimeMode) -> None:
-        self._previous_mode = mode
-        self._new_mode = new_mode
-
-    def __enter__(self) -> "_ModeSetter":
-        global mode
-        mode = self._new_mode
-        return self
-
-    def __exit__(
-            self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType]
-    ) -> None:
-        global mode
-        mode = self._previous_mode
-
-
-change_mode = _ModeSetter
 
 configs_by_name = {}
 
@@ -90,8 +66,8 @@ def add_config_args(parser: ArgumentParser) -> None:
     Args:
         parser (ArgumentParser): parser to add the arguments to
     """
-    for config in configs_by_name.values():
-        config.add_config_arguments(parser)
+    for config_ in configs_by_name.values():
+        config_.add_config_arguments(parser)
 
 
 def apply_args_to_configuration(args: Namespace) -> None:
@@ -100,5 +76,5 @@ def apply_args_to_configuration(args: Namespace) -> None:
     Args:
         args (Namespace): the cli configurations
     """
-    for config in configs_by_name.values():
-        config.apply_args_to_configuration(args)
+    for config_ in configs_by_name.values():
+        config_.apply_args_to_configuration(args)

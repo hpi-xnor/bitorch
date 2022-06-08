@@ -38,6 +38,9 @@ class LayerContainer:
             return Patch()
         return attr_value
 
+    def __repr__(self) -> "str":
+        return f"LayerContainer (at {hex(id(self))}), contains: {self._layer_implementation}"
+
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self._layer_implementation(*args, **kwargs)
 

@@ -2,8 +2,6 @@
 Adapted from official PyTorch example: https://github.com/pytorch/examples/blob/main/mnist/main.py
 """
 
-from __future__ import print_function
-
 import argparse
 
 import torch
@@ -16,23 +14,22 @@ import bitorch.layers as qnn
 from bitorch import datasets as bitorch_datasets, RuntimeMode
 from bitorch.datasets import MNIST
 from bitorch.models import Model
-
-from bitorch_inference_engine.layers.qlinear import QLinearInf
+import bitorch_inference_engine
 
 
 class QuantizedMLP(Model):
-    def __init__(self, num_hidden_units_1=128, num_hidden_units_2=64):
+    def __init__(self, num_hidden_units_1=256, num_hidden_units_2=128):
         super().__init__(dataset=MNIST)
         self._model.flatten = nn.Flatten()
         self._model.fc1 = nn.Linear(784, num_hidden_units_1)
         self._model.act1 = nn.PReLU()
         self._model.bn1 = nn.BatchNorm1d(num_hidden_units_1)
 
-        self._model.fc2 = qnn.QLinear(num_hidden_units_1, num_hidden_units_2)
+        self._model.fc2 = qnn.QLinear(num_hidden_units_1, num_hidden_units_2, bias=False)
         self._model.act2 = nn.PReLU()
         self._model.bn2 = nn.BatchNorm1d(num_hidden_units_2)
 
-        self._model.fc3 = qnn.QLinear(num_hidden_units_2, 10)
+        self._model.fc3 = nn.Linear(num_hidden_units_2, 10)
 
     def forward(self, x):
         x = self._model.flatten(x)

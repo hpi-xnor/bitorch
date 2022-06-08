@@ -4,12 +4,10 @@ from typing import Union, Type
 import torch
 from torch import nn
 
-import bitorch
 from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
-from ..layers.extensions.switchable_layer import LayerContainer
-from ..layers.qlinear import q_linear_registry, QLinear
+from bitorch.layers.qlinear import q_linear_registry
 
 
 class Model(nn.Module):
@@ -72,20 +70,7 @@ class Model(nn.Module):
                 nn.init.xavier_normal_(module.weight)
 
     def convert(self, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> "Model":
-        with bitorch.change_mode(new_mode):
-            for registry in (q_linear_registry, ):
-                for recipe in registry.instance_recipes:
-                    module = recipe.container
-                    assert isinstance(module, LayerContainer)
-                    if verbose:
-                        print("Converting", module)
-                    new_kwargs = {}
-                    new_kwargs.update(recipe.kwargs)
-                    new_kwargs["device"] = device
-                    replacement_module = registry.get_replacement(*recipe.args, **new_kwargs)
-                    if hasattr(module, "weight"):
-                        replacement_module.weight = module.weight
-                    if hasattr(module, "bias"):
-                        replacement_module.bias = module.bias
-                    module.replace_layer_implementation(replacement_module)
+        for registry in (q_linear_registry, ):
+            registry.convert_layers_to(new_mode, device, verbose)
+        self._model.to(device)
         return self

@@ -4,6 +4,9 @@ import bitorch
 from bitorch import RuntimeMode
 
 
+TEST_MODE = RuntimeMode.INFERENCE_AUTO
+
+
 def test_mode_creation_from_name():
     for mode_str in RuntimeMode.__members__.keys():
         assert isinstance(RuntimeMode.from_string(mode_str), RuntimeMode)
@@ -17,7 +20,7 @@ def test_mode_supports_self():
 def test_mode_does_not_support_other_mode():
     for mode in RuntimeMode.__members__.values():
         for other_mode in RuntimeMode.__members__.values():
-            if mode == other_mode:
+            if mode == other_mode or mode == RuntimeMode.RAW or other_mode == RuntimeMode.RAW:
                 continue
             assert not mode.is_supported_by(other_mode)
 
@@ -51,14 +54,14 @@ def test_bitorch_default_mode():
 
 
 @pytest.fixture()
-def set_inference_mode():
-    bitorch.mode = RuntimeMode.INFERENCE_AUTO
+def set_test_mode():
+    bitorch.mode = TEST_MODE
     yield None
     bitorch.mode = RuntimeMode.DEFAULT
 
 
-def test_set_bitorch_mode(set_inference_mode):
-    assert bitorch.mode == RuntimeMode.INFERENCE_AUTO
+def test_set_bitorch_mode(set_test_mode):
+    assert bitorch.mode == TEST_MODE
 
 
 @pytest.fixture()
@@ -70,5 +73,15 @@ def reset_modes():
 
 def test_setting_different_modes(reset_modes):
     assert bitorch.mode == RuntimeMode.DEFAULT
-    bitorch.mode = RuntimeMode.INFERENCE_AUTO
-    assert bitorch.mode == RuntimeMode.INFERENCE_AUTO
+    bitorch.mode = TEST_MODE
+    assert bitorch.mode == TEST_MODE
+
+
+def test_with_statement(reset_modes):
+    with bitorch.change_mode(TEST_MODE):
+        assert bitorch.mode == TEST_MODE
+
+
+def test_pause_wrap(reset_modes):
+    with bitorch.pause_wrapping():
+        assert bitorch.mode == RuntimeMode.RAW
