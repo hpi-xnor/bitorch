@@ -1,6 +1,6 @@
 build
 flake8
-mypy
+mypy~=0.920
 pep8-naming
 pytest
 sphinx
