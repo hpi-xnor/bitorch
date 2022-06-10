@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, Union, Set, Optional, Dict, Tuple, Type
+from typing import Any, Union, Set, Optional, Dict, Tuple, Type, Iterable
 
 import torch
 from torch import nn
@@ -233,9 +233,16 @@ class LayerRegistry:
         for i in to_remove:
             self.layer_implementations.remove(i)
 
-    def convert_layers_to(self, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> None:
+    def convert_layers_to(
+            self, new_mode: RuntimeMode,
+            filter_: Optional[Iterable[Any]] = None,
+            device: torch.device = None,
+            verbose: bool = False
+    ) -> None:
         for recipe in self._instance_recipes:
             module = recipe.layer
+            if filter_ is not None and module.layer_implementation not in filter_:
+                continue
             assert isinstance(module, LayerContainer)
             if verbose:
                 print("Converting", module)

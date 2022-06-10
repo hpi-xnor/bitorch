@@ -1,6 +1,7 @@
 from typing import Any
 
 import pytest
+import torch
 from torch import nn
 from torch.nn import functional as F
 
@@ -10,6 +11,9 @@ from bitorch import RuntimeMode
 from bitorch.datasets import MNIST
 from bitorch.layers import QConv2d, QLinear
 from bitorch.layers.extensions.layer_implementation import LayerRecipe, CustomImplementation
+from bitorch.layers.qconv1d import q_conv1d_registry
+from bitorch.layers.qconv2d import QConv2dBase, QConv2dImplementation, q_conv2d_registry
+from bitorch.layers.qconv3d import q_conv3d_registry
 from bitorch.layers.qlinear import QLinearImplementation, q_linear_registry, QLinearBase
 from bitorch.models import Model
 
@@ -23,7 +27,7 @@ class TestModel(Model):
         self.q_linear = QLinear(784, 64)
         self._model = nn.Sequential(
             self.q_conv2d,
-            nn.Conv2d(1, 32, 3, 1, 1),
+            nn.Conv2d(32, 1, 3, 1, 1),
             nn.Flatten(),
             self.q_linear,
             nn.Linear(64, 10),
@@ -35,8 +39,16 @@ class TestModel(Model):
         return output
 
 
+def reset():
+    bitorch.mode = RuntimeMode.DEFAULT
+    for registry in (q_linear_registry, q_conv2d_registry):
+        registry.unregister_custom_implementations()
+
+
 @pytest.fixture
-def get_decorated_test_impl():
+def get_decorated_impls():
+    reset()
+
     @QLinearImplementation(TEST_MODE)
     class QLinearTestImpl(CustomImplementation, nn.Module):
         def __init__(self, *args, **kwargs):
@@ -54,14 +66,40 @@ def get_decorated_test_impl():
 
         @classmethod
         def create_clone_from(cls, recipe: LayerRecipe) -> Any:
-            return cls(*recipe.args, **recipe.kwargs)
-    yield QLinearTestImpl
-    q_linear_registry.clear()
-    q_linear_registry.unregister_custom_implementations()
+            new_layer = cls(*recipe.args, **recipe.kwargs)
+            new_layer._layer.weight = recipe.layer.weight
+            new_layer._layer.bias = recipe.layer.bias
+            return new_layer
+
+    @QConv2dImplementation(TEST_MODE)
+    class QConv2dTestImpl(CustomImplementation, nn.Module):
+        def __init__(self, *args, **kwargs):
+            super().__init__()
+            with bitorch.pause_wrapping():
+                self._layer = QConv2d(*args, **kwargs)
+            self.is_test_implementation = True
+
+        def forward(self, x):
+            return self._layer(x)
+
+        @classmethod
+        def can_clone(cls, recipe: LayerRecipe) -> bool:
+            return True
+
+        @classmethod
+        def create_clone_from(cls, recipe: LayerRecipe) -> Any:
+            new_layer = cls(*recipe.args, **recipe.kwargs)
+            new_layer._layer.weight = recipe.layer.weight
+            new_layer._layer.bias = recipe.layer.bias
+            return new_layer
+    yield QLinearTestImpl, QConv2dTestImpl
+    reset()
 
 
 @pytest.fixture
-def get_subclassed_test_impl():
+def get_subclassed_impls():
+    reset()
+
     @QLinearImplementation(TEST_MODE)
     class QLinearTestImpl(CustomImplementation, QLinearBase):
         def __init__(self, *args, **kwargs):
@@ -74,21 +112,51 @@ def get_subclassed_test_impl():
 
         @classmethod
         def create_clone_from(cls, recipe: LayerRecipe) -> Any:
-            return cls(*recipe.args, **recipe.kwargs)
-    yield QLinearTestImpl
-    q_linear_registry.clear()
-    q_linear_registry.unregister_custom_implementations()
+            new_layer = cls(*recipe.args, **recipe.kwargs)
+            new_layer.weight = recipe.layer.weight
+            new_layer.bias = recipe.layer.bias
+            return new_layer
+
+    @QConv2dImplementation(TEST_MODE)
+    class QConv2dTestImpl(CustomImplementation, QConv2dBase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.is_test_implementation = True
+
+        @classmethod
+        def can_clone(cls, recipe: LayerRecipe) -> bool:
+            return True
+
+        @classmethod
+        def create_clone_from(cls, recipe: LayerRecipe) -> Any:
+            new_layer = cls(*recipe.args, **recipe.kwargs)
+            new_layer.weight = recipe.layer.weight
+            new_layer.bias = recipe.layer.bias
+            return new_layer
+    yield QLinearTestImpl, QConv2dTestImpl
+    reset()
 
 
-def test_convert_model_decorated(get_decorated_test_impl):
+def _test():
+    x = torch.rand(1, 1, 28, 28)
     net = TestModel()
+
     assert not hasattr(net.q_linear, "is_test_implementation")
+    assert not hasattr(net.q_conv2d, "is_test_implementation")
+    y1 = net(x)
+
     net.convert(TEST_MODE)
+
     assert hasattr(net.q_linear, "is_test_implementation") and net.q_linear.is_test_implementation
+    assert hasattr(net.q_conv2d, "is_test_implementation") and net.q_conv2d.is_test_implementation
+    y2 = net(x)
+
+    assert torch.equal(y1, y2)
 
 
-def test_convert_model_subclassed(get_subclassed_test_impl):
-    net = TestModel()
-    assert not hasattr(net.q_linear, "is_test_implementation")
-    net.convert(TEST_MODE)
-    assert hasattr(net.q_linear, "is_test_implementation") and net.q_linear.is_test_implementation
+def test_convert_model_decorated(get_decorated_impls):
+    _test()
+
+
+def test_convert_model_subclassed(get_subclassed_impls):
+    _test()

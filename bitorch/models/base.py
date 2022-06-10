@@ -7,6 +7,10 @@ from torch import nn
 from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
+from bitorch.layers.extensions.switchable_layer import LayerContainer
+from bitorch.layers.qconv1d import q_conv1d_registry
+from bitorch.layers.qconv2d import q_conv2d_registry
+from bitorch.layers.qconv3d import q_conv3d_registry
 from bitorch.layers.qlinear import q_linear_registry
 
 
@@ -70,7 +74,8 @@ class Model(nn.Module):
                 nn.init.xavier_normal_(module.weight)
 
     def convert(self, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> "Model":
-        for registry in (q_linear_registry, ):
-            registry.convert_layers_to(new_mode, device, verbose)
+        modules_to_replace = list(self.modules())
+        for registry in (q_linear_registry, q_conv1d_registry, q_conv2d_registry, q_conv3d_registry):
+            registry.convert_layers_to(new_mode, filter_=modules_to_replace, device=device, verbose=verbose)
         self._model.to(device)
         return self

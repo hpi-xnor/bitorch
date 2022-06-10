@@ -53,3 +53,7 @@ class LayerContainer:
     @property  # type: ignore[misc]
     def __class__(self) -> Any:
         return self._layer_implementation.__class__
+
+    @property
+    def layer_implementation(self) -> Any:
+        return self._layer_implementation

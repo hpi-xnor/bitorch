@@ -1,11 +1,16 @@
+"""Module containing the quantized 2d convolution layer"""
+
 from typing import Union, Any
+
 from torch import Tensor
 from torch.nn import Conv2d, init
 from torch.nn.functional import pad, conv2d
 
+from bitorch import runtime_mode_type, RuntimeMode
 from bitorch.layers.config import config
-from bitorch.quantizations import Quantization
+from bitorch.layers.extensions.layer_implementation import LayerRegistry, LayerImplementation, DefaultImplementation
 from bitorch.layers.qactivation import QActivation
+from bitorch.quantizations import Quantization
 
 
 class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
@@ -63,7 +68,7 @@ class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
             groups=self.groups)
 
 
-class QConv2d(QConv2d_NoAct):  # type: ignore
+class QConv2dBase(QConv2d_NoAct):  # type: ignore
     def __init__(self,  # type: ignore
                  *args: Any,
                  input_quantization: Union[str, Quantization] = None,
@@ -80,7 +85,7 @@ class QConv2d(QConv2d_NoAct):  # type: ignore
             weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                 function for weights. Defaults to None.
         """
-        super(QConv2d, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
+        super().__init__(*args, weight_quantization=weight_quantization, **kwargs)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
     def forward(self, input_tensor: Tensor) -> Tensor:
@@ -92,4 +97,32 @@ class QConv2d(QConv2d_NoAct):  # type: ignore
         Returns:
             Tensor: the activated and convoluted output tensor.
         """
-        return super(QConv2d, self).forward(self.activation(input_tensor))
+        return super().forward(self.activation(input_tensor))
+
+
+q_conv2d_registry = LayerRegistry("QConv2d")
+
+
+class QConv2dImplementation(LayerImplementation):
+    """
+    Decorator for :class:`QConv2d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
+    """
+    def __init__(self, supports_modes: runtime_mode_type) -> None:
+        """
+        Args:
+            supports_modes:  RuntimeMode(s) that is/are supported by an implementation
+        """
+        super().__init__(q_conv2d_registry, supports_modes)
+
+
+@QConv2dImplementation(RuntimeMode.DEFAULT)
+class QLinearDefaultImplementation(DefaultImplementation, QConv2dBase):
+    """
+    This class defines the default implementation of a QConv2d layer (which is actually implemented by QConv2dBase).
+
+    To implement a custom QConv2d implementation use QConv2dBase as a super class instead.
+    """
+    pass
+
+
+QConv2d = QLinearDefaultImplementation
