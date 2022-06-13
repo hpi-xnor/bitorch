@@ -8,7 +8,7 @@ from torch.nn.functional import pad, conv1d
 
 from bitorch import runtime_mode_type, RuntimeMode
 from bitorch.layers.config import config
-from bitorch.layers.extensions.layer_implementation import LayerRegistry, LayerImplementation, DefaultImplementation
+from bitorch.layers.extensions import LayerRegistry, LayerImplementation, DefaultImplementation
 from bitorch.layers.qactivation import QActivation
 from bitorch.quantizations import Quantization
 
