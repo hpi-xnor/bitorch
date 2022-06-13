@@ -2,7 +2,7 @@ import pytest
 import torch
 from torch import nn
 
-from bitorch.layers.extensions.switchable_layer import LayerContainer
+from bitorch.layers.extensions.layer_container import LayerContainer
 
 
 class Foo:

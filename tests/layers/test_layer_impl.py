@@ -6,7 +6,7 @@ import bitorch
 from bitorch import RuntimeMode
 from bitorch.layers.extensions.layer_implementation import LayerImplementation, LayerRegistry, \
     CustomImplementation, DefaultImplementation, LayerRecipe
-from bitorch.layers.extensions.switchable_layer import LayerContainer
+from bitorch.layers.extensions.layer_container import LayerContainer
 
 TEST_MODE = RuntimeMode.INFERENCE_AUTO
 

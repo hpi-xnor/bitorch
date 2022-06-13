@@ -7,7 +7,7 @@ from torch import nn
 
 import bitorch
 from bitorch import runtime_mode_type, RuntimeMode
-from .switchable_layer import LayerContainer
+from .layer_container import LayerContainer
 
 
 @dataclass(eq=False, frozen=True)
@@ -22,10 +22,10 @@ class LayerRecipe:
 
 
 class BaseImplementation:
+    """Defines the class interface of a custom layer implementation of a certain layer type."""
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
-    """Defines the class interface of a custom layer implementation of a certain layer type."""
     @classmethod
     def is_default_implementation(cls) -> bool:
         """
@@ -157,6 +157,14 @@ class LayerImplementation(ABC):
         return correct_layer_implementation._provide_layer_implementation(*args, **kwargs)
 
     def supports_mode(self, mode: RuntimeMode) -> bool:
+        """
+        Check whether the stored layer implementation supports a given RuntimeMode.
+        Args:
+            mode:
+
+        Returns:
+
+        """
         return mode.is_supported_by(self._supported_modes)
 
     def can_create_clone_from(self, recipe: LayerRecipe) -> bool:

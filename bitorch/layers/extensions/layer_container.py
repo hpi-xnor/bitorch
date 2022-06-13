@@ -2,10 +2,25 @@ from typing import Any
 
 
 class LayerContainer:
+    """
+    This class wraps another layer - but the internally contained class can be swapped out during runtime.
+    """
     def __init__(self, impl_class: Any, *args: Any, **kwargs: Any) -> None:
+        """
+        Wrap a new object based on the given class, positional arguments, and keyword arguments.
+        Args:
+            impl_class: class of the new object
+            *args: positional arguments of the new object
+            **kwargs: keyword arguments of the new object
+        """
         self._layer_implementation = impl_class(*args, **kwargs)
 
     def replace_layer_implementation(self, new_implementation: Any) -> None:
+        """
+        Replace the internally stored layer object with the given one.
+        Args:
+            new_implementation: new class which should replace the previous implementation.
+        """
         self._layer_implementation = new_implementation
 
     def __getattr__(self, item: Any) -> Any:
@@ -56,4 +71,9 @@ class LayerContainer:
 
     @property
     def layer_implementation(self) -> Any:
+        """
+        Access the internally wrapped layer object directly.
+        Returns:
+            the internal layer object
+        """
         return self._layer_implementation

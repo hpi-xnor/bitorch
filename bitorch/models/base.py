@@ -7,7 +7,7 @@ from torch import nn
 from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
-from bitorch.layers.extensions.switchable_layer import LayerContainer
+from bitorch.layers.extensions.layer_container import LayerContainer
 from bitorch.layers.qconv1d import q_conv1d_registry
 from bitorch.layers.qconv2d import q_conv2d_registry
 from bitorch.layers.qconv3d import q_conv3d_registry
