@@ -1,5 +1,8 @@
 """
-Adapted from official PyTorch example: https://github.com/pytorch/examples/blob/main/mnist/main.py
+An example script for training a model for the MNIST dataset with BITorch.
+
+Modified from the `PyTorch MNIST Example <https://github.com/pytorch/examples/blob/main/mnist/main.py>`_,
+which was published under the `BSD 3-Clause License <https://github.com/pytorch/examples/blob/main/LICENSE>`_.
 """
 
 import argparse

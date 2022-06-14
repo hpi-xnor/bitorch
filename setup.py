@@ -27,8 +27,8 @@ setuptools.setup(
     name="bitorch",
     url="https://github.com/hpi-xnor/bitorch",
     version=version,
-    author="Joseph Bethge",
-    author_email="joseph.bethge@hpi.de",
+    author="Hasso Plattner Institute",
+    author_email="fb10-xnor@hpi.de",
     description="A package for building and training quantized and binary neural networks with Pytorch",
     long_description=readme_content,
     long_description_content_type="text/markdown",
@@ -45,6 +45,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     python_requires='>=3.7',
     data_files=[
