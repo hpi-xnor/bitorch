@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Simple example script for MNIST
-- Support for integration of bitorch's inference engine
+- Support for integration of bitorch's inference engine for the following layers
+  - QLinear
 
 ### Changed
 
