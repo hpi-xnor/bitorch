@@ -6,6 +6,7 @@ from typing import List
 
 from .config import Config
 from .runtime_mode import RuntimeMode, runtime_mode_type, change_mode, pause_wrapping
+from .layers import convert
 
 mode: RuntimeMode = RuntimeMode.DEFAULT
 

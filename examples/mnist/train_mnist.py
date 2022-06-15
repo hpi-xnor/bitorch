@@ -20,6 +20,9 @@ from bitorch.models import Model
 import bitorch_inference_engine
 
 
+bitorch_inference_engine.initialize()
+
+
 class QuantizedMLP(Model):
     def __init__(self, num_hidden_units_1=256, num_hidden_units_2=128):
         super().__init__(dataset=MNIST)

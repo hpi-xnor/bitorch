@@ -10,7 +10,8 @@ import bitorch.runtime_mode
 from bitorch import RuntimeMode
 from bitorch.datasets import MNIST
 from bitorch.layers import QConv2d, QLinear
-from bitorch.layers.extensions.layer_implementation import LayerRecipe, CustomImplementation
+from bitorch.layers.extensions.layer_implementation import CustomImplementation
+from bitorch.layers.extensions import LayerRecipe
 from bitorch.layers.qconv1d import q_conv1d_registry
 from bitorch.layers.qconv2d import QConv2dBase, QConv2dImplementation, q_conv2d_registry
 from bitorch.layers.qconv3d import q_conv3d_registry

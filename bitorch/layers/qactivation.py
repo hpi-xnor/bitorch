@@ -67,8 +67,8 @@ class QActivation(nn.Module):
                 cancellation. Disabled if threshold is 0.
         """
         super(QActivation, self).__init__()
-        self._activation = config.get_quantization_function(activation or config.input_quantization)
-        self._gradient_cancellation_threshold = (
+        self.activation_function = config.get_quantization_function(activation or config.input_quantization)
+        self.gradient_cancellation_threshold = (
             gradient_cancellation_threshold or config.gradient_cancellation_threshold
         )
 
@@ -81,6 +81,6 @@ class QActivation(nn.Module):
         Returns:
             torch.Tensor: quantized input tensor.
         """
-        if self._gradient_cancellation_threshold > 0:
-            input_tensor = GradientCancellation.apply(input_tensor, self._gradient_cancellation_threshold)
-        return self._activation(input_tensor)
+        if self.gradient_cancellation_threshold > 0:
+            input_tensor = GradientCancellation.apply(input_tensor, self.gradient_cancellation_threshold)
+        return self.activation_function(input_tensor)

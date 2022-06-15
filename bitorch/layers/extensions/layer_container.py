@@ -1,11 +1,13 @@
-from typing import Any
+from typing import Any, TypeVar, Type, Generic
+
+T = TypeVar("T")
 
 
-class LayerContainer:
+class LayerContainer(Generic[T]):
     """
     This class wraps another layer - but the internally contained class can be swapped out during runtime.
     """
-    def __init__(self, impl_class: Any, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, impl_class: Type[T], *args: Any, **kwargs: Any) -> None:
         """
         Wrap a new object based on the given class, positional arguments, and keyword arguments.
         Args:
@@ -15,7 +17,7 @@ class LayerContainer:
         """
         self._layer_implementation = impl_class(*args, **kwargs)
 
-    def replace_layer_implementation(self, new_implementation: Any) -> None:
+    def replace_layer_implementation(self, new_implementation: T) -> None:
         """
         Replace the internally stored layer object with the given one.
         Args:
@@ -57,7 +59,7 @@ class LayerContainer:
         return f"LayerContainer (at {hex(id(self))}), contains: {self._layer_implementation}"
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        return self._layer_implementation(*args, **kwargs)
+        return self._layer_implementation(*args, **kwargs)  # type:ignore[operator]
 
     def __setattr__(self, key: Any, value: Any) -> None:
         if key == "_layer_implementation":
@@ -66,11 +68,11 @@ class LayerContainer:
         setattr(self._layer_implementation, key, value)
 
     @property  # type: ignore[misc]
-    def __class__(self) -> Any:
+    def __class__(self) -> Type[T]:  # type: ignore
         return self._layer_implementation.__class__
 
     @property
-    def layer_implementation(self) -> Any:
+    def layer_implementation(self) -> T:
         """
         Access the internally wrapped layer object directly.
         Returns:

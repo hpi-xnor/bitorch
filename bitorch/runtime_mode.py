@@ -14,7 +14,9 @@ runtime_mode_type = Union["RuntimeMode", int]
 class RuntimeMode(Enum):
     RAW = 0
     DEFAULT = 1
-    INFERENCE_AUTO = 2
+    CPU = 2
+    GPU = 4
+    INFERENCE_AUTO = 8
 
     def __add__(self, other: runtime_mode_type) -> runtime_mode_type:
         if self._to_int(self) == self._to_int(other):
@@ -57,6 +59,8 @@ class RuntimeMode(Enum):
         return {
             "raw": RuntimeMode.RAW,
             "default": RuntimeMode.DEFAULT,
+            "cpu": RuntimeMode.CPU,
+            "gpu": RuntimeMode.GPU,
             "inference_auto": RuntimeMode.INFERENCE_AUTO,
         }[level.lower()]
 

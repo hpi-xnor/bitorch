@@ -1,5 +1,5 @@
 """Module containing the quantized linear layer"""
-from typing import Union
+from typing import Union, Dict, Any
 
 import torch
 from torch.nn import Linear
@@ -8,7 +8,8 @@ from torch.nn.functional import linear
 from bitorch import RuntimeMode, runtime_mode_type
 from bitorch.quantizations import Quantization
 from .config import config
-from .extensions.layer_implementation import LayerImplementation, LayerRegistry, DefaultImplementation
+from .extensions.layer_implementation import DefaultImplementation
+from .extensions import LayerRecipe, LayerImplementation, LayerRegistry
 from .qactivation import QActivation
 
 
@@ -33,8 +34,36 @@ class QLinearBase(Linear):
             **kwargs: keyword arguments for linear layer
         """
         super().__init__(*args, **kwargs)  # type: ignore
-        self.weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization)
+        self.weight_quantization = config.get_quantization_function(weight_quantization or config.weight_quantization)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
+
+    @staticmethod
+    def get_args_as_kwargs(recipe: LayerRecipe) -> Dict[str, Any]:
+        """
+        Gather all arguments that were used to create a QLinear layer with names.
+        Can be used to recreate a layer with identical arguments.
+
+        Returns:
+            A dictionary with all arguments
+        """
+        return {
+            "in_features": recipe.args[0],
+            "out_features": recipe.args[1],
+            "input_quantization": recipe.layer.input_quantization,
+            "gradient_cancellation_threshold": recipe.layer,
+            "weight_quantization": recipe.layer.weight_quantization,
+            "bias": recipe.get_by_position_or_key(5, "bias", True),
+            "device": recipe.get_by_position_or_key(6, "device", None),
+            "dtype": recipe.get_by_position_or_key(7, "dtype", None),
+        }
+
+    @property
+    def input_quantization(self) -> Quantization:
+        return self.activation.activation_function
+
+    @property
+    def gradient_cancellation_threshold(self) -> float:
+        return self.activation.gradient_cancellation_threshold
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards x through the binary linear layer.
@@ -46,7 +75,7 @@ class QLinearBase(Linear):
             torch.Tensors: forwarded tensor
         """
 
-        return linear(self.activation(x), self.weight_quantize(self.weight), self.bias)
+        return linear(self.activation(x), self.weight_quantization(self.weight), self.bias)
 
 
 q_linear_registry = LayerRegistry("QLinear")
