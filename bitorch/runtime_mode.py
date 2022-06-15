@@ -24,6 +24,14 @@ class RuntimeMode(Enum):
         return self._to_int(other) + self.value
 
     @staticmethod
+    def available_values():
+        return RuntimeMode.__members__.values()
+
+    @staticmethod
+    def list_of_names():
+        return RuntimeMode.__members__.keys()
+
+    @staticmethod
     def _max_val() -> int:
         return sum(map(lambda x: x.value, RuntimeMode.__members__.values()))
 

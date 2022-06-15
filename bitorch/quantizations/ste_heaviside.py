@@ -29,7 +29,7 @@ class SteHeaviside(Quantization):
     """Module for applying the SteHeaviside quantization, using an ste in backward pass"""
 
     name = "steheaviside"
-    bitwidth = 1
+    bit_width = 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.

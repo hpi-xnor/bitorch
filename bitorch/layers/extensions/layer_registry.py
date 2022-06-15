@@ -81,7 +81,7 @@ class LayerRegistry:
     ) -> None:
         for recipe in list(self._instance_recipes):
             module = recipe.layer
-            if only is not None and module.layer_implementation not in only:
+            if only is not None and module.layer_implementation not in only and module not in only:
                 continue
             assert isinstance(module, LayerContainer)
             if verbose:
