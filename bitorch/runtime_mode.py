@@ -1,7 +1,7 @@
 from enum import Enum
 from functools import total_ordering
 from types import TracebackType
-from typing import Union, Any, Optional, Type
+from typing import Union, Any, Optional, Type, List
 
 import bitorch
 
@@ -24,12 +24,12 @@ class RuntimeMode(Enum):
         return self._to_int(other) + self.value
 
     @staticmethod
-    def available_values():
-        return RuntimeMode.__members__.values()
+    def available_values() -> List["RuntimeMode"]:
+        return RuntimeMode.__members__.values()  # type:ignore
 
     @staticmethod
-    def list_of_names():
-        return RuntimeMode.__members__.keys()
+    def list_of_names() -> List[str]:
+        return RuntimeMode.__members__.keys()  # type:ignore
 
     @staticmethod
     def _max_val() -> int:
