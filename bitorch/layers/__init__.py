@@ -3,11 +3,12 @@ This submodule contains adapted pytorch layers that use quantization functions o
 and activations before forwarding them. These layers use the quantization functions specified in the
 quantization submodule.
 """
-from typing import List, TypeVar
+from typing import TypeVar
 
 import torch
 from torch import nn
 
+from bitorch import RuntimeMode
 from .debug_layers import (
     InputGraphicalDebug,
     InputPrintDebug,
@@ -18,11 +19,12 @@ from .debug_layers import (
 from .extensions import CustomImplementation, LayerRegistry
 from .pact import Pact
 from .qactivation import QActivation
-from .qconv1d import QConv1d, QConv1d_NoAct, q_conv1d_registry
-from .qconv2d import QConv2d, QConv2d_NoAct, q_conv2d_registry
-from .qconv3d import QConv3d, QConv3d_NoAct, q_conv3d_registry
+from .qconv1d import QConv1d, QConv1d_NoAct
+from .qconv2d import QConv2d, QConv2d_NoAct
+from .qconv3d import QConv3d, QConv3d_NoAct
 from .qembedding import QEmbedding, QEmbeddingBag
-from .qlinear import QLinear, QLinearBase, q_linear_registry
+from .qlinear import QLinear, QLinearBase
+from .register import all_layer_registries
 
 __all__ = [
     "InputGraphicalDebug", "InputPrintDebug", "WeightGraphicalDebug", "WeightPrintDebug",
@@ -30,17 +32,6 @@ __all__ = [
     "QConv2d_NoAct", "QConv3d_NoAct", "QLinear", "QLinearBase", "QEmbedding", "QEmbeddingBag", "Pact",
     "CustomImplementation", "convert"
 ]
-
-from .. import RuntimeMode
-
-
-def _get_layer_registries() -> List[LayerRegistry]:
-    return [
-        q_conv1d_registry,
-        q_conv2d_registry,
-        q_conv3d_registry,
-        q_linear_registry,
-    ]
 
 
 T = TypeVar("T", bound=nn.Module)
@@ -59,7 +50,7 @@ def convert(module: T, new_mode: RuntimeMode, device: torch.device = None, verbo
         the converted module
     """
     submodules = list(module.modules())
-    for registry in _get_layer_registries():
+    for registry in all_layer_registries():
         registry.convert_layers_to(new_mode, only=submodules, device=device, verbose=verbose)
     module.to(device)
     return module

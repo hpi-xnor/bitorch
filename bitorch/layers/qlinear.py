@@ -5,12 +5,12 @@ import torch
 from torch.nn import Linear
 from torch.nn.functional import linear
 
-from bitorch import RuntimeMode, runtime_mode_type
+from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
 from .config import config
-from .extensions.layer_implementation import DefaultImplementation
-from .extensions import LayerRecipe, LayerImplementation, LayerRegistry
+from .extensions import LayerRecipe, DefaultImplementation
 from .qactivation import QActivation
+from .register import QLinearImplementation
 
 
 class QLinearBase(Linear):
@@ -47,14 +47,14 @@ class QLinearBase(Linear):
             A dictionary with all arguments
         """
         return {
-            "in_features": recipe.args[0],
-            "out_features": recipe.args[1],
+            "in_features": recipe.get_positional_arg(0),
+            "out_features": recipe.get_positional_arg(1),
             "input_quantization": recipe.layer.input_quantization,
-            "gradient_cancellation_threshold": recipe.layer,
+            "gradient_cancellation_threshold": recipe.layer.gradient_cancellation_threshold,
             "weight_quantization": recipe.layer.weight_quantization,
-            "bias": recipe.get_by_position_or_key(5, "bias", True),
-            "device": recipe.get_by_position_or_key(6, "device", None),
-            "dtype": recipe.get_by_position_or_key(7, "dtype", None),
+            "bias": recipe.get_arg(5, "bias", True),
+            "device": recipe.get_arg(6, "device", None),
+            "dtype": recipe.get_arg(7, "dtype", None),
         }
 
     @property
@@ -76,21 +76,6 @@ class QLinearBase(Linear):
         """
 
         return linear(self.activation(x), self.weight_quantization(self.weight), self.bias)
-
-
-q_linear_registry = LayerRegistry("QLinear")
-
-
-class QLinearImplementation(LayerImplementation):
-    """
-    Decorator for :class:`QLinear` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
-    """
-    def __init__(self, supports_modes: runtime_mode_type) -> None:
-        """
-        Args:
-            supports_modes:  RuntimeMode(s) that is/are supported by an implementation
-        """
-        super().__init__(q_linear_registry, supports_modes)
 
 
 @QLinearImplementation(RuntimeMode.DEFAULT)

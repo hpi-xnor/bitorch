@@ -12,10 +12,10 @@ from bitorch.datasets import MNIST
 from bitorch.layers import QConv2d, QLinear
 from bitorch.layers.extensions.layer_implementation import CustomImplementation
 from bitorch.layers.extensions import LayerRecipe
-from bitorch.layers.qconv1d import q_conv1d_registry
-from bitorch.layers.qconv2d import QConv2dBase, QConv2dImplementation, q_conv2d_registry
-from bitorch.layers.qconv3d import q_conv3d_registry
-from bitorch.layers.qlinear import QLinearImplementation, q_linear_registry, QLinearBase
+from bitorch.layers.qconv2d import QConv2dBase
+from bitorch.layers.qlinear import QLinearBase
+from bitorch.layers.register import q_linear_registry, QLinearImplementation, q_conv1d_registry, q_conv2d_registry, \
+    QConv2dImplementation, q_conv3d_registry
 from bitorch.models import Model
 
 TEST_MODE = RuntimeMode.INFERENCE_AUTO

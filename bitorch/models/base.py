@@ -8,10 +8,7 @@ from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct, convert
 from bitorch.layers.extensions.layer_container import LayerContainer
-from bitorch.layers.qconv1d import q_conv1d_registry
-from bitorch.layers.qconv2d import q_conv2d_registry
-from bitorch.layers.qconv3d import q_conv3d_registry
-from bitorch.layers.qlinear import q_linear_registry
+from bitorch.layers.register import q_linear_registry, q_conv1d_registry, q_conv2d_registry, q_conv3d_registry
 
 
 class Model(nn.Module):

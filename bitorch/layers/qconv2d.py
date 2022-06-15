@@ -6,11 +6,12 @@ from torch import Tensor
 from torch.nn import Conv2d, init
 from torch.nn.functional import pad, conv2d
 
-from bitorch import runtime_mode_type, RuntimeMode
-from bitorch.layers.config import config
-from bitorch.layers.extensions import LayerImplementation, DefaultImplementation, LayerRegistry
-from bitorch.layers.qactivation import QActivation
+from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
+from .config import config
+from .extensions import DefaultImplementation
+from .qactivation import QActivation
+from .register import QConv2dImplementation
 
 
 class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
@@ -98,21 +99,6 @@ class QConv2dBase(QConv2d_NoAct):  # type: ignore
             Tensor: the activated and convoluted output tensor.
         """
         return super().forward(self.activation(input_tensor))
-
-
-q_conv2d_registry = LayerRegistry("QConv2d")
-
-
-class QConv2dImplementation(LayerImplementation):
-    """
-    Decorator for :class:`QConv2d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
-    """
-    def __init__(self, supports_modes: runtime_mode_type) -> None:
-        """
-        Args:
-            supports_modes:  RuntimeMode(s) that is/are supported by an implementation
-        """
-        super().__init__(q_conv2d_registry, supports_modes)
 
 
 @QConv2dImplementation(RuntimeMode.DEFAULT)
