@@ -4,7 +4,7 @@ import pytest
 
 import bitorch
 from bitorch import RuntimeMode
-from bitorch.layers.extensions.layer_implementation import CustomImplementation, DefaultImplementation
+from bitorch.layers.extensions.layer_implementation import CustomImplementationMixin, DefaultImplementationMixin
 from bitorch.layers.extensions import LayerRecipe, LayerImplementation, LayerRegistry
 from bitorch.layers.extensions.layer_container import LayerContainer
 
@@ -32,7 +32,7 @@ class TestLayerImplementation(LayerImplementation):
 
 
 @TestLayerImplementation(RuntimeMode.DEFAULT)
-class TestLayerDefaultMode(DefaultImplementation, TestLayerBase):
+class TestLayerDefaultMode(DefaultImplementationMixin, TestLayerBase):
     """Designate the TestLayerBase as the Default Mode"""
     pass
 
@@ -41,7 +41,7 @@ TestLayer = TestLayerDefaultMode
 
 
 @TestLayerImplementation(TEST_MODE)
-class TestLayerCustomMode(CustomImplementation, TestLayerBase):
+class TestLayerCustomMode(CustomImplementationMixin, TestLayerBase):
     @classmethod
     def can_clone(cls, recipe: LayerRecipe) -> bool:
         # assume this test class can only clone layers with 'vals' lower than 100

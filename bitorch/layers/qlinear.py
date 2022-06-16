@@ -8,7 +8,7 @@ from torch.nn.functional import linear
 from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
 from .config import config
-from .extensions import LayerRecipe, DefaultImplementation
+from .extensions import LayerRecipe, DefaultImplementationMixin
 from .qactivation import QActivation
 from .register import QLinearImplementation
 
@@ -79,7 +79,7 @@ class QLinearBase(Linear):
 
 
 @QLinearImplementation(RuntimeMode.DEFAULT)
-class QLinearDefaultImplementation(DefaultImplementation, QLinearBase):
+class QLinearDefaultImplementation(DefaultImplementationMixin, QLinearBase):
     """
     This class defines the default implementation of a QLinear layer (which is actually implemented by QLinearBase).
 

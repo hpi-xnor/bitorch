@@ -9,7 +9,7 @@ from torch.nn.functional import pad, conv2d
 from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
 from .config import config
-from .extensions import DefaultImplementation
+from .extensions import DefaultImplementationMixin
 from .qactivation import QActivation
 from .register import QConv2dImplementation
 
@@ -102,7 +102,7 @@ class QConv2dBase(QConv2d_NoAct):  # type: ignore
 
 
 @QConv2dImplementation(RuntimeMode.DEFAULT)
-class QLinearDefaultImplementation(DefaultImplementation, QConv2dBase):
+class QLinearDefaultImplementation(DefaultImplementationMixin, QConv2dBase):
     """
     This class defines the default implementation of a QConv2d layer (which is actually implemented by QConv2dBase).
 

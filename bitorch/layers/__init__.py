@@ -16,7 +16,7 @@ from .debug_layers import (
     WeightPrintDebug,
     ShapePrintDebug
 )
-from .extensions import CustomImplementation, LayerRegistry
+from .extensions import CustomImplementationMixin, LayerRegistry
 from .pact import Pact
 from .qactivation import QActivation
 from .qconv1d import QConv1d, QConv1d_NoAct
@@ -30,7 +30,7 @@ __all__ = [
     "InputGraphicalDebug", "InputPrintDebug", "WeightGraphicalDebug", "WeightPrintDebug",
     "ShapePrintDebug", "QActivation", "QConv1d", "QConv2d", "QConv3d", "QConv1d_NoAct",
     "QConv2d_NoAct", "QConv3d_NoAct", "QLinear", "QLinearBase", "QEmbedding", "QEmbeddingBag", "Pact",
-    "CustomImplementation", "convert"
+    "CustomImplementationMixin", "convert"
 ]
 
 

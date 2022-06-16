@@ -45,7 +45,7 @@ class BaseImplementation:
         raise NotImplementedError("A custom layer should implement a method to create a cloned layer.")
 
 
-class DefaultImplementation(BaseImplementation, ABC):
+class DefaultImplementationMixin(BaseImplementation, ABC):
     """Defines the class interface of a default layer implementation of a certain layer type."""
     @classmethod
     def is_default_implementation(cls) -> bool:
@@ -60,7 +60,7 @@ class DefaultImplementation(BaseImplementation, ABC):
         return cls(*recipe.args, **recipe.kwargs)
 
 
-class CustomImplementation(BaseImplementation, ABC):
+class CustomImplementationMixin(BaseImplementation, ABC):
     """Defines the class interface of a custom layer implementation of a certain layer type."""
     @classmethod
     def is_default_implementation(cls) -> bool:

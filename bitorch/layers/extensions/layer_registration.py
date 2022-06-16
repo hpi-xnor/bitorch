@@ -4,7 +4,7 @@ from typing import Any, Type, Union, TYPE_CHECKING
 import bitorch
 from bitorch import runtime_mode_type, RuntimeMode
 from .layer_container import LayerContainer
-from .layer_implementation import DefaultImplementation, BaseImplementation, CustomImplementation
+from .layer_implementation import DefaultImplementationMixin, BaseImplementation, CustomImplementationMixin
 from .layer_recipe import LayerRecipe
 
 if TYPE_CHECKING:
@@ -58,12 +58,12 @@ class LayerImplementation(ABC):
         self.class_name = self.class_.__name__
         self.registry.register(self)
         if self._supported_modes == RuntimeMode.DEFAULT:
-            assert issubclass(self.class_, DefaultImplementation), \
+            assert issubclass(self.class_, DefaultImplementationMixin), \
                 f"{self.class_name} should be a subclass of DefaultLayerImplementation."
             # provide this wrapper
             return self
         else:
-            assert issubclass(self.class_, CustomImplementation), \
+            assert issubclass(self.class_, CustomImplementationMixin), \
                 f"{self.class_name} should be a subclass of CustomImplementationInterface (and it should " \
                 f"implement the corresponding class methods)."
             # after we have registered custom implementations, we do not interfere anymore

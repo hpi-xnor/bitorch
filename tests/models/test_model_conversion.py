@@ -10,7 +10,7 @@ import bitorch.runtime_mode
 from bitorch import RuntimeMode
 from bitorch.datasets import MNIST
 from bitorch.layers import QConv2d, QLinear
-from bitorch.layers.extensions.layer_implementation import CustomImplementation
+from bitorch.layers.extensions.layer_implementation import CustomImplementationMixin
 from bitorch.layers.extensions import LayerRecipe
 from bitorch.layers.qconv2d import QConv2dBase
 from bitorch.layers.qlinear import QLinearBase
@@ -51,7 +51,7 @@ def get_decorated_impls():
     reset()
 
     @QLinearImplementation(TEST_MODE)
-    class QLinearTestImpl(CustomImplementation, nn.Module):
+    class QLinearTestImpl(CustomImplementationMixin, nn.Module):
         def __init__(self, *args, **kwargs):
             super().__init__()
             with bitorch.pause_wrapping():
@@ -73,7 +73,7 @@ def get_decorated_impls():
             return new_layer
 
     @QConv2dImplementation(TEST_MODE)
-    class QConv2dTestImpl(CustomImplementation, nn.Module):
+    class QConv2dTestImpl(CustomImplementationMixin, nn.Module):
         def __init__(self, *args, **kwargs):
             super().__init__()
             with bitorch.pause_wrapping():
@@ -102,7 +102,7 @@ def get_subclassed_impls():
     reset()
 
     @QLinearImplementation(TEST_MODE)
-    class QLinearTestImpl(CustomImplementation, QLinearBase):
+    class QLinearTestImpl(CustomImplementationMixin, QLinearBase):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.is_test_implementation = True
@@ -119,7 +119,7 @@ def get_subclassed_impls():
             return new_layer
 
     @QConv2dImplementation(TEST_MODE)
-    class QConv2dTestImpl(CustomImplementation, QConv2dBase):
+    class QConv2dTestImpl(CustomImplementationMixin, QConv2dBase):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.is_test_implementation = True
