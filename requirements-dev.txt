@@ -10,3 +10,4 @@ pep8-naming
 pytest
 sphinx
 twine
+pre-commit
