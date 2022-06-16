@@ -40,10 +40,10 @@ class ModelWrapper(LightningModule):
         self.train_accuracy_top1(y_hat, y_train)
         self.train_accuracy_top5(y_hat, y_train)
         self.log_dict({
-            "metrics/train-top1-accuracy": self.accuracy_top1(y_hat, y_train),
-            "metrics/train-top5-accuracy": self.accuracy_top1(y_hat, y_train),
-        }, prog_bar=True)
-        self.log("loss/train", loss)
+            "metrics/train-top1-accuracy": self.train_accuracy_top1,
+            "metrics/train-top5-accuracy": self.train_accuracy_top5,
+        }, prog_bar=True, on_step=True, on_epoch=False)
+        self.log("loss/train", loss, on_step=True, on_epoch=False)
         return loss
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:  # type: ignore
@@ -52,19 +52,25 @@ class ModelWrapper(LightningModule):
         y_hat = self.model(x_test)
         loss = self.loss_function(y_hat, y_test)
 
+        self.accuracy_top1(y_hat, y_test)
+        self.accuracy_top5(y_hat, y_test)
+
         metrics_dict = {
-            "metrics/test-top1-accuracy": self.accuracy_top1(y_hat, y_test),
-            "metrics/test-top5-accuracy": self.accuracy_top5(y_hat, y_test),
+            "metrics/test-top1-accuracy": self.accuracy_top1,
+            "metrics/test-top5-accuracy": self.accuracy_top5,
             "loss/test": loss,
         }
 
         if self.add_f1_prec_recall:
+            self.f1(y_hat, y_test)
+            self.prec(y_hat, y_test)
+            self.recall(y_hat, y_test)
             metrics_dict.update({
-                "metrics/f1": self.f1(y_hat, y_test),
-                "metrics/precision": self.prec(y_hat, y_test),
-                "metrics/recall": self.recall(y_hat, y_test),
+                "metrics/f1": self.f1,
+                "metrics/precision": self.prec,
+                "metrics/recall": self.recall,
             })
-        self.log_dict(metrics_dict, prog_bar=True)
+        self.log_dict(metrics_dict, prog_bar=True, on_step=True, on_epoch=True)
 
         return loss
 

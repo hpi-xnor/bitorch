@@ -147,11 +147,11 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logger.info("Total size in MB: " + str(total_size / 1e6 / 8.0))
         total_flops = stats["#speed up flops (app.)"][""]
         logger.info("Approximated mflops: " + str(total_flops / 1e6))
-        # for logger in loggers:
-        #     logger.log_dict({
-        #         "mflops": total_flops / 1e6,
-        #         "size in MB": total_size / 1e6 / 8.0,
-        #     })
+        if WANDB_AVAILABLE and args.wandb_log:
+            wandb.config.update({
+                "mflops": total_flops / 1e6,
+                "size in MB": total_size / 1e6 / 8.0,
+            })
 
     trainer.fit(
         model_wrapped,
