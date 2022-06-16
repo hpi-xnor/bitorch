@@ -70,7 +70,7 @@ class ModelWrapper(LightningModule):
                 "metrics/precision": self.prec,
                 "metrics/recall": self.recall,
             })
-        self.log_dict(metrics_dict, prog_bar=True, on_step=True, on_epoch=True)
+        self.log_dict(metrics_dict, prog_bar=True, on_step=False, on_epoch=True)
 
         return loss
 

@@ -116,10 +116,6 @@ class CommandLineLogger(ProgressBarBase):
     def _replace_metric_key(metric_key: str) -> str:
         remove_strings = [
             "metrics/",
-            "/train",
-            "train-",
-            "/test",
-            "test-",
         ]
         for s in remove_strings:
             metric_key = metric_key.replace(s, "")
@@ -128,16 +124,9 @@ class CommandLineLogger(ProgressBarBase):
     @staticmethod
     def _format_metric_string(metrics_dict: Dict[str, Union[int, str]], train: bool = True) -> str:
         metric_list = []
-        skip_keys = {"v_num"}
-        if train:
-            skip_keys.add("test-top1-acc")
-            skip_keys.add("test-top5-acc")
-        else:
-            skip_keys.add("train-top1-acc")
-            skip_keys.add("train-top5-acc")
 
         for key, value in metrics_dict.items():
-            if key in skip_keys:
+            if key == "v_num" or "loss" in key:
                 continue
             key = CommandLineLogger._replace_metric_key(key)
             try:
