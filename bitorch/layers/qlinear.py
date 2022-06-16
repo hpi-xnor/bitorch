@@ -79,13 +79,10 @@ class QLinearBase(Linear):
 
 
 @QLinearImplementation(RuntimeMode.DEFAULT)
-class QLinearDefaultImplementation(DefaultImplementationMixin, QLinearBase):
+class QLinear(DefaultImplementationMixin, QLinearBase):
     """
     This class defines the default implementation of a QLinear layer (which is actually implemented by QLinearBase).
 
     To implement a custom QLinear implementation use QLinearBase as a super class instead.
     """
     pass
-
-
-QLinear = QLinearDefaultImplementation

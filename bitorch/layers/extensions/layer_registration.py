@@ -1,8 +1,9 @@
 from abc import ABC
-from typing import Any, Type, Union, TYPE_CHECKING
+from typing import Any, Type, Union, Tuple, TYPE_CHECKING
 
 import bitorch
 from bitorch import runtime_mode_type, RuntimeMode
+
 from .layer_container import LayerContainer
 from .layer_implementation import DefaultImplementationMixin, BaseImplementation, CustomImplementationMixin
 from .layer_recipe import LayerRecipe
@@ -81,16 +82,16 @@ class LayerImplementation(ABC):
 
     def supports_mode(self, mode: RuntimeMode) -> bool:
         """
-        Check whether the stored layer implementation supports a given RuntimeMode.
+        Check whether this layer implementation supports a given RuntimeMode.
         Args:
-            mode:
+            mode: the runtime mode that should be supported
 
         Returns:
-
+            True if the given mode is supported, False otherwise
         """
         return mode.is_supported_by(self._supported_modes)
 
-    def can_create_clone_from(self, recipe: LayerRecipe) -> bool:
+    def can_create_clone_from(self, recipe: LayerRecipe) -> Tuple[bool, str]:
         return self.class_.can_clone(recipe)
 
     def get_replacement(self, recipe: LayerRecipe) -> Any:

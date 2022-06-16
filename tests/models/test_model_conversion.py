@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Tuple
 
 import pytest
 import torch
@@ -62,8 +62,8 @@ def get_decorated_impls():
             return self._layer(x)
 
         @classmethod
-        def can_clone(cls, recipe: LayerRecipe) -> bool:
-            return True
+        def can_clone(cls, recipe: LayerRecipe) -> Tuple[bool, str]:
+            return True, ""
 
         @classmethod
         def create_clone_from(cls, recipe: LayerRecipe) -> Any:
@@ -84,8 +84,8 @@ def get_decorated_impls():
             return self._layer(x)
 
         @classmethod
-        def can_clone(cls, recipe: LayerRecipe) -> bool:
-            return True
+        def can_clone(cls, recipe: LayerRecipe) -> Tuple[bool, str]:
+            return True, ""
 
         @classmethod
         def create_clone_from(cls, recipe: LayerRecipe) -> Any:
@@ -109,7 +109,7 @@ def get_subclassed_impls():
 
         @classmethod
         def can_clone(cls, recipe: LayerRecipe) -> bool:
-            return True
+            return True, ""
 
         @classmethod
         def create_clone_from(cls, recipe: LayerRecipe) -> Any:
@@ -125,8 +125,8 @@ def get_subclassed_impls():
             self.is_test_implementation = True
 
         @classmethod
-        def can_clone(cls, recipe: LayerRecipe) -> bool:
-            return True
+        def can_clone(cls, recipe: LayerRecipe) -> Tuple[bool, str]:
+            return True, ""
 
         @classmethod
         def create_clone_from(cls, recipe: LayerRecipe) -> Any:

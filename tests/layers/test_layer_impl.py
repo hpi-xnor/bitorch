@@ -46,7 +46,7 @@ class TestLayerCustomMode(CustomImplementationMixin, TestLayerBase):
     def can_clone(cls, recipe: LayerRecipe) -> bool:
         # assume this test class can only clone layers with 'vals' lower than 100
         val = recipe.kwargs.get("val", recipe.args[2] if 2 < len(recipe.args) else None)
-        return val < 100
+        return val < 100, "val needs to be smaller than 100"
 
     @classmethod
     def create_clone_from(cls, recipe: LayerRecipe) -> Any:
@@ -119,5 +119,6 @@ def test_clone(val, is_supported):
             _ = test_registry.get_replacement(TEST_MODE, s_recipe)
         error_message = str(e_info.value)
         assert e_info.typename == "RuntimeError"
-        expected_key_strings = ["TestLayer", "implementation", str(TEST_MODE)]
-        assert all(key in error_message for key in expected_key_strings)
+        expected_key_strings = ["TestLayer", "implementation", str(TEST_MODE), "val", "100"]
+        for key in expected_key_strings:
+            assert key in error_message

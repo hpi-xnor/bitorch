@@ -102,13 +102,10 @@ class QConv2dBase(QConv2d_NoAct):  # type: ignore
 
 
 @QConv2dImplementation(RuntimeMode.DEFAULT)
-class QLinearDefaultImplementation(DefaultImplementationMixin, QConv2dBase):
+class QConv2d(DefaultImplementationMixin, QConv2dBase):
     """
     This class defines the default implementation of a QConv2d layer (which is actually implemented by QConv2dBase).
 
     To implement a custom QConv2d implementation use QConv2dBase as a super class instead.
     """
     pass
-
-
-QConv2d = QLinearDefaultImplementation

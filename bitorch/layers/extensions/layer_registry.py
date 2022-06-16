@@ -1,9 +1,9 @@
 from typing import Set, Any, Optional, Iterable
 
-import torch
-
 import bitorch
+import torch
 from bitorch import RuntimeMode
+
 from .layer_container import LayerContainer
 from .layer_recipe import LayerRecipe
 from .layer_registration import LayerImplementation
@@ -44,24 +44,56 @@ class LayerRegistry:
         return item.__class__ in map(lambda x: x.class_, self.layer_implementations)
 
     def register(self, layer: LayerImplementation) -> None:
+        """
+        Register a layer implementaiton in this registry.
+
+        Args:
+            layer: the layer to be registered
+        """
         self.layer_implementations.add(layer)
 
     def get_layer(
             self, mode: Optional[RuntimeMode] = None, recipe: Optional[LayerRecipe] = None
     ) -> LayerImplementation:
+        """
+        Get a layer implementaiton compatible to the given mode and recipe.
+
+        If no recipe is given, only compatibility with the mode is checked.
+        If no mode is given, the current bitorch mode is used.
+
+        Args:
+            mode: mode that the layer implementation should support
+            recipe: recipe that the layer implementation should be able to copy
+
+        Returns:
+            a LayerImplementation compatible with the given mode and recipe (if available)
+        """
         if mode is None:
             mode = bitorch.mode
         available_layers = []
+        unavailable_layers = []
+
         for implementation in self.layer_implementations:
             if not implementation.supports_mode(mode):
                 continue
-            if recipe and not implementation.can_create_clone_from(recipe):
-                continue
+            if recipe:
+                return_tuple = implementation.can_create_clone_from(recipe)
+                if not isinstance(return_tuple, tuple) and len(return_tuple) == 2:
+                    raise RuntimeError(f"{implementation.__class__} returned non-tuple on 'can_create_clone_from'.")
+                can_be_used, message = return_tuple
+                if not can_be_used:
+                    unavailable_layers.append(f"    {implementation.__class__} unavailable because: {message}")
+                    continue
             available_layers.append(implementation)
+
         if len(available_layers) > 1:
             RuntimeWarning(f"Multiple layer implementations available for '{self.name}' available (mode='{mode}').")
         if len(available_layers) == 0:
-            raise RuntimeError(f"No implementation for '{self.name}' available (mode='{mode}').")
+            base_error = f"No implementations for '{self.name}' available (mode='{mode}')."
+            if len(unavailable_layers) > 0:
+                raise RuntimeError("\n".join([base_error] + unavailable_layers))
+            else:
+                raise RuntimeError(base_error)
         return available_layers[0]
 
     def clear(self) -> None:

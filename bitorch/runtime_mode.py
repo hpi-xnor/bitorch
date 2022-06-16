@@ -12,6 +12,16 @@ runtime_mode_type = Union["RuntimeMode", int]
 
 @total_ordering
 class RuntimeMode(Enum):
+    """
+    Enum for BITorch modes:
+
+    - DEFAULT: use the default implementation of all layers
+    - CPU: use layer implementations for inference on CPU
+    - GPU: use layer implementations for inference on GPU
+    - INFERENCE_AUTO: use an automatic layer that uses the fastest implementation available (not recommended)
+    - RAW: while in this mode, new layers are created as the default implementation BUT without wrapping, so they can
+      not be switched to other layers later on (it does not influence already wrapped layers)
+    """
     RAW = 0
     DEFAULT = 1
     CPU = 2

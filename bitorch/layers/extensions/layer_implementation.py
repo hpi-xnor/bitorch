@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, TYPE_CHECKING
+from typing import Any, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from . import LayerRecipe
@@ -19,7 +19,7 @@ class BaseImplementation:
         raise NotImplementedError("Should be implemented by subclass.")
 
     @classmethod
-    def can_clone(cls, recipe: "LayerRecipe") -> bool:
+    def can_clone(cls, recipe: "LayerRecipe") -> Tuple[bool, str]:
         """
         Returns whether this layer class supports the implementation of a given layer recipe.
 
@@ -27,7 +27,7 @@ class BaseImplementation:
             recipe (LayerRecipe): the layer which should be checked for cloning
 
         Returns:
-            bool: Whether the layer can be cloned or not
+            Whether the layer can be cloned or not and an info message if it can not be cloned
         """
         raise NotImplementedError("A custom layer should implement their own compatibility check.")
 
@@ -52,8 +52,8 @@ class DefaultImplementationMixin(BaseImplementation, ABC):
         return True
 
     @classmethod
-    def can_clone(cls, recipe: "LayerRecipe") -> bool:
-        return True
+    def can_clone(cls, recipe: "LayerRecipe") -> Tuple[bool, str]:
+        return True, ""
 
     @classmethod
     def create_clone_from(cls, recipe: "LayerRecipe") -> Any:
@@ -67,7 +67,7 @@ class CustomImplementationMixin(BaseImplementation, ABC):
         return False
 
     @classmethod
-    def can_clone(cls, recipe: "LayerRecipe") -> bool:
+    def can_clone(cls, recipe: "LayerRecipe") -> Tuple[bool, str]:
         raise NotImplementedError("A custom layer should implement their own compatibility check.")
 
     @classmethod

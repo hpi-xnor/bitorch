@@ -102,13 +102,10 @@ class QConv3dBase(QConv3d_NoAct):  # type: ignore
 
 
 @QConv3dImplementation(RuntimeMode.DEFAULT)
-class QLinearDefaultImplementation(DefaultImplementationMixin, QConv3dBase):
+class QConv3d(DefaultImplementationMixin, QConv3dBase):
     """
     This class defines the default implementation of a QConv3d layer (which is actually implemented by QConv3dBase).
 
     To implement a custom QConv3d implementation use QConv3dBase as a super class instead.
     """
     pass
-
-
-QConv3d = QLinearDefaultImplementation
