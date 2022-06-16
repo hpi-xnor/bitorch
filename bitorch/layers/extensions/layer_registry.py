@@ -31,9 +31,9 @@ class LayerRegistry:
             return None
         return next(filter(lambda x: x.layer == layer, self._instance_recipes))
 
-    def get_replacement(self, mode: RuntimeMode, recipe: LayerRecipe) -> Any:
+    def get_replacement(self, mode: RuntimeMode, recipe: LayerRecipe, device: torch.device) -> Any:
         layer = self.get_layer(mode, recipe)
-        return layer.get_replacement(recipe)
+        return layer.get_replacement(recipe, device)
 
     def add_recipe(self, new_recipe: LayerRecipe) -> None:
         if self.is_replacing:
@@ -117,7 +117,9 @@ class LayerRegistry:
                 continue
             assert isinstance(module, LayerContainer)
             if verbose:
-                print("Converting", module)
-            replacement_module = self.get_replacement(new_mode, recipe)
+                print("| Replacing layer in", module)
+            replacement_module = self.get_replacement(new_mode, recipe, device)
             replacement_module.to(device)
+            if verbose:
+                print("- with:", replacement_module)
             module.replace_layer_implementation(replacement_module)

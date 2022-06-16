@@ -1,6 +1,8 @@
 from abc import ABC
 from typing import Any, Tuple, TYPE_CHECKING
 
+import torch
+
 if TYPE_CHECKING:
     from . import LayerRecipe
 
@@ -32,7 +34,7 @@ class BaseImplementation:
         raise NotImplementedError("A custom layer should implement their own compatibility check.")
 
     @classmethod
-    def create_clone_from(cls, recipe: "LayerRecipe") -> Any:
+    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device) -> Any:
         """
         Create a new layer based on a given layer recipe (can be expected to be from the default category).
 
@@ -56,7 +58,7 @@ class DefaultImplementationMixin(BaseImplementation, ABC):
         return True, ""
 
     @classmethod
-    def create_clone_from(cls, recipe: "LayerRecipe") -> Any:
+    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device) -> Any:
         return cls(*recipe.args, **recipe.kwargs)
 
 
@@ -71,5 +73,5 @@ class CustomImplementationMixin(BaseImplementation, ABC):
         raise NotImplementedError("A custom layer should implement their own compatibility check.")
 
     @classmethod
-    def create_clone_from(cls, recipe: "LayerRecipe") -> Any:
+    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device) -> Any:
         raise NotImplementedError("A custom layer should implement a method to create a cloned layer.")

@@ -2,6 +2,7 @@ from abc import ABC
 from typing import Any, Type, Union, Tuple, TYPE_CHECKING
 
 import bitorch
+import torch
 from bitorch import runtime_mode_type, RuntimeMode
 
 from .layer_container import LayerContainer
@@ -94,8 +95,8 @@ class LayerImplementation(ABC):
     def can_create_clone_from(self, recipe: LayerRecipe) -> Tuple[bool, str]:
         return self.class_.can_clone(recipe)
 
-    def get_replacement(self, recipe: LayerRecipe) -> Any:
-        return self.class_.create_clone_from(recipe)
+    def get_replacement(self, recipe: LayerRecipe, device: torch.device) -> Any:
+        return self.class_.create_clone_from(recipe, device)
 
     def is_default(self) -> bool:
         return self.class_.is_default_implementation()

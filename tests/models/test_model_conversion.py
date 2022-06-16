@@ -66,7 +66,7 @@ def get_decorated_impls():
             return True, ""
 
         @classmethod
-        def create_clone_from(cls, recipe: LayerRecipe) -> Any:
+        def create_clone_from(cls, recipe: LayerRecipe, device: torch.device) -> Any:
             new_layer = cls(*recipe.args, **recipe.kwargs)
             new_layer._layer.weight = recipe.layer.weight
             new_layer._layer.bias = recipe.layer.bias
@@ -88,7 +88,7 @@ def get_decorated_impls():
             return True, ""
 
         @classmethod
-        def create_clone_from(cls, recipe: LayerRecipe) -> Any:
+        def create_clone_from(cls, recipe: LayerRecipe, device: torch.device) -> Any:
             new_layer = cls(*recipe.args, **recipe.kwargs)
             new_layer._layer.weight = recipe.layer.weight
             new_layer._layer.bias = recipe.layer.bias
@@ -112,7 +112,7 @@ def get_subclassed_impls():
             return True, ""
 
         @classmethod
-        def create_clone_from(cls, recipe: LayerRecipe) -> Any:
+        def create_clone_from(cls, recipe: LayerRecipe, device: torch.device) -> Any:
             new_layer = cls(*recipe.args, **recipe.kwargs)
             new_layer.weight = recipe.layer.weight
             new_layer.bias = recipe.layer.bias
@@ -129,7 +129,7 @@ def get_subclassed_impls():
             return True, ""
 
         @classmethod
-        def create_clone_from(cls, recipe: LayerRecipe) -> Any:
+        def create_clone_from(cls, recipe: LayerRecipe, device: torch.device) -> Any:
             new_layer = cls(*recipe.args, **recipe.kwargs)
             new_layer.weight = recipe.layer.weight
             new_layer.bias = recipe.layer.bias

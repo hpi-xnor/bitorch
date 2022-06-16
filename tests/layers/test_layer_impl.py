@@ -3,6 +3,7 @@ from typing import Any
 import pytest
 
 import bitorch
+import torch
 from bitorch import RuntimeMode
 from bitorch.layers.extensions.layer_implementation import CustomImplementationMixin, DefaultImplementationMixin
 from bitorch.layers.extensions import LayerRecipe, LayerImplementation, LayerRegistry
@@ -49,7 +50,7 @@ class TestLayerCustomMode(CustomImplementationMixin, TestLayerBase):
         return val < 100, "val needs to be smaller than 100"
 
     @classmethod
-    def create_clone_from(cls, recipe: LayerRecipe) -> Any:
+    def create_clone_from(cls, recipe: LayerRecipe, device: torch.device) -> Any:
         return cls(recipe.layer.s, recipe.layer.val)
 
     def do_something(self):
