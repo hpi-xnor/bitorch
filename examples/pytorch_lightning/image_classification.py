@@ -76,7 +76,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 log_model=True,
                 name=args.wandb_experiment,
                 save_dir=str(output_dir)
-            )
+            )  # type: ignore
         )
     callbacks = []
     if args.checkpoint_dir is not None:
