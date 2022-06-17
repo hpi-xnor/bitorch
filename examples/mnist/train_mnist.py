@@ -45,6 +45,7 @@ class QuantizedMLP(Model):
         x = self._model.bn1(x)
 
         x = self._model.fc2(x)
+        x = x.to(dtype=torch.float32)  # todo: fix in inference engine
         x = self._model.act2(x)
         x = self._model.bn2(x)
 

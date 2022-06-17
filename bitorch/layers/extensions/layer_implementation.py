@@ -34,12 +34,13 @@ class BaseImplementation:
         raise NotImplementedError("A custom layer should implement their own compatibility check.")
 
     @classmethod
-    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device) -> Any:
+    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device = None) -> Any:
         """
         Create a new layer based on a given layer recipe (can be expected to be from the default category).
 
         Args:
-            recipe (LayerRecipe): the layer which should be cloned
+            recipe: the layer which should be cloned
+            device: the device on which the layer is going to be run
 
         Returns:
             A clone of the LayerRecipe in the current class implementation
@@ -58,7 +59,7 @@ class DefaultImplementationMixin(BaseImplementation, ABC):
         return True, ""
 
     @classmethod
-    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device) -> Any:
+    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device = None) -> Any:
         return cls(*recipe.args, **recipe.kwargs)
 
 
@@ -73,5 +74,5 @@ class CustomImplementationMixin(BaseImplementation, ABC):
         raise NotImplementedError("A custom layer should implement their own compatibility check.")
 
     @classmethod
-    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device) -> Any:
+    def create_clone_from(cls, recipe: "LayerRecipe", device: torch.device = None) -> Any:
         raise NotImplementedError("A custom layer should implement a method to create a cloned layer.")

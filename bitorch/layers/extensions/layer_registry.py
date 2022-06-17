@@ -31,7 +31,7 @@ class LayerRegistry:
             return None
         return next(filter(lambda x: x.layer == layer, self._instance_recipes))
 
-    def get_replacement(self, mode: RuntimeMode, recipe: LayerRecipe, device: torch.device) -> Any:
+    def get_replacement(self, mode: RuntimeMode, recipe: LayerRecipe, device: torch.device = None) -> Any:
         layer = self.get_layer(mode, recipe)
         return layer.get_replacement(recipe, device)
 
@@ -56,7 +56,7 @@ class LayerRegistry:
             self, mode: Optional[RuntimeMode] = None, recipe: Optional[LayerRecipe] = None
     ) -> LayerImplementation:
         """
-        Get a layer implementaiton compatible to the given mode and recipe.
+        Get a layer implementation compatible to the given mode and recipe.
 
         If no recipe is given, only compatibility with the mode is checked.
         If no mode is given, the current bitorch mode is used.

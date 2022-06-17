@@ -95,7 +95,7 @@ class LayerImplementation(ABC):
     def can_create_clone_from(self, recipe: LayerRecipe) -> Tuple[bool, str]:
         return self.class_.can_clone(recipe)
 
-    def get_replacement(self, recipe: LayerRecipe, device: torch.device) -> Any:
+    def get_replacement(self, recipe: LayerRecipe, device: torch.device = None) -> Any:
         return self.class_.create_clone_from(recipe, device)
 
     def is_default(self) -> bool:
