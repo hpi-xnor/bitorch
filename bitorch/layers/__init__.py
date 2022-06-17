@@ -40,6 +40,7 @@ T = TypeVar("T", bound=nn.Module)
 def convert(module: T, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> T:
     """
     Convert the given module to a new bitorch RuntimeMode. Needs to have custom implementations installed.
+
     Args:
         module: the module to be converted
         new_mode: the new mode for the module
