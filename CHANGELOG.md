@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Support for integration of bitorch's inference engine for the following layers
   - QLinear
 
+### Added
+
+- code formatting using black
+
 ### Changed
 
 - using PyTorch's implementation of RAdam
