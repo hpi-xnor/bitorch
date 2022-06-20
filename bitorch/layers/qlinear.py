@@ -40,11 +40,11 @@ class QLinearBase(Linear):
     @staticmethod
     def get_args_as_kwargs(recipe: LayerRecipe) -> Dict[str, Any]:
         """
-        Gather all arguments that were used to create a QLinear layer with names.
+        Gather all arguments that were used to create a QLinear layer with argument names.
         Can be used to recreate a layer with identical arguments.
 
         Returns:
-            A dictionary with all arguments
+            A dictionary with all arguments (key is the argument name as a string even for positional arguments)
         """
         return {
             "in_features": recipe.get_positional_arg(0),
