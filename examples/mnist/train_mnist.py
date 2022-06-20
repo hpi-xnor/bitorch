@@ -15,41 +15,40 @@ from torch.optim.lr_scheduler import StepLR
 
 import bitorch.layers as qnn
 from bitorch import datasets as bitorch_datasets, RuntimeMode
-from bitorch.datasets import MNIST
-from bitorch.models import Model
+from bitorch.layers import convert
 import bitorch_inference_engine
 
 
 bitorch_inference_engine.initialize()
 
 
-class QuantizedMLP(Model):
+class QuantizedMLP(nn.Module):
     def __init__(self, num_hidden_units_1=256, num_hidden_units_2=128):
-        super().__init__(dataset=MNIST)
-        self._model.flatten = nn.Flatten()
-        self._model.fc1 = nn.Linear(784, num_hidden_units_1)
-        self._model.act1 = nn.PReLU()
-        self._model.bn1 = nn.BatchNorm1d(num_hidden_units_1)
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(784, num_hidden_units_1)
+        self.act1 = nn.PReLU()
+        self.bn1 = nn.BatchNorm1d(num_hidden_units_1)
 
-        self._model.fc2 = qnn.QLinear(num_hidden_units_1, num_hidden_units_2, bias=False)
-        self._model.act2 = nn.PReLU()
-        self._model.bn2 = nn.BatchNorm1d(num_hidden_units_2)
+        self.fc2 = qnn.QLinear(num_hidden_units_1, num_hidden_units_2, bias=False)
+        self.act2 = nn.PReLU()
+        self.bn2 = nn.BatchNorm1d(num_hidden_units_2)
 
-        self._model.fc3 = nn.Linear(num_hidden_units_2, 10)
+        self.fc3 = nn.Linear(num_hidden_units_2, 10)
 
     def forward(self, x):
-        x = self._model.flatten(x)
+        x = self.flatten(x)
 
-        x = self._model.fc1(x)
-        x = self._model.act1(x)
-        x = self._model.bn1(x)
+        x = self.fc1(x)
+        x = self.act1(x)
+        x = self.bn1(x)
 
-        x = self._model.fc2(x)
+        x = self.fc2(x)
         x = x.to(dtype=torch.float32)  # todo: fix in inference engine
-        x = self._model.act2(x)
-        x = self._model.bn2(x)
+        x = self.act2(x)
+        x = self.bn2(x)
 
-        x = self._model.fc3(x)
+        x = self.fc3(x)
         output = F.log_softmax(x, dim=1)
         return output
 
@@ -176,7 +175,7 @@ def main():
         test(model, device, test_loader)
         scheduler.step()
 
-    inference_model = model.convert(RuntimeMode.INFERENCE_AUTO, device=device, verbose=True)
+    inference_model = convert(model, RuntimeMode.INFERENCE_AUTO, device=device, verbose=True)
     test(inference_model, device, test_loader)
 
     if args.save_model:
