@@ -57,3 +57,22 @@ def test_qconv(conv_layer, conv_fn, input_shape, args, kwargs):
     assert torch.equal(padded_input, layer._apply_padding(expected_tensor))
     assert torch.equal(result1, direct_result)
     assert torch.equal(grad1, grad2)
+
+
+@pytest.mark.parametrize("all_args", [
+    [
+        ("in_channels", 16),
+        ("out_channels", 64),
+        ("kernel_size", 3),
+        ("stride", 1),
+        ("padding", 1),
+        ("dilation", 1),
+        ("groups", 1),
+        ("bias", True),
+        ("padding_mode", "zeros"),
+        ("device", None),
+        ("dtype", None),
+    ],
+])
+def test_args_function(all_args):
+    pass

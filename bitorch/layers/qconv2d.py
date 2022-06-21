@@ -1,6 +1,6 @@
 """Module containing the quantized 2d convolution layer"""
 
-from typing import Union, Any
+from typing import Union, Any, Dict
 
 from torch import Tensor
 from torch.nn import Conv2d, init
@@ -9,7 +9,7 @@ from torch.nn.functional import pad, conv2d
 from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
 from .config import config
-from .extensions import DefaultImplementationMixin
+from .extensions import DefaultImplementationMixin, LayerRecipe
 from .qactivation import QActivation
 from .register import QConv2dImplementation
 
@@ -88,6 +88,38 @@ class QConv2dBase(QConv2d_NoAct):  # type: ignore
         """
         super().__init__(*args, weight_quantization=weight_quantization, **kwargs)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
+
+    @staticmethod
+    def get_args_as_kwargs(recipe: LayerRecipe) -> Dict[str, Any]:
+        """
+        Gather all arguments that were used to create a QLinear layer with argument names.
+        Can be used to recreate a layer with identical arguments.
+
+        Returns:
+            A dictionary with all arguments (key is the argument name as a string even for positional arguments)
+        """
+        _ = ...
+        return {
+            # "in_features": recipe.get_positional_arg(0),
+            # "out_features": recipe.get_positional_arg(1),
+            # "input_quantization": recipe.layer.input_quantization,
+            # "gradient_cancellation_threshold": recipe.layer.gradient_cancellation_threshold,
+            # "weight_quantization": recipe.layer.weight_quantization,
+            # "bias": recipe.get_arg(5, "bias", True),
+            "in_channels": _,
+            "out_channels": _,
+            "kernel_size": _,
+            "stride": _,
+            "padding": _,
+            "dilation": _,
+            "transposed": _,
+            "output_padding": _,
+            "groups": _,
+            "bias": _,
+            "padding_mode": _,
+            "device": recipe.get_arg(6, "device", None),
+            "dtype": recipe.get_arg(7, "dtype", None),
+        }
 
     def forward(self, input_tensor: Tensor) -> Tensor:
         """forward the input tensor through the activation and quantized convolution layer.

@@ -1,7 +1,9 @@
+import typing
 from dataclasses import dataclass
 from typing import TypeVar, Tuple, Any, Dict
 
-from .layer_container import LayerContainer
+if typing.TYPE_CHECKING:
+    from .layer_container import LayerContainer
 
 T = TypeVar("T")
 

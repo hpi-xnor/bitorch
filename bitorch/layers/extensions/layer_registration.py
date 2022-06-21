@@ -1,10 +1,10 @@
 from abc import ABC
 from typing import Any, Type, Union, Tuple, TYPE_CHECKING
 
-import bitorch
 import torch
-from bitorch import runtime_mode_type, RuntimeMode
 
+import bitorch
+from bitorch import runtime_mode_type, RuntimeMode
 from .layer_container import LayerContainer
 from .layer_implementation import DefaultImplementationMixin, BaseImplementation, CustomImplementationMixin
 from .layer_recipe import LayerRecipe
@@ -76,7 +76,7 @@ class LayerImplementation(ABC):
         if self == correct_layer_implementation:
             # this class provides the correct implementation for the current mode (recursion stop)
             layer_container = LayerContainer(self.class_, *args, **kwargs)
-            self.registry.add_recipe(LayerRecipe(layer=layer_container, args=args, kwargs=kwargs))
+            self.registry.add_recipe(layer_container.recipe)
             return layer_container
         # call this method again but on the correct base class
         return correct_layer_implementation._provide_layer_implementation(*args, **kwargs)

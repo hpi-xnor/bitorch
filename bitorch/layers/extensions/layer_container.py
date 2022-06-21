@@ -1,9 +1,21 @@
 from typing import Any, TypeVar, Type, Generic
 
+from bitorch.layers.extensions.layer_recipe import LayerRecipe
+
 T = TypeVar("T")
 
 
 class LayerContainer(Generic[T]):
+
+    internal_variable_names = [
+        "_layer_implementation",
+        "_recipe",
+    ]
+
+    patch = [
+        "to",
+    ]
+
     """
     This class wraps another layer - but the internally contained class can be swapped out during runtime.
     """
@@ -16,6 +28,7 @@ class LayerContainer(Generic[T]):
             **kwargs: keyword arguments of the new object
         """
         self._layer_implementation = impl_class(*args, **kwargs)
+        self._recipe = LayerRecipe(layer=self, args=args, kwargs=kwargs)
 
     def replace_layer_implementation(self, new_implementation: T) -> None:
         """
@@ -26,13 +39,13 @@ class LayerContainer(Generic[T]):
         self._layer_implementation = new_implementation
 
     def __getattr__(self, item: Any) -> Any:
-        if item == "_layer_implementation":
+        if item in self.internal_variable_names:
             return self.__dict__[item]
         attr_value = getattr(self._layer_implementation, item)
         if attr_value == self._layer_implementation:
             return self
-        if callable(attr_value):
-            # dirty patch functions and classes
+        if callable(attr_value) and item in self.patch:
+            # patch return values of all functions/classes defined in self.patch
             # they should return this LayerContainer instead of themselves
             # required for e.g. pytorch's .to(device) function
             other = self
@@ -62,7 +75,7 @@ class LayerContainer(Generic[T]):
         return self._layer_implementation(*args, **kwargs)  # type:ignore[operator]
 
     def __setattr__(self, key: Any, value: Any) -> None:
-        if key == "_layer_implementation":
+        if key in self.internal_variable_names:
             self.__dict__[key] = value
             return
         setattr(self._layer_implementation, key, value)
@@ -79,3 +92,7 @@ class LayerContainer(Generic[T]):
             the internal layer object
         """
         return self._layer_implementation
+
+    @property
+    def recipe(self) -> LayerRecipe:
+        return self._recipe

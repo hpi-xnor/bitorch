@@ -26,10 +26,16 @@ class Layer(nn.Module):
         return self
 
 
+class TestLayerContainer(LayerContainer):
+    patch = LayerContainer.patch + [
+        "self_function",
+    ]
+
+
 @pytest.mark.parametrize("test_wrapped_layer", [False, True])
 def test_switchable_layer(test_wrapped_layer):
     if test_wrapped_layer:
-        layer = LayerContainer(Layer, 42)
+        layer = TestLayerContainer(Layer, 42)
     else:
         layer = Layer(42)
     assert layer.x == 42
@@ -38,16 +44,18 @@ def test_switchable_layer(test_wrapped_layer):
     assert layer.self_function() == layer
     assert layer.self_property == layer
 
-    def test_class_assertions(layer_):
-        assert isinstance(layer_, nn.Module)
-        assert isinstance(layer_, Layer)
-        assert isinstance(layer_.foo, Foo)
-        assert isinstance(layer_.get_foo(), Foo)
-        assert test_wrapped_layer == isinstance(layer_, LayerContainer)
-
-    test_class_assertions(layer)
+    assert isinstance(layer, nn.Module)
+    assert isinstance(layer, Layer)
+    assert isinstance(layer.foo, Foo)
+    assert isinstance(layer.get_foo(), Foo)
+    assert test_wrapped_layer == isinstance(layer, LayerContainer)
 
     moved_layer = layer.to(torch.device("cpu"))
 
-    test_class_assertions(moved_layer)
+    assert isinstance(layer, nn.Module)
+    assert isinstance(layer, Layer)
+    assert isinstance(layer.foo, Foo)
+    assert isinstance(layer.get_foo(), Foo)
+    assert test_wrapped_layer == isinstance(layer, LayerContainer)
+
     assert layer == moved_layer

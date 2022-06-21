@@ -1,10 +1,10 @@
 import pytest
-from bitorch.layers.qlinear import QLinear
-from bitorch.layers.qactivation import QActivation
-from bitorch.quantizations import Sign, quantization_from_name
 import torch
 from torch.nn import Parameter
 
+from bitorch.layers.qactivation import QActivation
+from bitorch.layers.qlinear import QLinear, QLinearBase
+from bitorch.quantizations import Sign, quantization_from_name
 
 TEST_INPUT_DATA = [
     [0., 0.],
@@ -34,3 +34,36 @@ def test_qlinear(input_values, quantization):
     y = layer(x)
 
     assert torch.equal(result, y)
+
+
+@pytest.mark.parametrize("all_args", [
+    [
+        ("in_features", 64),
+        ("out_features", 32),
+        ("input_quantization", Sign()),
+        ("gradient_cancellation_threshold", 1.3),
+        ("weight_quantization", Sign()),
+        ("bias", False),
+        ("device", None),
+        ("dtype", None),
+    ],
+])
+def test_args_function(all_args):
+    positional_args = 2
+
+    expected_result = {}
+    layer_args = []
+    layer_kwargs = {}
+
+    for j, (key, val) in enumerate(all_args):
+        expected_result[key] = val
+        if j < positional_args:
+            layer_args.append(val)
+        else:
+            layer_kwargs[key] = val
+
+    layer = QLinear(*layer_args, **layer_kwargs)
+    result = QLinearBase.get_args_as_kwargs(layer.recipe)
+    assert result.keys() == expected_result.keys()
+    for k in expected_result.keys():
+        assert expected_result[k] == result[k]

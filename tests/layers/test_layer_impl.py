@@ -12,7 +12,7 @@ from bitorch.layers.extensions.layer_container import LayerContainer
 TEST_MODE = RuntimeMode.INFERENCE_AUTO
 
 
-class TestLayerBase:
+class LayerBase:
     def __init__(self, s: str, val: int = 42) -> None:
         self.s = s
         self.val = val
@@ -24,25 +24,22 @@ class TestLayerBase:
         return self.__class__.__name__
 
 
-test_registry = LayerRegistry("TestLayer")
+test_registry = LayerRegistry("Layer")
 
 
-class TestLayerImplementation(LayerImplementation):
+class LayerImplementation(LayerImplementation):
     def __init__(self, *args):
         super().__init__(test_registry, *args)
 
 
-@TestLayerImplementation(RuntimeMode.DEFAULT)
-class TestLayerDefaultMode(DefaultImplementationMixin, TestLayerBase):
-    """Designate the TestLayerBase as the Default Mode"""
+@LayerImplementation(RuntimeMode.DEFAULT)
+class Layer(DefaultImplementationMixin, LayerBase):
+    """Designate the LayerBase as the Default Mode"""
     pass
 
 
-TestLayer = TestLayerDefaultMode
-
-
-@TestLayerImplementation(TEST_MODE)
-class TestLayerCustomMode(CustomImplementationMixin, TestLayerBase):
+@LayerImplementation(TEST_MODE)
+class CustomLayerImplementation(CustomImplementationMixin, LayerBase):
     @classmethod
     def can_clone(cls, recipe: LayerRecipe) -> bool:
         # assume this test class can only clone layers with 'vals' lower than 100
@@ -70,8 +67,8 @@ def clean_environment():
 
 
 def test_recipe():
-    s1 = TestLayer("Hello World", val=21)
-    s2 = TestLayer("Hello World", 21)
+    s1 = Layer("Hello World", val=21)
+    s2 = Layer("Hello World", 21)
 
     s1_recipe = test_registry.get_recipe_for(s1)
     assert s1_recipe.args[0] == "Hello World"
@@ -83,43 +80,43 @@ def test_recipe():
 
 
 def test_default_impl():
-    s = TestLayer("Hello World", val=21)
+    s = Layer("Hello World", val=21)
     assert s.val == 21
-    assert s.class_name() == "TestLayerDefaultMode"
-    assert isinstance(s, TestLayerDefaultMode.class_)
+    assert s.class_name() == "Layer"
+    assert isinstance(s, Layer.class_)
     assert isinstance(s, LayerContainer)
 
 
 def test_train_impl():
     bitorch.mode = TEST_MODE
-    s = TestLayer("Hello World", val=21)
+    s = Layer("Hello World", val=21)
     assert s.val == 21
-    assert s.class_name() == "TestLayerCustomMode"
-    assert isinstance(s, TestLayerCustomMode)
+    assert s.class_name() == "CustomLayerImplementation"
+    assert isinstance(s, CustomLayerImplementation)
     assert isinstance(s, LayerContainer)
 
 
 def test_raw_impl():
     bitorch.mode = RuntimeMode.RAW
-    s = TestLayer("Hello World", val=21)
+    s = Layer("Hello World", val=21)
     assert s.val == 21
-    assert s.class_name() == "TestLayerDefaultMode"
-    assert isinstance(s, TestLayer.class_)
+    assert s.class_name() == "Layer"
+    assert isinstance(s, Layer.class_)
     assert not isinstance(s, LayerContainer)
 
 
 @pytest.mark.parametrize("val, is_supported", [(150, False), (50, True)])
 def test_clone(val, is_supported):
-    s = TestLayer("Hello World", val=val)
+    s = Layer("Hello World", val=val)
     s_recipe = test_registry.get_recipe_for(s)
     if is_supported:
         replacement = test_registry.get_replacement(TEST_MODE, s_recipe)
-        assert isinstance(replacement, TestLayerCustomMode)  # type: ignore
+        assert isinstance(replacement, CustomLayerImplementation)  # type: ignore
     else:
         with pytest.raises(RuntimeError) as e_info:
             _ = test_registry.get_replacement(TEST_MODE, s_recipe)
         error_message = str(e_info.value)
         assert e_info.typename == "RuntimeError"
-        expected_key_strings = ["TestLayer", "implementation", str(TEST_MODE), "val", "100"]
+        expected_key_strings = ["Layer", "implementation", str(TEST_MODE), "val", "100"]
         for key in expected_key_strings:
             assert key in error_message
