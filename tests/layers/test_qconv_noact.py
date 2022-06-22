@@ -11,8 +11,7 @@ TEST_INPUT_DATA = [
     (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "weight_quantization": "sign", "padding": 1}),
     (QConv1d_NoAct, conv1d, (1, 2, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(), "padding": 1}),
     (QConv2d_NoAct, conv2d, (1, 2, 5, 5), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(), "padding": 1}),
-    (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {
-     "kernel_size": 3, "weight_quantization": Sign(), "padding": 1}),
+    (QConv3d_NoAct, conv3d, (1, 2, 4, 4, 4), [2, 2], {"kernel_size": 3, "weight_quantization": Sign(), "padding": 1}),
 ] * 10
 
 
@@ -42,7 +41,8 @@ def test_qconv(conv_layer, conv_fn, input_shape, args, kwargs):
         stride=layer.stride,
         padding=0,
         dilation=layer.dilation,
-        groups=layer.groups)
+        groups=layer.groups,
+    )
     direct_result.backward(input_tensor)
     grad2 = input_tensor.grad.clone()
 

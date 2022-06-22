@@ -10,8 +10,9 @@ class SignFunction(STE):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            input_tensor: torch.Tensor) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+        input_tensor: torch.Tensor,
+    ) -> torch.Tensor:
         """Binarize the input tensor using the sign function
 
         Args:
@@ -22,8 +23,7 @@ class SignFunction(STE):
             torch.Tensor: the sign tensor
         """
         sign_tensor = torch.sign(input_tensor)
-        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(
-            1., device=sign_tensor.device), sign_tensor)
+        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1.0, device=sign_tensor.device), sign_tensor)
         return sign_tensor
 
 

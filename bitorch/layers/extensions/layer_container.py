@@ -7,6 +7,10 @@ T = TypeVar("T")
 
 class LayerContainer(Generic[T]):
 
+    """
+    This class wraps another layer - but the internally contained class can be swapped out during runtime.
+    """
+
     internal_variable_names = [
         "_layer_implementation",
         "_recipe",
@@ -16,9 +20,6 @@ class LayerContainer(Generic[T]):
         "to",
     ]
 
-    """
-    This class wraps another layer - but the internally contained class can be swapped out during runtime.
-    """
     def __init__(self, impl_class: Type[T], *args: Any, **kwargs: Any) -> None:
         """
         Wrap a new object based on the given class, positional arguments, and keyword arguments.

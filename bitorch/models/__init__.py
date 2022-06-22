@@ -28,9 +28,20 @@ from .resnet_e import (
 from ..util import build_lookup_dictionary
 
 __all__ = [
-    "Model", "LeNet", "Resnet", "Resnet152V1", "Resnet152V2", "Resnet18V1",
-    "Resnet18V2", "Resnet34V1", "Resnet34V2", "Resnet50V1", "Resnet50V2",
-    "ResnetE", "ResnetE18", "ResnetE34",
+    "Model",
+    "LeNet",
+    "Resnet",
+    "Resnet152V1",
+    "Resnet152V2",
+    "Resnet18V1",
+    "Resnet18V2",
+    "Resnet34V1",
+    "Resnet34V2",
+    "Resnet50V1",
+    "Resnet50V2",
+    "ResnetE",
+    "ResnetE18",
+    "ResnetE34",
 ]
 
 

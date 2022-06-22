@@ -22,6 +22,7 @@ class RuntimeMode(Enum):
     - RAW: while in this mode, new layers are created as the default implementation BUT without wrapping, so they can
       not be switched to other layers later on (it does not influence already wrapped layers)
     """
+
     RAW = 0
     DEFAULT = 1
     CPU = 2
@@ -103,10 +104,10 @@ class _PauseWrapping:
         return self
 
     def __exit__(
-            self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType]
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> None:
         bitorch.mode = self._previous_mode
 
@@ -122,10 +123,10 @@ class _SafeModeChanger:
         return self
 
     def __exit__(
-            self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType]
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> None:
         bitorch.mode = self._previous_mode
 

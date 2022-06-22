@@ -17,8 +17,14 @@ from .swish_sign import SwishSign
 from ..util import build_lookup_dictionary
 
 __all__ = [
-    "Quantization", "ApproxSign", "InputDoReFa", "WeightDoReFa", "Identity", "Sign",
-    "SteHeaviside", "SwishSign",
+    "Quantization",
+    "ApproxSign",
+    "InputDoReFa",
+    "WeightDoReFa",
+    "Identity",
+    "Sign",
+    "SteHeaviside",
+    "SwishSign",
 ]
 
 

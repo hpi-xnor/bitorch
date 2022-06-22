@@ -80,6 +80,18 @@ The codebase has type annotations, please make sure to add type hints if require
 mypy --config-file mypy.ini
 ```
 
+
+For code formatting we use `black`:
+```bash
+black . --check --verbose --diff --color  # check what changes the formatter would do
+black .  # apply the formatter
+```
+
+In order to automatically apply the code formatting with every commit, you can install pre-commit and use the pre-commit hook:
+```bash
+pre-commit install
+```
+
 Finally, the tests can be run with:
 
 ```bash

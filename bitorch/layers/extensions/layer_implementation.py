@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 class BaseImplementation:
     """Defines the class interface of a custom layer implementation of a certain layer type."""
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
@@ -50,6 +51,7 @@ class BaseImplementation:
 
 class DefaultImplementationMixin(BaseImplementation, ABC):
     """Defines the class interface of a default layer implementation of a certain layer type."""
+
     @classmethod
     def is_default_implementation(cls) -> bool:
         return True
@@ -65,6 +67,7 @@ class DefaultImplementationMixin(BaseImplementation, ABC):
 
 class CustomImplementationMixin(BaseImplementation, ABC):
     """Defines the class interface of a custom layer implementation of a certain layer type."""
+
     @classmethod
     def is_default_implementation(cls) -> bool:
         return False

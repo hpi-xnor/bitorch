@@ -6,7 +6,7 @@ from torchvision.transforms import transforms
 
 from .base import BasicDataset, Augmentation
 
-__all__ = ['CIFAR10', 'CIFAR100']
+__all__ = ["CIFAR10", "CIFAR100"]
 
 
 class CIFAR(BasicDataset, ABC):
@@ -16,19 +16,23 @@ class CIFAR(BasicDataset, ABC):
 
     @classmethod
     def train_transform(cls, augmentation: Augmentation = Augmentation.DEFAULT) -> transforms.Compose:
-        return transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            cls.get_normalize_transform(),
-        ])
+        return transforms.Compose(
+            [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                cls.get_normalize_transform(),
+            ]
+        )
 
     @classmethod
     def test_transform(cls) -> transforms.Compose:
-        return transforms.Compose([
-            transforms.ToTensor(),
-            cls.get_normalize_transform(),
-        ])
+        return transforms.Compose(
+            [
+                transforms.ToTensor(),
+                cls.get_normalize_transform(),
+            ]
+        )
 
 
 class CIFAR10(CIFAR):
@@ -42,7 +46,7 @@ class CIFAR10(CIFAR):
             root=self.root_directory,
             train=self.is_train,
             transform=self.get_transform(),
-            download=download
+            download=download,
         )
 
 
@@ -57,5 +61,5 @@ class CIFAR100(CIFAR):
             root=self.root_directory,
             train=self.is_train,
             transform=self.get_transform(),
-            download=download
+            download=download,
         )

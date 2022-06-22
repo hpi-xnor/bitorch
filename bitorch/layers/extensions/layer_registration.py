@@ -43,7 +43,9 @@ class LayerImplementation(ABC):
         self.class_ = None  # type: ignore
         self.class_name = ""
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Union["LayerImplementation", Type[BaseImplementation], LayerContainer]:
+    def __call__(
+        self, *args: Any, **kwargs: Any
+    ) -> Union["LayerImplementation", Type[BaseImplementation], LayerContainer]:
         if not self.__initialized:
             # this object is called once when @Decorator is used, we need to initialize
             return self._initialize(*args, **kwargs)
@@ -60,14 +62,16 @@ class LayerImplementation(ABC):
         self.class_name = self.class_.__name__
         self.registry.register(self)
         if self._supported_modes == RuntimeMode.DEFAULT:
-            assert issubclass(self.class_, DefaultImplementationMixin), \
-                f"{self.class_name} should be a subclass of DefaultLayerImplementation."
+            assert issubclass(
+                self.class_, DefaultImplementationMixin
+            ), f"{self.class_name} should be a subclass of DefaultLayerImplementation."
             # provide this wrapper
             return self
         else:
-            assert issubclass(self.class_, CustomImplementationMixin), \
-                f"{self.class_name} should be a subclass of CustomImplementationInterface (and it should " \
+            assert issubclass(self.class_, CustomImplementationMixin), (
+                f"{self.class_name} should be a subclass of CustomImplementationInterface (and it should "
                 f"implement the corresponding class methods)."
+            )
             # after we have registered custom implementations, we do not interfere anymore
             return self.class_
 

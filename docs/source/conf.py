@@ -12,17 +12,18 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))
+
+sys.path.insert(0, os.path.abspath("../.."))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'bitorch'
-copyright = '2022, Joseph Bethge, Haojin Yang, Paul Mattes, Christopher Aust'
-author = 'Joseph Bethge, Haojin Yang, Paul Mattes, Christopher Aust'
+project = "bitorch"
+copyright = "2022, Joseph Bethge, Haojin Yang, Paul Mattes, Christopher Aust"
+author = "Joseph Bethge, Haojin Yang, Paul Mattes, Christopher Aust"
 
 # The full version, including alpha/beta/rc tags
-release = 'v0.1'
+release = "v0.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -31,24 +32,24 @@ release = 'v0.1'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.napoleon',
-    'nbsphinx',
-    'nbsphinx_link',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
+    "sphinx.ext.todo",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.githubpages",
+    "sphinx.ext.napoleon",
+    "nbsphinx",
+    "nbsphinx_link",
 ]
 
 # Generate type hints
 autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 autosummary_generate = True
 
@@ -63,7 +64,7 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = "alabaster"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

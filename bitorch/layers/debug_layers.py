@@ -4,10 +4,7 @@ from .config import config
 
 
 class _Debug(torch.nn.Module):
-    def __init__(self,
-                 debug_interval: int = 100,
-                 num_outputs: int = 10,
-                 name: str = "Debug") -> None:
+    def __init__(self, debug_interval: int = 100, num_outputs: int = 10, name: str = "Debug") -> None:
         """inits values.
 
         Args:
@@ -44,17 +41,19 @@ class _PrintDebug(_Debug):
         Args:
             debug_tensor (torch.Tensor): tensor to be debugged
         """
-        print(self.name, ":", debug_tensor if len(debug_tensor) <
-              self._num_outputs else debug_tensor[:self._num_outputs])
+        print(
+            self.name, ":", debug_tensor if len(debug_tensor) < self._num_outputs else debug_tensor[: self._num_outputs]
+        )
 
 
 class _GraphicalDebug(_Debug):
-
-    def __init__(self,
-                 figure: object = None,
-                 images: list = None,
-                 debug_interval: int = 100,
-                 num_outputs: int = 10) -> None:
+    def __init__(
+        self,
+        figure: object = None,
+        images: list = None,
+        debug_interval: int = 100,
+        num_outputs: int = 10,
+    ) -> None:
         """Debugs the given layer by drawing weights/inputs in given matplotlib plot images.
 
         Args:
@@ -91,7 +90,8 @@ class _GraphicalDebug(_Debug):
         if self._images is not None and len(self._images) != self._num_outputs:
             raise ValueError(
                 f"number of given images ({len(self._images)}) must match "
-                f"number of desired outputs ({self._num_outputs})!")
+                f"number of desired outputs ({self._num_outputs})!"
+            )
 
     def _debug(self, debug_tensor: torch.Tensor) -> None:
         """draws graphical debug information about given debug tensor into figure
@@ -183,7 +183,7 @@ class WeightPrintDebug(_PrintDebug):
 
         weight = self._debug_module.weight.clone()  # type: ignore
         # check if given module is a quantized module
-        if hasattr(self._debug_module, 'quantize'):
+        if hasattr(self._debug_module, "quantize"):
             weight = self._debug_module.quantize(weight)  # type: ignore
         self._debug_tensor(weight)
 
@@ -213,7 +213,7 @@ class WeightGraphicalDebug(_GraphicalDebug):
 
         weight = self._debug_module.weight.clone()  # type: ignore
         # check if given module is a quantized module
-        if hasattr(self._debug_module, 'quantize'):
+        if hasattr(self._debug_module, "quantize"):
             weight = self._debug_module.quantize(weight)  # type: ignore
         self._debug_tensor(weight)
 

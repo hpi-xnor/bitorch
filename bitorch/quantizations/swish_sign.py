@@ -15,9 +15,10 @@ class SwishSignFunction(Function):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            input_tensor: torch.Tensor,
-            beta: float = 1.0) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+        input_tensor: torch.Tensor,
+        beta: float = 1.0,
+    ) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
 
         Args:
@@ -29,14 +30,14 @@ class SwishSignFunction(Function):
         ctx.save_for_backward(input_tensor, torch.tensor(beta, device=input_tensor.device))
 
         sign_tensor = torch.sign(input_tensor)
-        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1., device=input_tensor.device), sign_tensor)
+        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1.0, device=input_tensor.device), sign_tensor)
         return sign_tensor
 
     @staticmethod
     @typing.no_type_check
     def backward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            output_grad: torch.Tensor) -> Tuple[torch.Tensor, None]:
+        ctx: torch.autograd.function.BackwardCFunction, output_grad: torch.Tensor  # type: ignore
+    ) -> Tuple[torch.Tensor, None]:
         """Apply straight through estimator.
 
         This passes the output gradient as input gradient after clamping the gradient values to the range [-1, 1]
@@ -50,8 +51,9 @@ class SwishSignFunction(Function):
         """
         input_tensor, beta = ctx.saved_tensors
         # produces zeros where preactivation inputs exceeded threshold, ones otherwise
-        swish = (beta * (2 - beta * input_tensor * torch.tanh(beta * input_tensor / 2))) / \
-            (1 + torch.cosh(beta * input_tensor))
+        swish = (beta * (2 - beta * input_tensor * torch.tanh(beta * input_tensor / 2))) / (
+            1 + torch.cosh(beta * input_tensor)
+        )
         return swish * output_grad, None
 
 

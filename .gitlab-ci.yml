@@ -12,8 +12,10 @@ before_script:
   script:
     - flake8 --version
     - mypy --version
+    - black --version
     - flake8
     - mypy --config-file mypy.ini
+    - black . --check --verbose --diff --color
 
 codestyle:
   extends: .codestyle

@@ -9,11 +9,11 @@ from pytorch_lightning.utilities.types import STEP_OUTPUT
 
 
 TIME_INTERVALS = (
-    ('w', 60 * 60 * 24 * 7),
-    ('d', 60 * 60 * 24),
-    ('h', 60 * 60),
-    ('m', 60),
-    ('s', 1),
+    ("w", 60 * 60 * 24 * 7),
+    ("d", 60 * 60 * 24),
+    ("h", 60 * 60),
+    ("m", 60),
+    ("s", 1),
 )
 
 
@@ -28,7 +28,7 @@ def display_time(seconds: float, granularity: int = 2) -> str:
             continue
         seconds -= value * count
         result.append(f"{value:02d}{name}")
-    return ':'.join(result[:granularity])
+    return ":".join(result[:granularity])
 
 
 class CommandLineLogger(ProgressBarBase):
@@ -36,6 +36,7 @@ class CommandLineLogger(ProgressBarBase):
     This module provides a replacement for the default tqdm-based progress bar, that is more suitable for logging
     progress in a non-interactive way, e.g. to a file.
     """
+
     def __init__(self, refresh_rate: int) -> None:
         super().__init__()
         self._is_enabled = True

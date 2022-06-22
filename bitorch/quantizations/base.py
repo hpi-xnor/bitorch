@@ -14,8 +14,9 @@ class STE(Function):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            input_tensor: torch.Tensor) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+        input_tensor: torch.Tensor,
+    ) -> torch.Tensor:
         """just fowards the unchanged input_tensor.
 
         Args:
@@ -54,8 +55,8 @@ class Quantization(nn.Module):
         return self.bit_width
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
-        """quantize the input tensor. It is recommended to use a torch.Function to also maniputlate backward behaiviour. See
-        the implementations of sign or dorefa quantization functions for more examples.
+        """quantize the input tensor. It is recommended to use a torch.Function to also maniputlate backward behavior.
+        See the implementations of sign or dorefa quantization functions for more examples.
 
         Args:
             x (torch.Tensor): the input to be quantized

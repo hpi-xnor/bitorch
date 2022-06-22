@@ -23,7 +23,7 @@ class PactActFn(Function):
         # Backward function, I borrowed code from
         # https://github.com/obilaniu/GradOverride/blob/master/functional.py
         # We get dL / dy_q as a gradient
-        x, alpha, = ctx.saved_tensors
+        x, alpha = ctx.saved_tensors
         # Weight gradient is only valid when [0, alpha]
         # Actual gradient for alpha,
         # By applying Chain Rule, we get dL / dy_q * dy_q / dy * dy / dalpha
@@ -44,7 +44,7 @@ class Pact(Module):
 
     def __init__(self, bits: int = None) -> None:
         super().__init__()
-        self.alpha = torch.nn.parameter.Parameter(torch.tensor(10.))
+        self.alpha = torch.nn.parameter.Parameter(torch.tensor(10.0))
         self.bits = bits or config.pact_bits
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

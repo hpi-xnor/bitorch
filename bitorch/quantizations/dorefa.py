@@ -26,7 +26,7 @@ class WeightDoReFa(Quantization):
         """
         super(WeightDoReFa, self).__init__()
         self.bit_width = bits or config.dorefa_bits
-        self._max_value = 2 ** self.bit_width - 1
+        self._max_value = 2**self.bit_width - 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """DoReFas the tensor to desired bit resolution using weight dorefa.
@@ -47,8 +47,8 @@ class InputDoReFaFunction(Function):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            input_tensor: torch.Tensor, bits: int) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction, input_tensor: torch.Tensor, bits: int  # type: ignore
+    ) -> torch.Tensor:
         """quantizes input tensor and forwards it.
 
         Args:
@@ -59,7 +59,7 @@ class InputDoReFaFunction(Function):
         Returns:
             torch.Tensor: the quantized input tensor
         """
-        max_value = 2 ** bits - 1
+        max_value = 2**bits - 1
 
         quantized_tensor = torch.round(torch.clamp(input_tensor, 0, 1) * max_value) / max_value
         return quantized_tensor

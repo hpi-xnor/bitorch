@@ -6,13 +6,7 @@ from bitorch.layers.qactivation import QActivation
 from bitorch.layers.qlinear import QLinear, QLinearBase
 from bitorch.quantizations import Sign, quantization_from_name
 
-TEST_INPUT_DATA = [
-    [0., 0.],
-    [1., 0.],
-    [-1., 1.],
-    [0.3, -0.3],
-    [1e12, -1e12]
-]
+TEST_INPUT_DATA = [[0.0, 0.0], [1.0, 0.0], [-1.0, 1.0], [0.3, -0.3], [1e12, -1e12]]
 
 
 @pytest.mark.parametrize("input_values", TEST_INPUT_DATA)
@@ -36,18 +30,21 @@ def test_qlinear(input_values, quantization):
     assert torch.equal(result, y)
 
 
-@pytest.mark.parametrize("all_args", [
+@pytest.mark.parametrize(
+    "all_args",
     [
-        ("in_features", 64),
-        ("out_features", 32),
-        ("input_quantization", Sign()),
-        ("gradient_cancellation_threshold", 1.3),
-        ("weight_quantization", Sign()),
-        ("bias", False),
-        ("device", None),
-        ("dtype", None),
+        [
+            ("in_features", 64),
+            ("out_features", 32),
+            ("input_quantization", Sign()),
+            ("gradient_cancellation_threshold", 1.3),
+            ("weight_quantization", Sign()),
+            ("bias", False),
+            ("device", None),
+            ("dtype", None),
+        ],
     ],
-])
+)
 def test_args_function(all_args):
     positional_args = 2
 

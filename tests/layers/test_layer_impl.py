@@ -35,6 +35,7 @@ class LayerImplementation(LayerImplementation):
 @LayerImplementation(RuntimeMode.DEFAULT)
 class Layer(DefaultImplementationMixin, LayerBase):
     """Designate the LayerBase as the Default Mode"""
+
     pass
 
 
@@ -57,7 +58,7 @@ class CustomLayerImplementation(CustomImplementationMixin, LayerBase):
         return self.__class__.__name__
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def clean_environment():
     test_registry.clear()
     bitorch.mode = RuntimeMode.DEFAULT

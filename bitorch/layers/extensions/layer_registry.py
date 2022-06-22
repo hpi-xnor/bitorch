@@ -15,6 +15,7 @@ class LayerRegistry:
     It also wraps these implementations and stores references to them, so they can be replaced easily.
     Needs to be subclassed for each type of layer.
     """
+
     def __init__(self, name: str) -> None:
         self.name = name
         self._class = None
@@ -53,7 +54,7 @@ class LayerRegistry:
         self.layer_implementations.add(layer)
 
     def get_layer(
-            self, mode: Optional[RuntimeMode] = None, recipe: Optional[LayerRecipe] = None
+        self, mode: Optional[RuntimeMode] = None, recipe: Optional[LayerRecipe] = None
     ) -> LayerImplementation:
         """
         Get a layer implementation compatible to the given mode and recipe.
@@ -106,11 +107,11 @@ class LayerRegistry:
             self.layer_implementations.remove(i)
 
     def convert_layers_to(
-            self,
-            new_mode: RuntimeMode,
-            only: Optional[Iterable[Any]] = None,
-            device: torch.device = None,
-            verbose: bool = False
+        self,
+        new_mode: RuntimeMode,
+        only: Optional[Iterable[Any]] = None,
+        device: torch.device = None,
+        verbose: bool = False,
     ) -> None:
         for recipe in list(self._instance_recipes):
             module = recipe.layer
