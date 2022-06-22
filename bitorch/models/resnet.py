@@ -111,8 +111,9 @@ class BottleneckV1(Module):
             nn.Sequential: the downsampling model
         """
         return nn.Sequential(
-            QConv2d_NoAct(self.in_channels, self.out_channels, kernel_size=1,
-                          stride=self.stride, padding=0, bias=False),
+            QConv2d_NoAct(
+                self.in_channels, self.out_channels, kernel_size=1, stride=self.stride, padding=0, bias=False
+            ),
             nn.BatchNorm2d(self.out_channels),
         )
 
@@ -130,7 +131,7 @@ class BottleneckV1(Module):
             nn.BatchNorm2d(self.out_channels // 4),
             nn.ReLU(),
             QConv2d_NoAct(self.out_channels // 4, self.out_channels, kernel_size=1, stride=1),
-            nn.BatchNorm2d(self.out_channels)
+            nn.BatchNorm2d(self.out_channels),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -348,13 +349,14 @@ class ResNetV1(SpecificResnet):
     """
 
     def __init__(
-            self,
-            block: Module,
-            layers: list,
-            channels: list,
-            classes: int,
-            initial_layers: str = "imagenet",
-            image_channels: int = 3) -> None:
+        self,
+        block: Module,
+        layers: list,
+        channels: list,
+        classes: int,
+        initial_layers: str = "imagenet",
+        image_channels: int = 3,
+    ) -> None:
         """Creates ResNetV1 model.
 
         Args:
@@ -373,7 +375,8 @@ class ResNetV1(SpecificResnet):
         super(ResNetV1, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
-                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
+                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!"
+            )
 
         feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
@@ -396,13 +399,14 @@ class ResNetV2(SpecificResnet):
     """
 
     def __init__(
-            self,
-            block: Module,
-            layers: list,
-            channels: list,
-            classes: int = 1000,
-            initial_layers: str = "imagenet",
-            image_channels: int = 3) -> None:
+        self,
+        block: Module,
+        layers: list,
+        channels: list,
+        classes: int = 1000,
+        initial_layers: str = "imagenet",
+        image_channels: int = 3,
+    ) -> None:
         """Creates ResNetV2 model.
 
         Args:
@@ -421,7 +425,8 @@ class ResNetV2(SpecificResnet):
         super(ResNetV2, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
-                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
+                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!"
+            )
 
         feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
@@ -446,31 +451,38 @@ class Resnet(Model):
 
     name = "resnet"
 
-    resnet_spec = {18: ('basic_block', [2, 2, 2, 2], [64, 64, 128, 256, 512]),
-                   34: ('basic_block', [3, 4, 6, 3], [64, 64, 128, 256, 512]),
-                   50: ('bottle_neck', [3, 4, 6, 3], [64, 256, 512, 1024, 2048]),
-                   101: ('bottle_neck', [3, 4, 23, 3], [64, 256, 512, 1024, 2048]),
-                   152: ('bottle_neck', [3, 8, 36, 3], [64, 256, 512, 1024, 2048])}
+    resnet_spec = {
+        18: ("basic_block", [2, 2, 2, 2], [64, 64, 128, 256, 512]),
+        34: ("basic_block", [3, 4, 6, 3], [64, 64, 128, 256, 512]),
+        50: ("bottle_neck", [3, 4, 6, 3], [64, 256, 512, 1024, 2048]),
+        101: ("bottle_neck", [3, 4, 23, 3], [64, 256, 512, 1024, 2048]),
+        152: ("bottle_neck", [3, 8, 36, 3], [64, 256, 512, 1024, 2048]),
+    }
     resnet_net_versions = [ResNetV1, ResNetV2]
-    resnet_block_versions = [{'basic_block': BasicBlockV1, 'bottle_neck': BottleneckV1},
-                             {'basic_block': BasicBlockV2, 'bottle_neck': BottleneckV2}]
+    resnet_block_versions = [
+        {"basic_block": BasicBlockV1, "bottle_neck": BottleneckV1},
+        {"basic_block": BasicBlockV2, "bottle_neck": BottleneckV2},
+    ]
 
-    def __init__(
-            self,
-            resnet_version: int,
-            resnet_num_layers: int,
-            dataset: BasicDataset) -> None:
+    def __init__(self, resnet_version: int, resnet_num_layers: int, dataset: BasicDataset) -> None:
         super(Resnet, self).__init__(dataset)
-        self._model = self.create_resnet(resnet_version, resnet_num_layers,
-                                         self._dataset.num_classes, self._dataset.name, self._dataset.shape[1])
+        self._model = self.create_resnet(
+            resnet_version,
+            resnet_num_layers,
+            self._dataset.num_classes,
+            self._dataset.name,
+            self._dataset.shape[1],
+        )
         logging.info(f"building Resnetv{str(resnet_version)} with {str(resnet_num_layers)} layers...")
 
-    def create_resnet(self,
-                      version: int,
-                      num_layers: int,
-                      classes: int = 1000,
-                      initial_layers: str = "imagenet",
-                      image_channels: int = 3) -> Module:
+    def create_resnet(
+        self,
+        version: int,
+        num_layers: int,
+        classes: int = 1000,
+        initial_layers: str = "imagenet",
+        image_channels: int = 3,
+    ) -> Module:
         """Creates a resnet complying to given version and layer number.
 
         Args:
@@ -499,10 +511,20 @@ class Resnet(Model):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--resnet-version", type=int, choices=[1, 2], required=True,
-                            help="version of resnet to be used")
-        parser.add_argument("--resnet-num-layers", type=int, choices=[18, 34, 50, 152], required=True,
-                            help="number of layers to be used inside resnet")
+        parser.add_argument(
+            "--resnet-version",
+            type=int,
+            choices=[1, 2],
+            required=True,
+            help="version of resnet to be used",
+        )
+        parser.add_argument(
+            "--resnet-num-layers",
+            type=int,
+            choices=[18, 34, 50, 152],
+            required=True,
+            help="number of layers to be used inside resnet",
+        )
 
 
 class Resnet18V1(Resnet):
@@ -524,6 +546,7 @@ class Resnet34V1(Resnet):
     """ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
+
     name = "resnet34v1"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:

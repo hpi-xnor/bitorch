@@ -23,8 +23,9 @@ def configure_logging(logger: Any, log_file: Union[None, str], log_level: str, o
     logger.setLevel(log_level)
 
     logging_format = logging.Formatter(
-        '%(asctime)s - %(levelname)s [%(filename)s : %(funcName)s() : l. %(lineno)s]: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
+        "%(asctime)s - %(levelname)s [%(filename)s : %(funcName)s() : l. %(lineno)s]: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     if log_file:
         log_file_path = Path(log_file)
@@ -68,11 +69,12 @@ def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Op
 
 
 def create_scheduler(
-        scheduler_name: Optional[str],
-        optimizer: Optimizer,
-        lr_factor: float,
-        lr_steps: Optional[list],
-        epochs: int) -> Union[_LRScheduler, None]:
+    scheduler_name: Optional[str],
+    optimizer: Optimizer,
+    lr_factor: float,
+    lr_steps: Optional[list],
+    epochs: int,
+) -> Union[_LRScheduler, None]:
     """creates a learning rate scheduler with the given parameters
 
     Args:

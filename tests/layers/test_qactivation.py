@@ -29,7 +29,7 @@ def test_q_activation(threshold):
     y.backward(x)
 
     if threshold > 0:
-        expected_gradient = torch.where(torch.abs(x) <= threshold, x, torch.tensor(0.))
+        expected_gradient = torch.where(torch.abs(x) <= threshold, x, torch.tensor(0.0))
     else:
         expected_gradient = x.clone()
     assert torch.equal(expected_gradient, x.grad)

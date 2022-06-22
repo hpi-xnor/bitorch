@@ -12,8 +12,13 @@ from .mnist import MNIST
 from ..util import build_lookup_dictionary
 
 __all__ = [
-    'BasicDataset', 'dataset_from_name', 'dataset_names',
-    'MNIST', 'CIFAR10', 'CIFAR100', 'ImageNet',
+    "BasicDataset",
+    "dataset_from_name",
+    "dataset_names",
+    "MNIST",
+    "CIFAR10",
+    "CIFAR100",
+    "ImageNet",
 ]
 
 

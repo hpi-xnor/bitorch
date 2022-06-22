@@ -7,12 +7,11 @@ from torch import nn
 from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct, convert
-from bitorch.layers.extensions.layer_container import LayerContainer
-from bitorch.layers.register import q_linear_registry, q_conv1d_registry, q_conv2d_registry, q_conv3d_registry
 
 
 class Model(nn.Module):
     """Base class for Bitorch models"""
+
     name = "None"
 
     def __init__(self, dataset: Union[BasicDataset, Type[BasicDataset]]) -> None:
@@ -61,7 +60,7 @@ class Model(nn.Module):
                 else:
                     if module.kernel_size[0] == 7:
                         # first conv layer
-                        nn.init.kaiming_normal_(module.weight, nonlinearity='relu')
+                        nn.init.kaiming_normal_(module.weight, nonlinearity="relu")
                     else:
                         # other 32-bit conv layers
                         nn.init.xavier_normal_(module.weight)

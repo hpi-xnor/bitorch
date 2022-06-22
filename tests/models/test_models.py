@@ -12,7 +12,7 @@ from bitorch.models import (
     Resnet50V2,
     ResnetE,
     ResnetE18,
-    ResnetE34
+    ResnetE34,
 )
 import torch
 import numpy as np
@@ -33,7 +33,7 @@ TEST_INPUT_DATA = [
     [ResnetE, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
     [ResnetE18, {}, RGB_DATASETS],
     [ResnetE34, {}, RGB_DATASETS],
-    [LeNet, {"lenet_version": [0,1,2,3,4]}, [MNIST]],
+    [LeNet, {"lenet_version": [0, 1, 2, 3, 4]}, [MNIST]],
 ]
 
 
@@ -59,5 +59,6 @@ def test_models(model_class, model_kwargs, datasets_to_test, dataset) -> None:
             model = model_class(dataset=dataset, **combination)
             input_values = torch.Tensor(np.random.uniform(0, 1.0, input_shape))
             output = model(input_values)
-            assert torch.equal(torch.as_tensor(output.shape), torch.Tensor(
-                [input_shape[0], dataset.num_classes]).long())
+            assert torch.equal(
+                torch.as_tensor(output.shape), torch.Tensor([input_shape[0], dataset.num_classes]).long()
+            )

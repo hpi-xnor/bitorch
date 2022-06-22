@@ -32,18 +32,22 @@ class ImageNet(BasicDataset):
     @classmethod
     def train_transform(cls, augmentation: Augmentation = Augmentation.DEFAULT) -> transforms.Compose:
         crop_scale = 0.08
-        return transforms.Compose([
-            transforms.RandomResizedCrop(224, scale=(crop_scale, 1.0)),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            cls.get_normalize_transform(),
-        ])
+        return transforms.Compose(
+            [
+                transforms.RandomResizedCrop(224, scale=(crop_scale, 1.0)),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                cls.get_normalize_transform(),
+            ]
+        )
 
     @classmethod
     def test_transform(cls) -> transforms.Compose:
-        return transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            cls.get_normalize_transform(),
-        ])
+        return transforms.Compose(
+            [
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                cls.get_normalize_transform(),
+            ]
+        )

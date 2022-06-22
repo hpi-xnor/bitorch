@@ -14,6 +14,7 @@ class LayerRecipe:
     Data class to store a layer object and the arguments used to create it.
     It allows to create other implementations of the same layer later on.
     """
+
     layer: "LayerContainer"
     args: Tuple[Any, ...]
     kwargs: Dict[str, Any]

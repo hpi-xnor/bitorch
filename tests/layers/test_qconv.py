@@ -6,21 +6,66 @@ import torch
 import numpy as np
 
 TEST_INPUT_DATA = [
-    (QConv1d, conv1d, (1, 2, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1}),
-    (QConv2d, conv2d, (1, 2, 5, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1}),
-    (QConv3d, conv3d, (1, 2, 4, 4, 4), [2, 2],
-        {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1}),
-    (QConv1d, conv1d, (1, 2, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
-         "gradient_cancellation_threshold": 0.5, "padding": 1}),
-    (QConv2d, conv2d, (1, 2, 5, 5), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
-         "gradient_cancellation_threshold": 1.0, "padding": 1}),
-    (QConv3d, conv3d, (1, 2, 4, 4, 4), [2, 2],
-        {"kernel_size": 3, "weight_quantization": Sign(), "input_quantization": "sign",
-         "gradient_cancellation_threshold": 2.0, "padding": 1}),
+    (
+        QConv1d,
+        conv1d,
+        (1, 2, 5),
+        [2, 2],
+        {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1},
+    ),
+    (
+        QConv2d,
+        conv2d,
+        (1, 2, 5, 5),
+        [2, 2],
+        {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1},
+    ),
+    (
+        QConv3d,
+        conv3d,
+        (1, 2, 4, 4, 4),
+        [2, 2],
+        {"kernel_size": 3, "weight_quantization": "sign", "input_quantization": "sign", "padding": 1},
+    ),
+    (
+        QConv1d,
+        conv1d,
+        (1, 2, 5),
+        [2, 2],
+        {
+            "kernel_size": 3,
+            "weight_quantization": Sign(),
+            "input_quantization": "sign",
+            "gradient_cancellation_threshold": 0.5,
+            "padding": 1,
+        },
+    ),
+    (
+        QConv2d,
+        conv2d,
+        (1, 2, 5, 5),
+        [2, 2],
+        {
+            "kernel_size": 3,
+            "weight_quantization": Sign(),
+            "input_quantization": "sign",
+            "gradient_cancellation_threshold": 1.0,
+            "padding": 1,
+        },
+    ),
+    (
+        QConv3d,
+        conv3d,
+        (1, 2, 4, 4, 4),
+        [2, 2],
+        {
+            "kernel_size": 3,
+            "weight_quantization": Sign(),
+            "input_quantization": "sign",
+            "gradient_cancellation_threshold": 2.0,
+            "padding": 1,
+        },
+    ),
 ] * 10
 
 
@@ -50,7 +95,8 @@ def test_qconv(conv_layer, conv_fn, input_shape, args, kwargs):
         stride=layer.stride,
         padding=0,
         dilation=layer.dilation,
-        groups=layer.groups)
+        groups=layer.groups,
+    )
     direct_result.backward(input_tensor)
     grad2 = input_tensor.grad.clone()
 
@@ -59,20 +105,23 @@ def test_qconv(conv_layer, conv_fn, input_shape, args, kwargs):
     assert torch.equal(grad1, grad2)
 
 
-@pytest.mark.parametrize("all_args", [
+@pytest.mark.parametrize(
+    "all_args",
     [
-        ("in_channels", 16),
-        ("out_channels", 64),
-        ("kernel_size", 3),
-        ("stride", 1),
-        ("padding", 1),
-        ("dilation", 1),
-        ("groups", 1),
-        ("bias", True),
-        ("padding_mode", "zeros"),
-        ("device", None),
-        ("dtype", None),
+        [
+            ("in_channels", 16),
+            ("out_channels", 64),
+            ("kernel_size", 3),
+            ("stride", 1),
+            ("padding", 1),
+            ("dilation", 1),
+            ("groups", 1),
+            ("bias", True),
+            ("padding_mode", "zeros"),
+            ("device", None),
+            ("dtype", None),
+        ],
     ],
-])
+)
 def test_args_function(all_args):
     pass

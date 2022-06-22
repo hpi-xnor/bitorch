@@ -14,8 +14,14 @@ from bitorch.layers.extensions.layer_implementation import CustomImplementationM
 from bitorch.layers.extensions import LayerRecipe
 from bitorch.layers.qconv2d import QConv2dBase
 from bitorch.layers.qlinear import QLinearBase
-from bitorch.layers.register import q_linear_registry, QLinearImplementation, q_conv1d_registry, q_conv2d_registry, \
-    QConv2dImplementation, q_conv3d_registry
+from bitorch.layers.register import (
+    q_linear_registry,
+    QLinearImplementation,
+    q_conv1d_registry,
+    q_conv2d_registry,
+    QConv2dImplementation,
+    q_conv3d_registry,
+)
 from bitorch.models import Model
 
 TEST_MODE = RuntimeMode.INFERENCE_AUTO
@@ -93,6 +99,7 @@ def get_decorated_impls():
             new_layer._layer.weight = recipe.layer.weight
             new_layer._layer.bias = recipe.layer.bias
             return new_layer
+
     yield QLinearTestImpl, QConv2dTestImpl
     reset()
 
@@ -134,6 +141,7 @@ def get_subclassed_impls():
             new_layer.weight = recipe.layer.weight
             new_layer.bias = recipe.layer.bias
             return new_layer
+
     yield QLinearTestImpl, QConv2dTestImpl
     reset()
 

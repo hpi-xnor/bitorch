@@ -15,12 +15,13 @@ from .register import QLinearImplementation
 
 class QLinearBase(Linear):
     def __init__(
-            self,
-            *args: int,
-            input_quantization: Union[str, Quantization] = None,
-            gradient_cancellation_threshold: Union[float, None] = None,
-            weight_quantization: Union[str, Quantization] = None,
-            **kwargs: bool) -> None:
+        self,
+        *args: int,
+        input_quantization: Union[str, Quantization] = None,
+        gradient_cancellation_threshold: Union[float, None] = None,
+        weight_quantization: Union[str, Quantization] = None,
+        **kwargs: bool,
+    ) -> None:
         """Applies the given quantization functions on weights and inputs before applying the linear operation.
 
         Args:
@@ -85,4 +86,5 @@ class QLinear(DefaultImplementationMixin, QLinearBase):
 
     To implement a custom QLinear implementation use QLinearBase as a super class instead.
     """
+
     pass

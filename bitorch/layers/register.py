@@ -27,10 +27,7 @@ def all_layer_registries() -> List[LayerRegistry]:
 
 
 def convert_layers_to(
-    new_mode: RuntimeMode,
-    only: Optional[Iterable[Any]] = None,
-    device: torch.device = None,
-    verbose: bool = False
+    new_mode: RuntimeMode, only: Optional[Iterable[Any]] = None, device: torch.device = None, verbose: bool = False
 ) -> None:
     """
     Convert all wrapped layers (or a given subset of them) to a new mode.
@@ -48,6 +45,7 @@ class QLinearImplementation(LayerImplementation):
     """
     Decorator for :class:`QLinear` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
     """
+
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """
         Args:
@@ -60,6 +58,7 @@ class QConv1dImplementation(LayerImplementation):
     """
     Decorator for :class:`QConv1d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
     """
+
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """
         Args:
@@ -72,6 +71,7 @@ class QConv2dImplementation(LayerImplementation):
     """
     Decorator for :class:`QConv2d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
     """
+
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """
         Args:
@@ -84,6 +84,7 @@ class QConv3dImplementation(LayerImplementation):
     """
     Decorator for :class:`QConv3d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
     """
+
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """
         Args:

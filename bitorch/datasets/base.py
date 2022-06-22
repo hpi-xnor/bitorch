@@ -39,11 +39,12 @@ class BasicDataset(Dataset):
     num_val_samples = 0
 
     def __init__(
-            self,
-            train: bool,
-            root_directory: str = None,
-            download: bool = False,
-            augmentation: Augmentation = Augmentation.DEFAULT) -> None:
+        self,
+        train: bool,
+        root_directory: str = None,
+        download: bool = False,
+        augmentation: Augmentation = Augmentation.DEFAULT,
+    ) -> None:
         """initializes the dataset.
 
         Args:
@@ -64,10 +65,11 @@ class BasicDataset(Dataset):
 
     @classmethod
     def get_train_and_test(
-            cls,
-            root_directory: Optional[str] = None,
-            download: bool = False,
-            augmentation: Augmentation = Augmentation.DEFAULT) -> Tuple["BasicDataset", "BasicDataset"]:
+        cls,
+        root_directory: Optional[str] = None,
+        download: bool = False,
+        augmentation: Augmentation = Augmentation.DEFAULT,
+    ) -> Tuple["BasicDataset", "BasicDataset"]:
         """creates a pair of train and test dataset.
 
         Returns:

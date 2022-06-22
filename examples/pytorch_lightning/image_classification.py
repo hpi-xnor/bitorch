@@ -1,11 +1,13 @@
 import os
-if os.environ.get('REMOTE_PYCHARM_DEBUG_SESSION', False):
+
+if os.environ.get("REMOTE_PYCHARM_DEBUG_SESSION", False):
     import pydevd_pycharm
+
     pydevd_pycharm.settrace(
-        'localhost',
-        port=int(os.environ.get('REMOTE_PYCHARM_DEBUG_PORT', "12345")),
+        "localhost",
+        port=int(os.environ.get("REMOTE_PYCHARM_DEBUG_PORT", "12345")),
         stdoutToServer=True,
-        stderrToServer=True
+        stderrToServer=True,
     )
 
 import argparse
@@ -75,13 +77,19 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 project=args.wandb_project,
                 log_model=True,
                 name=args.wandb_experiment,
-                save_dir=str(output_dir)
+                save_dir=str(output_dir),
             )  # type: ignore
         )
     callbacks = []
     if args.checkpoint_dir is not None:
-        callbacks.append(ModelCheckpoint(args.checkpoint_dir, save_last=True,
-                         save_top_k=args.checkpoint_keep_count, monitor="metrics/test-top1-accuracy"))
+        callbacks.append(
+            ModelCheckpoint(
+                args.checkpoint_dir,
+                save_last=True,
+                save_top_k=args.checkpoint_keep_count,
+                monitor="metrics/test-top1-accuracy",
+            )
+        )
 
     # providing our own progress bar disables the default progress bar (not needed to disable later on)
     cmd_logger = CommandLineLogger(args.log_interval)
@@ -89,7 +97,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     configure_logging(cmd_logger.logger, args.log_file, args.log_level, args.log_stdout)
 
     if len(loggers) > 0:
-        lr_monitor = LearningRateMonitor(logging_interval='step')
+        lr_monitor = LearningRateMonitor(logging_interval="step")
         callbacks.append(lr_monitor)  # type: ignore
 
     dataset = dataset_from_name(args.dataset)
@@ -113,7 +121,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         max_steps=args.max_steps,
         logger=loggers if len(loggers) > 0 else None,  # type: ignore
         callbacks=callbacks,  # type: ignore
-        log_every_n_steps=args.log_interval
+        log_every_n_steps=args.log_interval,
     )
     augmentation_level = Augmentation.from_string(args.augmentation)
     logger.info(f"model: {args.model}")
@@ -128,17 +136,27 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         train_dataset, test_dataset = dataset.get_train_and_test(  # type: ignore
             root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
         )
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                              shuffle=True, pin_memory=True, persistent_workers=True)  # type: ignore
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.num_workers,
-                             shuffle=False, pin_memory=True, persistent_workers=True)  # type: ignore
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=True,
+        pin_memory=True,
+        persistent_workers=True,
+    )  # type: ignore
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=False,
+        pin_memory=True,
+        persistent_workers=True,
+    )  # type: ignore
 
     if FVBITCORE_AVAILABLE:
         data_point = torch.zeros(dataset.shape)
         computational_intensity = fv_nn.FlopCountAnalysis(
-            model,
-            inputs=data_point,
-            quantization_base_class=Quantization
+            model, inputs=data_point, quantization_base_class=Quantization
         )
 
         stats, table = fv_nn.flop_count_table(computational_intensity, automatic_qmodules=True)
@@ -148,16 +166,18 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         total_flops = stats["#speed up flops (app.)"][""]
         logger.info("Approximated mflops: " + str(total_flops / 1e6))
         if WANDB_AVAILABLE and args.wandb_log:
-            wandb.config.update({
-                "mflops": total_flops / 1e6,
-                "size in MB": total_size / 1e6 / 8.0,
-            })
+            wandb.config.update(
+                {
+                    "mflops": total_flops / 1e6,
+                    "size in MB": total_size / 1e6 / 8.0,
+                }
+            )
 
     trainer.fit(
         model_wrapped,
         train_dataloaders=train_loader,
         val_dataloaders=test_loader,
-        ckpt_path=args.checkpoint_load if not args.pretrained else None
+        ckpt_path=args.checkpoint_load if not args.pretrained else None,
     )
 
 

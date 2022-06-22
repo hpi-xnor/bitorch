@@ -1,4 +1,3 @@
-import subprocess
 from pathlib import Path
 from typing import Union
 
@@ -32,11 +31,11 @@ setuptools.setup(
     description="A package for building and training quantized and binary neural networks with Pytorch",
     long_description=readme_content,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(exclude='tests'),
-    install_requires=get_requirements('requirements.txt'),
+    packages=setuptools.find_packages(exclude="tests"),
+    install_requires=get_requirements("requirements.txt"),
     extras_require={
-        "dev": get_requirements('requirements-dev.txt'),
-        "opt": get_requirements('requirements-opt.txt'),
+        "dev": get_requirements("requirements-dev.txt"),
+        "opt": get_requirements("requirements-opt.txt"),
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -47,13 +46,16 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    python_requires='>=3.7',
+    python_requires=">=3.7",
     data_files=[
-        ('.', [
-            'version.txt',
-            'requirements.txt',
-            'requirements-dev.txt',
-            'requirements-opt.txt',
-        ]),
-    ]
+        (
+            ".",
+            [
+                "version.txt",
+                "requirements.txt",
+                "requirements-dev.txt",
+                "requirements-opt.txt",
+            ],
+        ),
+    ],
 )

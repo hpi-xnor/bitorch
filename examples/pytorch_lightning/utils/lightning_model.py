@@ -13,11 +13,12 @@ from .utils import create_optimizer, create_scheduler
 
 class ModelWrapper(LightningModule):
     def __init__(
-            self,
-            model: Module,
-            num_classes: int,
-            args: Namespace,
-            add_f1_prec_recall: bool = False) -> None:
+        self,
+        model: Module,
+        num_classes: int,
+        args: Namespace,
+        add_f1_prec_recall: bool = False,
+    ) -> None:
         super().__init__()
         self.save_hyperparameters(clean_hyperparameters(args))
         self.loss_function = CrossEntropyLoss()
@@ -39,10 +40,15 @@ class ModelWrapper(LightningModule):
         loss = self.loss_function(y_hat, y_train)
         self.train_accuracy_top1(y_hat, y_train)
         self.train_accuracy_top5(y_hat, y_train)
-        self.log_dict({
-            "metrics/train-top1-accuracy": self.train_accuracy_top1,
-            "metrics/train-top5-accuracy": self.train_accuracy_top5,
-        }, prog_bar=True, on_step=True, on_epoch=False)
+        self.log_dict(
+            {
+                "metrics/train-top1-accuracy": self.train_accuracy_top1,
+                "metrics/train-top5-accuracy": self.train_accuracy_top5,
+            },
+            prog_bar=True,
+            on_step=True,
+            on_epoch=False,
+        )
         self.log("loss/train", loss, on_step=True, on_epoch=False)
         return loss
 
@@ -65,11 +71,13 @@ class ModelWrapper(LightningModule):
             self.f1(y_hat, y_test)
             self.prec(y_hat, y_test)
             self.recall(y_hat, y_test)
-            metrics_dict.update({
-                "metrics/f1": self.f1,
-                "metrics/precision": self.prec,
-                "metrics/recall": self.recall,
-            })
+            metrics_dict.update(
+                {
+                    "metrics/f1": self.f1,
+                    "metrics/precision": self.prec,
+                    "metrics/recall": self.recall,
+                }
+            )
         self.log_dict(metrics_dict, prog_bar=True, on_step=False, on_epoch=True)
 
         return loss
@@ -79,12 +87,12 @@ class ModelWrapper(LightningModule):
         optimizer = create_optimizer(self.hparams.optimizer, self.model, self.hparams.lr, self.hparams.momentum)
         if self.hparams.lr_scheduler is not None:
             scheduler = create_scheduler(
-                self.hparams.lr_scheduler, optimizer, self.hparams.lr_factor,
-                self.hparams.lr_steps, self.hparams.max_epochs
+                self.hparams.lr_scheduler,
+                optimizer,
+                self.hparams.lr_factor,
+                self.hparams.lr_steps,
+                self.hparams.max_epochs,
             )
-            return {
-                "optimizer": optimizer,
-                "lr_scheduler": scheduler
-            }
+            return {"optimizer": optimizer, "lr_scheduler": scheduler}
         else:
             return optimizer
