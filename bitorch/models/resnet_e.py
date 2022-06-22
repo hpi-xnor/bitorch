@@ -61,8 +61,7 @@ class BasicBlock(nn.Module):
             nn.Sequential: the basic building block body model
         """
         return nn.Sequential(
-            QConv2d(self.in_channels, self.out_channels, kernel_size=3, stride=self.stride, padding=1, bias=False,
-                    input_quantization="sign", weight_quantization="sign"),
+            QConv2d(self.in_channels, self.out_channels, kernel_size=3, stride=self.stride, padding=1, bias=False),
             nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
 
