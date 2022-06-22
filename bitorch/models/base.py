@@ -4,8 +4,11 @@ from typing import Union, Type
 import torch
 from torch import nn
 
+from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
-from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct
+from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct, convert
+from bitorch.layers.extensions.layer_container import LayerContainer
+from bitorch.layers.register import q_linear_registry, q_conv1d_registry, q_conv2d_registry, q_conv3d_registry
 
 
 class Model(nn.Module):
@@ -66,3 +69,6 @@ class Model(nn.Module):
                         nn.init.constant_(module.bias, 0)
             elif isinstance(module, nn.Linear):
                 nn.init.xavier_normal_(module.weight)
+
+    def convert(self, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> "Model":
+        return convert(self, new_mode, device, verbose)

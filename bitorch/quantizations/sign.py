@@ -31,7 +31,7 @@ class Sign(Quantization):
     """Module for applying the sign function with straight through estimator in backward pass"""
 
     name = "sign"
-    bitwidth = 1
+    bit_width = 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.

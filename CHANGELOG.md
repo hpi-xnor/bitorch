@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.x.x] - Unreleased
+## [0.3.x] - Unreleased
+
+### Added
+
+- Simple example script for MNIST
+- Support for integration of bitorch's inference engine for the following layers
+  - QLinear
 
 ### Changed
 
 - using PyTorch's implementation of RAdam
+- renamed the `bitwidth` attribute of quantization functions to `bit_width`
 
 ### Fixed
 

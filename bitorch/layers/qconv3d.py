@@ -1,12 +1,17 @@
-"""Module containing the quantized convolution layer"""
+"""Module containing the quantized 3d convolution layer"""
+
 from typing import Union, Any
+
 from torch import Tensor
 from torch.nn import Conv3d, init
 from torch.nn.functional import pad, conv3d
 
-from bitorch.layers.config import config
+from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
-from bitorch.layers.qactivation import QActivation
+from .config import config
+from .extensions import DefaultImplementationMixin
+from .qactivation import QActivation
+from .register import QConv3dImplementation
 
 
 class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
@@ -64,7 +69,7 @@ class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
             groups=self.groups)
 
 
-class QConv3d(QConv3d_NoAct):  # type: ignore
+class QConv3dBase(QConv3d_NoAct):  # type: ignore
     def __init__(self,  # type: ignore
                  *args: Any,
                  input_quantization: Union[str, Quantization] = None,
@@ -81,7 +86,7 @@ class QConv3d(QConv3d_NoAct):  # type: ignore
             weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                 function for weights. Defaults to None.
         """
-        super(QConv3d, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
+        super().__init__(*args, weight_quantization=weight_quantization, **kwargs)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
     def forward(self, input_tensor: Tensor) -> Tensor:
@@ -93,4 +98,14 @@ class QConv3d(QConv3d_NoAct):  # type: ignore
         Returns:
             Tensor: the activated and convoluted output tensor.
         """
-        return super(QConv3d, self).forward(self.activation(input_tensor))
+        return super().forward(self.activation(input_tensor))
+
+
+@QConv3dImplementation(RuntimeMode.DEFAULT)
+class QConv3d(DefaultImplementationMixin, QConv3dBase):
+    """
+    This class defines the default implementation of a QConv3d layer (which is actually implemented by QConv3dBase).
+
+    To implement a custom QConv3d implementation use QConv3dBase as a super class instead.
+    """
+    pass

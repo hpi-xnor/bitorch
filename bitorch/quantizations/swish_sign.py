@@ -59,7 +59,7 @@ class SwishSign(Quantization):
     """Module for applying the SwishSign function"""
 
     name = "swishsign"
-    bitwidth = 1
+    bit_width = 1
 
     def __init__(self, beta: Union[float, None] = None) -> None:
         """Initializes gradient cancelation threshold.

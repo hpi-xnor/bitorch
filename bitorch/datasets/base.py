@@ -65,7 +65,7 @@ class BasicDataset(Dataset):
     @classmethod
     def get_train_and_test(
             cls,
-            root_directory: str,
+            root_directory: Optional[str] = None,
             download: bool = False,
             augmentation: Augmentation = Augmentation.DEFAULT) -> Tuple["BasicDataset", "BasicDataset"]:
         """creates a pair of train and test dataset.

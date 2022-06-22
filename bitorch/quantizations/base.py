@@ -5,6 +5,7 @@ import typing
 from torch import nn
 from torch.autograd.function import Function
 from typing import Any
+from warnings import warn
 
 
 class STE(Function):
@@ -44,8 +45,13 @@ class STE(Function):
 class Quantization(nn.Module):
     """superclass for quantization modules"""
 
-    name = "None"
-    bitwidth = -1
+    name: str = "None"
+    bit_width: int = -1
+
+    @property
+    def bitwidth(self) -> int:
+        warn("Attribute 'bitwidth' is deprecated, use 'bit_width' instead.", DeprecationWarning, stacklevel=2)
+        return self.bit_width
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """quantize the input tensor. It is recommended to use a torch.Function to also maniputlate backward behaiviour. See

@@ -53,7 +53,7 @@ class ApproxSign(Quantization):
     """Module for applying the sign function with approx sign in backward pass"""
 
     name = "approxsign"
-    bitwidth = 1
+    bit_width = 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the approx sign function.

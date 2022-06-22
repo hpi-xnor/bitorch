@@ -8,7 +8,7 @@ Welcome to bitorch's documentation!
 
 
 BITorch is a library currently under development to simplify building quantized and binary neural networks
-with [PyTorch](https://pytorch.org/).
+with `PyTorch <https://pytorch.org/>`_.
 This is an early preview version of the library.
 If you wish to use it and encounter any problems, please create an issue.
 Our current roadmap contains:
@@ -16,7 +16,7 @@ Our current roadmap contains:
 - Extending the model zoo with pre-trained models of state-of-the-art approaches
 - Adding examples for advanced training methods with multiple stages, knowledge distillation, etc.
 
-All changes are tracked in the [changelog](CHANGELOG.md).
+All changes are tracked in the `changelog <https://github.com/hpi-xnor/bitorch/blob/main/CHANGELOG.md>`_.
 
 
 

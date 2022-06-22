@@ -25,7 +25,7 @@ def dataset_from_name(name: str) -> Type[BasicDataset]:
     name-attribute)
 
     Args:
-        name (str): name of the dataset
+        name: name of the dataset
 
     Raises:
         ValueError: raised if no dataset under that name was found

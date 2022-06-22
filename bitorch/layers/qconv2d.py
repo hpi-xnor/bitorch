@@ -1,11 +1,17 @@
-from typing import Union, Any
+"""Module containing the quantized 2d convolution layer"""
+
+from typing import Union, Any, Dict
+
 from torch import Tensor
 from torch.nn import Conv2d, init
 from torch.nn.functional import pad, conv2d
 
-from bitorch.layers.config import config
+from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
-from bitorch.layers.qactivation import QActivation
+from .config import config
+from .extensions import DefaultImplementationMixin, LayerRecipe
+from .qactivation import QActivation
+from .register import QConv2dImplementation
 
 
 class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
@@ -63,7 +69,7 @@ class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
             groups=self.groups)
 
 
-class QConv2d(QConv2d_NoAct):  # type: ignore
+class QConv2dBase(QConv2d_NoAct):  # type: ignore
     def __init__(self,  # type: ignore
                  *args: Any,
                  input_quantization: Union[str, Quantization] = None,
@@ -80,8 +86,40 @@ class QConv2d(QConv2d_NoAct):  # type: ignore
             weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                 function for weights. Defaults to None.
         """
-        super(QConv2d, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
+        super().__init__(*args, weight_quantization=weight_quantization, **kwargs)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
+
+    @staticmethod
+    def get_args_as_kwargs(recipe: LayerRecipe) -> Dict[str, Any]:
+        """
+        Gather all arguments that were used to create a QLinear layer with argument names.
+        Can be used to recreate a layer with identical arguments.
+
+        Returns:
+            A dictionary with all arguments (key is the argument name as a string even for positional arguments)
+        """
+        _ = ...
+        return {
+            # "in_features": recipe.get_positional_arg(0),
+            # "out_features": recipe.get_positional_arg(1),
+            # "input_quantization": recipe.layer.input_quantization,
+            # "gradient_cancellation_threshold": recipe.layer.gradient_cancellation_threshold,
+            # "weight_quantization": recipe.layer.weight_quantization,
+            # "bias": recipe.get_arg(5, "bias", True),
+            "in_channels": _,
+            "out_channels": _,
+            "kernel_size": _,
+            "stride": _,
+            "padding": _,
+            "dilation": _,
+            "transposed": _,
+            "output_padding": _,
+            "groups": _,
+            "bias": _,
+            "padding_mode": _,
+            "device": recipe.get_arg(6, "device", None),
+            "dtype": recipe.get_arg(7, "dtype", None),
+        }
 
     def forward(self, input_tensor: Tensor) -> Tensor:
         """forward the input tensor through the activation and quantized convolution layer.
@@ -92,4 +130,14 @@ class QConv2d(QConv2d_NoAct):  # type: ignore
         Returns:
             Tensor: the activated and convoluted output tensor.
         """
-        return super(QConv2d, self).forward(self.activation(input_tensor))
+        return super().forward(self.activation(input_tensor))
+
+
+@QConv2dImplementation(RuntimeMode.DEFAULT)
+class QConv2d(DefaultImplementationMixin, QConv2dBase):
+    """
+    This class defines the default implementation of a QConv2d layer (which is actually implemented by QConv2dBase).
+
+    To implement a custom QConv2d implementation use QConv2dBase as a super class instead.
+    """
+    pass

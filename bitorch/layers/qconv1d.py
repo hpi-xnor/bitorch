@@ -1,13 +1,17 @@
-"""Module containing the quantized convolution layer"""
+"""Module containing the quantized 1d convolution layer"""
 
 from typing import Any, Union
+
 from torch import Tensor
 from torch.nn import Conv1d, init
 from torch.nn.functional import pad, conv1d
 
-from bitorch.layers.config import config
+from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
-from bitorch.layers.qactivation import QActivation
+from .config import config
+from .extensions import DefaultImplementationMixin
+from .qactivation import QActivation
+from .register import QConv1dImplementation
 
 
 class QConv1d_NoAct(Conv1d):  # noqa: N801
@@ -67,7 +71,7 @@ class QConv1d_NoAct(Conv1d):  # noqa: N801
             groups=self.groups)
 
 
-class QConv1d(QConv1d_NoAct):  # type: ignore
+class QConv1dBase(QConv1d_NoAct):  # type: ignore
     def __init__(self,  # type: ignore
                  *args: Any,
                  input_quantization: Union[str, Quantization] = None,
@@ -84,7 +88,7 @@ class QConv1d(QConv1d_NoAct):  # type: ignore
             weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                 function for weights. Defaults to None.
         """
-        super(QConv1d, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
+        super().__init__(*args, weight_quantization=weight_quantization, **kwargs)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
     def forward(self, input_tensor: Tensor) -> Tensor:
@@ -96,4 +100,14 @@ class QConv1d(QConv1d_NoAct):  # type: ignore
         Returns:
             Tensor: the activated and convoluted output tensor.
         """
-        return super(QConv1d, self).forward(self.activation(input_tensor))
+        return super().forward(self.activation(input_tensor))
+
+
+@QConv1dImplementation(RuntimeMode.DEFAULT)
+class QConv1d(DefaultImplementationMixin, QConv1dBase):
+    """
+    This class defines the default implementation of a QConv1d layer (which is actually implemented by QConv1dBase).
+
+    To implement a custom QConv1d implementation use QConv1dBase as a super class instead.
+    """
+    pass
