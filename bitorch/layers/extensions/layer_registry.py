@@ -106,7 +106,8 @@ class LayerRegistry:
             self.layer_implementations.remove(i)
 
     def convert_layers_to(
-            self, new_mode: RuntimeMode,
+            self,
+            new_mode: RuntimeMode,
             only: Optional[Iterable[Any]] = None,
             device: torch.device = None,
             verbose: bool = False

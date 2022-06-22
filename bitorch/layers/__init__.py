@@ -53,5 +53,4 @@ def convert(module: T, new_mode: RuntimeMode, device: torch.device = None, verbo
     submodules = list(module.modules())
     for registry in all_layer_registries():
         registry.convert_layers_to(new_mode, only=submodules, device=device, verbose=verbose)
-    module.to(device)
     return module
