@@ -35,7 +35,7 @@ setuptools.setup(
     install_requires=get_requirements("requirements.txt"),
     extras_require={
         "dev": get_requirements("requirements-dev.txt"),
-        "opt": get_requirements("requirements-opt.txt"),
+        "opt": get_requirements("examples/requirements.txt"),
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -54,7 +54,6 @@ setuptools.setup(
                 "version.txt",
                 "requirements.txt",
                 "requirements-dev.txt",
-                "requirements-opt.txt",
             ],
         ),
     ],
