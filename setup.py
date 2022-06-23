@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 import setuptools
 
@@ -15,12 +15,20 @@ if version_file.exists():
 print("version:", version)
 
 
-def _get_requirements(file_path: Union[Path, str]):
-    return [requirement.strip() for requirement in (root_path / file_path).open().readlines()]
+def _get_requirements(*file_path: Union[Path, str]):
+    result = []
+    for fp in file_path:
+        result.extend(list(requirement.strip() for requirement in (root_path / fp).open().readlines()))
+    return result
+
+
+def _get_files_recursively(glob: str, root: str = ".") -> List[str]:
+    return list(str(x) for x in Path(root).rglob(glob))
 
 
 with open("README.md", "r", encoding="utf-8") as handle:
     readme_content = handle.read()
+
 
 setuptools.setup(
     name="bitorch",
@@ -31,12 +39,11 @@ setuptools.setup(
     description="A package for building and training quantized and binary neural networks with Pytorch",
     long_description=readme_content,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(exclude="tests"),
+    packages=setuptools.find_packages(),
     install_requires=_get_requirements("requirements.txt"),
     extras_require={
         "dev": _get_requirements("requirements-dev.txt"),
-        "opt": _get_requirements("examples/pytorch_lightning/requirements.txt")
-        # + _get_requirements("examples/mnist/requirements.txt"),
+        "opt": _get_requirements(*_get_files_recursively("requirements*.txt", root="examples")),
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -52,10 +59,13 @@ setuptools.setup(
         (
             ".",
             [
+                "AUTHORS",
+                "CHANGELOG.md",
+                "mypy.ini",
                 "version.txt",
-                "requirements.txt",
-                "requirements-dev.txt",
-            ],
+            ]
+            + _get_files_recursively("requirements*.txt")
+            + _get_files_recursively("README.md", root="examples"),
         ),
     ],
 )
