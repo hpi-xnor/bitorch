@@ -66,20 +66,30 @@ Install the package and _dev_ requirements locally for development:
 pip install -e ".[dev]"
 ```
 
+### Tests
+
+The tests can be run with [pytest](https://docs.pytest.org/):
+
+```bash
+pytest
+```
+
 ### Code formatting and typing
 
-New code should be compatible with Python 3.X versions and be compliant with PEP8. To check the codebase, please run
+For conveniently checking whether your code suites the required style (more details below), run
+```bash
+./check-codestyle.sh
+```
 
+New code should be compatible with Python 3.X versions and be compliant with PEP8. To check the codebase, please run
 ```bash
 flake8
 ```
 
 The codebase has type annotations, please make sure to add type hints if required. We use `mypy` for type checking:
-
 ```bash
 mypy --config-file mypy.ini
 ```
-
 
 For code formatting we use `black`:
 ```bash
@@ -87,15 +97,10 @@ black . --check --verbose --diff --color  # check what changes the formatter wou
 black .  # apply the formatter
 ```
 
-In order to automatically apply the code formatting with every commit, you can install pre-commit and use the pre-commit hook:
+In order to automatically apply the code formatting with every commit, you can also install pre-commit
+and use the pre-commit hook:
 ```bash
 pre-commit install
-```
-
-Finally, the tests can be run with:
-
-```bash
-pytest
 ```
 
 ### Documentation
