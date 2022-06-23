@@ -35,7 +35,8 @@ setuptools.setup(
     install_requires=get_requirements("requirements.txt"),
     extras_require={
         "dev": get_requirements("requirements-dev.txt"),
-        "opt": get_requirements("examples/requirements.txt"),
+        "opt": get_requirements("examples/pytorch_lightning/requirements.txt")
+        + get_requirements("examples/mnist/requirements.txt"),
     },
     classifiers=[
         "Development Status :: 3 - Alpha",

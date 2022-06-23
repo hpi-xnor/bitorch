@@ -1,5 +1,4 @@
 torch
 torchvision
-bitorchinfo
 matplotlib
 numpy
