@@ -19,6 +19,7 @@ class LayerImplementation(ABC):
 
     It registers all decorated classes in the given registry. On creation of a decorated class, it
     wraps the created class object in a layer container and stores the arguments used to create the layer.
+    It also captures which RuntimeMode(s) is/are supported by an implementation.
     """
 
     registry: "LayerRegistry"

@@ -55,7 +55,9 @@ class Quantization(nn.Module):
         return self.bit_width
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
-        """quantize the input tensor. It is recommended to use a torch.Function to also maniputlate backward behavior.
+        """Quantize the input tensor.
+
+        It is recommended to use a torch.Function to also manipulate backwards behavior.
         See the implementations of sign or dorefa quantization functions for more examples.
 
         Args:

@@ -47,7 +47,6 @@ class QEmbeddingBag(EmbeddingBag):
         Returns:
             Tensor: embeddings for given sequences
         """
-
         # necessary for torch 1.8 compliance
         if hasattr(self, "padding_idx"):
             embeddings = embedding_bag(

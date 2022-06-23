@@ -20,7 +20,6 @@ class SteHeavisideFunction(STE):
         Returns:
             torch.Tensor: the quantized input tensor
         """
-
         quantized_tensor = torch.where(
             input_tensor > 0,
             torch.tensor(1.0, device=input_tensor.device),

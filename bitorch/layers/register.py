@@ -42,9 +42,7 @@ def convert_layers_to(
 
 
 class QLinearImplementation(LayerImplementation):
-    """
-    Decorator for :class:`QLinear` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
-    """
+    """Decorator for :class:`QLinear` implementations."""
 
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """
@@ -55,9 +53,7 @@ class QLinearImplementation(LayerImplementation):
 
 
 class QConv1dImplementation(LayerImplementation):
-    """
-    Decorator for :class:`QConv1d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
-    """
+    """Decorator for :class:`QConv1d` implementations."""
 
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """
@@ -68,9 +64,7 @@ class QConv1dImplementation(LayerImplementation):
 
 
 class QConv2dImplementation(LayerImplementation):
-    """
-    Decorator for :class:`QConv2d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
-    """
+    """Decorator for :class:`QConv2d` implementations."""
 
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """
@@ -81,9 +75,7 @@ class QConv2dImplementation(LayerImplementation):
 
 
 class QConv3dImplementation(LayerImplementation):
-    """
-    Decorator for :class:`QConv3d` implementations, captures which RuntimeMode(s) is/are supported by an implementation.
-    """
+    """Decorator for :class:`QConv3d` implementations."""
 
     def __init__(self, supports_modes: runtime_mode_type) -> None:
         """

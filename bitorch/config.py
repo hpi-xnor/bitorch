@@ -1,12 +1,16 @@
-"""Config class for bitorch configurations. These configs can be used to specify key default values which benefit
-from beeing changed easily via argparse e.g. for training scripts."""
+"""
+Config class for bitorch configurations. These configs can be used to specify key default values which benefit
+from beeing changed easily via argparse e.g. for training scripts.
+"""
 
 from argparse import ArgumentParser, Namespace
 
 
 class Config:
-    """Config superclass that implements functionality to create argparse arguments for class attributes of
-    subclasses."""
+    """
+    Config superclass that implements functionality to create argparse arguments for class attributes of
+    subclasses.
+    """
 
     def __init__(self) -> None:
         """collects all attributes of class that are not the name as configurable attributes."""

@@ -15,7 +15,7 @@ if version_file.exists():
 print("version:", version)
 
 
-def get_requirements(file_path: Union[Path, str]):
+def _get_requirements(file_path: Union[Path, str]):
     return [requirement.strip() for requirement in (root_path / file_path).open().readlines()]
 
 
@@ -32,11 +32,11 @@ setuptools.setup(
     long_description=readme_content,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude="tests"),
-    install_requires=get_requirements("requirements.txt"),
+    install_requires=_get_requirements("requirements.txt"),
     extras_require={
-        "dev": get_requirements("requirements-dev.txt"),
-        "opt": get_requirements("examples/pytorch_lightning/requirements.txt")
-        + get_requirements("examples/mnist/requirements.txt"),
+        "dev": _get_requirements("requirements-dev.txt"),
+        "opt": _get_requirements("examples/pytorch_lightning/requirements.txt")
+        + _get_requirements("examples/mnist/requirements.txt"),
     },
     classifiers=[
         "Development Status :: 3 - Alpha",

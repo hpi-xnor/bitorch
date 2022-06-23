@@ -4,6 +4,7 @@ from typing import List
 
 
 def clean_hyperparameters(args: Namespace) -> Namespace:
+    """Remove args which are not passed to the constructor in our training script."""
     clean_args = Namespace()
     for key in args.__dict__.keys():
         if key in UNUSED_PL_ARGS:

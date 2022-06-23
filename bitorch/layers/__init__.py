@@ -10,7 +10,7 @@ from torch import nn
 
 from bitorch import RuntimeMode
 from .debug_layers import InputGraphicalDebug, InputPrintDebug, WeightGraphicalDebug, WeightPrintDebug, ShapePrintDebug
-from .extensions import CustomImplementationMixin, LayerRegistry
+from .extensions import CustomImplementationMixin
 from .pact import Pact
 from .qactivation import QActivation
 from .qconv1d import QConv1d, QConv1d_NoAct
