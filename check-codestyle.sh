@@ -27,6 +27,7 @@ fi
 if [ "${#fails[@]}" -gt "0" ]; then
     echo "The following checks failed (please check the output above):"
     echo ${fails[@]}
+    exit 1
 else
     echo
     echo "All looking good!"
