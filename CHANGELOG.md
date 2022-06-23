@@ -8,16 +8,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
-- Simple example script for MNIST
-- Support for integration of bitorch's inference engine for the following layers
+- simple example script for MNIST
+- support for integration of bitorch's inference engine for the following layers
   - QLinear
-
-### Added
-
-- code formatting using black
+  - QConv
 
 ### Changed
 
+- requirements changed:
+  - requirements for examples are now stored at their respective folders
+  - optional requirements now install everything needed to run all examples
+- code is now formatted with the black code formatter
 - using PyTorch's implementation of RAdam
 - renamed the `bitwidth` attribute of quantization functions to `bit_width`
 
