@@ -108,8 +108,7 @@ class SpecificResnetE(nn.Module):
         Returns:
             nn.Sequential: the model containing the building blocks
         """
-
-        # this tricks adds shortcut connections between original resnet blocks
+        # this trick adds shortcut connections between original resnet blocks
         # we multiple number of blocks by 2, but add only one layer instead of two in each block
         layers = layers * 2
 

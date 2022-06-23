@@ -80,6 +80,11 @@ def add_logging_args(parser: ArgumentParser) -> None:
 
 
 def add_checkpoint_args(parser: ArgumentParser) -> None:
+    """adds cli parameters for checkpoint logging
+
+    Args:
+        parser (ArgumentParser): the main argument parser
+    """
     checkpoint = parser.add_argument_group("checkpoints", "parameters for checkpoint storing / loading")
     checkpoint.add_argument(
         "--checkpoint-dir",

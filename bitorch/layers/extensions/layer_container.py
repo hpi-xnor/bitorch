@@ -6,10 +6,7 @@ T = TypeVar("T")
 
 
 class LayerContainer(Generic[T]):
-
-    """
-    This class wraps another layer - but the internally contained class can be swapped out during runtime.
-    """
+    """This class wraps another layer - but the internally contained class can be swapped out during runtime."""
 
     internal_variable_names = [
         "_layer_implementation",

@@ -1,8 +1,9 @@
 """Sign Function Implementation"""
-from typing import Tuple, Union, Optional
+
+import typing
 
 import torch
-import typing
+
 from .base import Quantization, STE
 
 

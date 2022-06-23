@@ -3,6 +3,7 @@ from torch import nn
 
 
 def get_initial_layers(variant: str, input_channels: int, output_channels: int) -> List[nn.Module]:
+    """Get commonly used layers to extract initial features from the image."""
     layers: List[nn.Module] = []
     if variant == "imagenet":
         layers.append(nn.Conv2d(input_channels, output_channels, kernel_size=7, stride=2, padding=3, bias=False))

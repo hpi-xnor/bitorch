@@ -107,5 +107,4 @@ class InputDoReFa(Quantization):
         Returns:
             torch.Tensor: DoReFaed tensor x
         """
-
         return InputDoReFaFunction.apply(x, self.bit_width)

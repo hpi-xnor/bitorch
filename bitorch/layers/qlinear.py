@@ -75,7 +75,6 @@ class QLinearBase(Linear):
         Returns:
             torch.Tensors: forwarded tensor
         """
-
         return linear(self.activation(x), self.weight_quantization(self.weight), self.bias)
 
 

@@ -15,8 +15,10 @@ from .register import QConv1dImplementation
 
 
 class QConv1d_NoAct(Conv1d):  # noqa: N801
-    """Quantized 1d Convolutional Layer. Has the same api as Conv1d but lets you specify a weight quantization, that is
-    applied before the convolutional operation."""
+    """
+    Quantized 1d Convolutional Layer. Has the same api as Conv1d but lets you specify a weight quantization, that is
+    applied before the convolutional operation.
+    """
 
     def __init__(
         self,
@@ -26,7 +28,8 @@ class QConv1d_NoAct(Conv1d):  # noqa: N801
         bias: bool = False,
         **kwargs: Any,
     ) -> None:
-        """initialization function for padding and quantization.
+        """
+        initialization function for padding and quantization.
 
         Args:
             weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization

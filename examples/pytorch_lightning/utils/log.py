@@ -17,7 +17,7 @@ TIME_INTERVALS = (
 )
 
 
-def display_time(seconds: float, granularity: int = 2) -> str:
+def _display_time(seconds: float, granularity: int = 2) -> str:
     result: List[str] = []
 
     seconds = int(round(seconds))
@@ -99,13 +99,13 @@ class CommandLineLogger(ProgressBarBase):
 
         time_in_this_epoch = time.time() - self._epoch_start_time
         epoch_total_est = int(round((time_in_this_epoch * self.total_train_batches) / self.train_batch_idx))
-        eta_epoch = display_time(epoch_total_est - time_in_this_epoch)
+        eta_epoch = _display_time(epoch_total_est - time_in_this_epoch)
         full_epochs_left = trainer.max_epochs - trainer.current_epoch
         if full_epochs_left < 0:
             full_epochs_left = 0
         if self._average_epoch_time() > 0:
             epoch_total_est = self._average_epoch_time() + self._average_validation_time()
-        eta_train = display_time(epoch_total_est - time_in_this_epoch + full_epochs_left * epoch_total_est)
+        eta_train = _display_time(epoch_total_est - time_in_this_epoch + full_epochs_left * epoch_total_est)
 
         epoch_info = f"Epoch {trainer.current_epoch:3d}"
         batch_info = f"{self.train_batch_idx:4d}/{self.total_train_batches:4d} ({percent:5.1f}%)"
