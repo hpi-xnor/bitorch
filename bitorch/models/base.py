@@ -6,7 +6,10 @@ from torch import nn
 
 from bitorch import RuntimeMode
 from bitorch.datasets.base import BasicDataset
-from bitorch.layers import QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct, convert
+from bitorch.layers import convert
+from bitorch.layers.qconv1d import QConv1dBase, QConv1d_NoAct
+from bitorch.layers.qconv2d import QConv2dBase, QConv2d_NoAct
+from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
 
 
 class Model(nn.Module):
@@ -55,7 +58,17 @@ class Model(nn.Module):
         for module in self._model.modules():
             if isinstance(module, (nn.Conv1d, nn.Conv2d, nn.Conv3d)):
                 # binary layers
-                if isinstance(module, (QConv1d, QConv2d, QConv3d, QConv1d_NoAct, QConv2d_NoAct, QConv3d_NoAct)):
+                if isinstance(
+                    module,
+                    (
+                        QConv1dBase,
+                        QConv2dBase,
+                        QConv3dBase,
+                        QConv1d_NoAct,
+                        QConv2d_NoAct,
+                        QConv3d_NoAct,
+                    ),
+                ):
                     nn.init.xavier_normal_(module.weight)
                 else:
                     if module.kernel_size[0] == 7:
