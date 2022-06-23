@@ -1,9 +1,4 @@
 torch
 torchvision
-bitorchinfo
 matplotlib
 numpy
-sklearn
-pytorch_lightning
-protobuf~=3.20.0
-torchmetrics

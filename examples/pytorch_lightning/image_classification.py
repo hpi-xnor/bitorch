@@ -15,41 +15,25 @@ import logging
 from pathlib import Path
 from typing import List
 
+import fvbitcore.nn as fv_nn
 import torch
-
-from torch.utils.data import DataLoader
+import wandb
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
-from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase
-from utils.utils import configure_logging
-from utils.arg_parser import create_argparser
-from utils.lightning_model import ModelWrapper
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase, WandbLogger
+from torch.utils.data import DataLoader
 
+from bitorch import apply_args_to_configuration
+from bitorch.datasets import dataset_from_name
 from bitorch.datasets.base import Augmentation
 from bitorch.models import model_from_name
-from bitorch.datasets import dataset_from_name
-from bitorch import apply_args_to_configuration
 from bitorch.quantizations import Quantization
-
 from examples.pytorch_lightning.utils.log import CommandLineLogger
+from utils.arg_parser import create_argparser
+from utils.lightning_model import ModelWrapper
+from utils.utils import configure_logging
 
 logger = logging.getLogger()
-
-
-FVBITCORE_AVAILABLE = True
-try:
-    import fvbitcore.nn as fv_nn
-except ModuleNotFoundError:
-    logger.warning("fvbitcore not installed, will not calculate model flops!")
-    FVBITCORE_AVAILABLE = False
-
-WANDB_AVAILABLE = True
-try:
-    from pytorch_lightning.loggers import WandbLogger
-    import wandb
-except ModuleNotFoundError:
-    logger.warning("wandb not installed, will not log metrics to wandb!")
-    WANDB_AVAILABLE = False
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
@@ -71,7 +55,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         loggers.append(TensorBoardLogger(str(output_dir), name="tensorboard"))
     if args.csv_log:
         loggers.append(CSVLogger(str(output_dir), name="csv"))
-    if WANDB_AVAILABLE and args.wandb_log:
+    if args.wandb_log:
         loggers.append(
             WandbLogger(
                 project=args.wandb_project,
@@ -153,25 +137,22 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         persistent_workers=True,
     )  # type: ignore
 
-    if FVBITCORE_AVAILABLE:
-        data_point = torch.zeros(dataset.shape)
-        computational_intensity = fv_nn.FlopCountAnalysis(
-            model, inputs=data_point, quantization_base_class=Quantization
-        )
+    data_point = torch.zeros(dataset.shape)
+    computational_intensity = fv_nn.FlopCountAnalysis(model, inputs=data_point, quantization_base_class=Quantization)
 
-        stats, table = fv_nn.flop_count_table(computational_intensity, automatic_qmodules=True)
-        logger.info("\n" + table)
-        total_size = stats["#compressed size in bits"][""]
-        logger.info("Total size in MB: " + str(total_size / 1e6 / 8.0))
-        total_flops = stats["#speed up flops (app.)"][""]
-        logger.info("Approximated mflops: " + str(total_flops / 1e6))
-        if WANDB_AVAILABLE and args.wandb_log:
-            wandb.config.update(
-                {
-                    "mflops": total_flops / 1e6,
-                    "size in MB": total_size / 1e6 / 8.0,
-                }
-            )
+    stats, table = fv_nn.flop_count_table(computational_intensity, automatic_qmodules=True)
+    logger.info("\n" + table)
+    total_size = stats["#compressed size in bits"][""]
+    logger.info("Total size in MB: " + str(total_size / 1e6 / 8.0))
+    total_flops = stats["#speed up flops (app.)"][""]
+    logger.info("Approximated mflops: " + str(total_flops / 1e6))
+    if args.wandb_log:
+        wandb.config.update(
+            {
+                "mflops": total_flops / 1e6,
+                "size in MB": total_size / 1e6 / 8.0,
+            }
+        )
 
     trainer.fit(
         model_wrapped,
@@ -183,7 +164,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     parser, model_parser = create_argparser()
-    args, unparsed_model_args = parser.parse_known_args()
-    model_args = model_parser.parse_args(unparsed_model_args)
+    args_, unparsed_model_args = parser.parse_known_args()
+    model_args_ = model_parser.parse_args(unparsed_model_args)
 
-    main(args, model_args)
+    main(args_, model_args_)

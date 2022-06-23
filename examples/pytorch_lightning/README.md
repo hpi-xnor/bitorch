@@ -3,8 +3,13 @@
 To give an example on how to use bitorch for your own projects `image_classification.py` trains one of the
 models implemented in `bitorch` on an image classification dataset.
 
-Below you can find an example call of the script:
+First the requirements for this example need to be installed
+(unless the optional dependencies of BITorch were already installed):
+```bash
+pip install -r requirements.txt
+```
 
+Below you can find an example call of the script:
 ```bash
 python3 image_classification.py --optimizer adam --lr 0.001 --lr-scheduler cosine --max_epochs 2 --dataset imagenet --model resnet18v1 --batch-size 128 --accelerator gpu --num-workers 16 --gpus 3
 ```
