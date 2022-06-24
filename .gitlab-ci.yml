@@ -17,12 +17,28 @@ before_script:
     - mypy --config-file mypy.ini
     - black . --check --verbose --diff --color
 
+.scheduled-only:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
 codestyle:
   extends: .codestyle
 
 codestyle:3.8:
   extends: .codestyle
   image: python:3.8
+
+codestyle:3.9:
+  extends:
+    - .codestyle
+    - .scheduled-only
+  image: python:3.9
+
+codestyle:3.10:
+  extends:
+    - .codestyle
+    - .scheduled-only
+  image: python:3.10
 
 .test:
   stage: test
@@ -36,6 +52,18 @@ test:
 test:3.8:
   extends: .test
   image: python:3.8
+
+test:3.9:
+  extends:
+    - .test
+    - .scheduled-only
+  image: python:3.9
+
+test:3.10:
+  extends:
+    - .test
+    - .scheduled-only
+  image: python:3.10
 
 test-build-doc:
   stage: test
