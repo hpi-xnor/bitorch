@@ -13,7 +13,7 @@ if os.environ.get("REMOTE_PYCHARM_DEBUG_SESSION", False):
 import argparse
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Any
 
 import fvbitcore.nn as fv_nn
 import torch
@@ -64,7 +64,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 save_dir=str(output_dir),
             )  # type: ignore
         )
-    callbacks = []
+    callbacks: List[Any] = []
     if args.checkpoint_dir is not None:
         callbacks.append(
             ModelCheckpoint(
@@ -82,7 +82,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     if len(loggers) > 0:
         lr_monitor = LearningRateMonitor(logging_interval="step")
-        callbacks.append(lr_monitor)  # type: ignore
+        callbacks.append(lr_monitor)
 
     dataset = dataset_from_name(args.dataset)
 
