@@ -25,7 +25,9 @@ codestyle:
   extends: .codestyle
 
 codestyle:3.8:
-  extends: .codestyle
+  extends:
+    - .codestyle
+    - .scheduled-only
   image: python:3.8
 
 codestyle:3.9:
@@ -50,7 +52,9 @@ test:
   extends: .test
 
 test:3.8:
-  extends: .test
+  extends:
+    - .test
+    - .scheduled-only
   image: python:3.8
 
 test:3.9:
