@@ -2,10 +2,13 @@ image: python:3.7
 
 before_script:
   - python --version
-  - pip install -e .[dev] --extra-index-url https://download.pytorch.org/whl/cu113
-  - pwd
-  - ls -l
-  - python -c "import sys;print(sys.path)"
+  - pip install -e ".[dev]" --extra-index-url https://download.pytorch.org/whl/cu113
+
+.scheduled-only:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# Checking codestyle
 
 .codestyle:
   stage: test
@@ -17,10 +20,6 @@ before_script:
     - mypy --config-file mypy.ini
     - black . --check --verbose --diff --color
 
-.scheduled-only:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-
 codestyle:
   extends: .codestyle
 
@@ -30,20 +29,33 @@ codestyle:3.10:
     - .scheduled-only
   image: python:3.10
 
+# Running tests
+
 .test:
   stage: test
   script:
     - pytest --version
     - python -m pytest .
 
-test:
+test-and-coverage:
   extends: .test
+  script:
+    - pytest --version
+    - python -m pytest --cov bitorch --cov-report xml .
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 test:3.10:
   extends:
     - .test
     - .scheduled-only
   image: python:3.10
+
+# Documentation
 
 test-build-doc:
   stage: test

@@ -26,7 +26,7 @@ class Layer(nn.Module):
         return self
 
 
-class TestLayerContainer(LayerContainer):
+class _LayerContainer(LayerContainer):
     patch = LayerContainer.patch + [
         "self_function",
     ]
@@ -35,7 +35,7 @@ class TestLayerContainer(LayerContainer):
 @pytest.mark.parametrize("test_wrapped_layer", [False, True])
 def test_switchable_layer(test_wrapped_layer):
     if test_wrapped_layer:
-        layer = TestLayerContainer(Layer, 42)
+        layer = _LayerContainer(Layer, 42)
     else:
         layer = Layer(42)
     assert layer.x == 42
