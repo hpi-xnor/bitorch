@@ -16,10 +16,13 @@ print("version:", version)
 
 
 def _get_requirements(*file_path: Union[Path, str]):
-    result = []
+    requirements_list = []
     for fp in file_path:
-        result.extend(list(requirement.strip() for requirement in (root_path / fp).open().readlines()))
-    return result
+        requirements_list.extend(list(requirement.strip() for requirement in (root_path / fp).open().readlines()))
+    # exclude bitorch from examples
+    if "bitorch" in requirements_list:
+        requirements_list.remove("bitorch")
+    return requirements_list
 
 
 def _get_files_recursively(glob: str, root: str = ".") -> List[str]:

@@ -1,5 +1,6 @@
-wandb
+bitorch
 fvbitcore
-sklearn
 pytorch_lightning
+sklearn
 torchmetrics
+wandb

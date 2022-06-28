@@ -24,18 +24,6 @@ before_script:
 codestyle:
   extends: .codestyle
 
-codestyle:3.8:
-  extends:
-    - .codestyle
-    - .scheduled-only
-  image: python:3.8
-
-codestyle:3.9:
-  extends:
-    - .codestyle
-    - .scheduled-only
-  image: python:3.9
-
 codestyle:3.10:
   extends:
     - .codestyle
@@ -51,18 +39,6 @@ codestyle:3.10:
 test:
   extends: .test
 
-test:3.8:
-  extends:
-    - .test
-    - .scheduled-only
-  image: python:3.8
-
-test:3.9:
-  extends:
-    - .test
-    - .scheduled-only
-  image: python:3.9
-
 test:3.10:
   extends:
     - .test
@@ -74,3 +50,11 @@ test-build-doc:
   script:
     - apt-get update && apt-get install -y pandoc
     - sphinx-build -b html docs/source/ docs/build/ -a
+
+test-doc-completeness:
+  extends: .scheduled-only
+  stage: test
+  script:
+    - flake8 --version
+    # explicitly select Docstring errors and ignore to overwrite config in setup.cfg
+    - flake8 --select=D1 --ignore=E501
