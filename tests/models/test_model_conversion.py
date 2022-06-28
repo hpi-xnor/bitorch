@@ -27,7 +27,7 @@ from bitorch.models import Model
 TEST_MODE = RuntimeMode.INFERENCE_AUTO
 
 
-class TestModel(Model):
+class _TestModel(Model):
     def __init__(self):
         super().__init__(dataset=MNIST)
         self.q_conv2d = QConv2d(1, 32, 3, 1, 1)
@@ -148,7 +148,7 @@ def get_subclassed_impls():
 
 def _test():
     x = torch.rand(1, 1, 28, 28)
-    net = TestModel()
+    net = _TestModel()
 
     assert not hasattr(net.q_linear, "is_test_implementation")
     assert not hasattr(net.q_conv2d, "is_test_implementation")
