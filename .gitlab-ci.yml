@@ -41,7 +41,9 @@ test-and-coverage:
   extends: .test
   script:
     - pytest --version
-    - python -m pytest --cov bitorch --cov-report xml .
+    - coverage run -m pytest
+    - coverage report
+    - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     reports:
