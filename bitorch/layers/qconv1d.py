@@ -11,6 +11,7 @@ from bitorch.quantizations import Quantization
 from .config import config
 from .extensions import DefaultImplementationMixin
 from .qactivation import QActivation
+from .qconv_mixin import QConvArgsProviderMixin
 from .register import QConv1dImplementation
 
 
@@ -77,7 +78,7 @@ class QConv1d_NoAct(Conv1d):  # noqa: N801
         )
 
 
-class QConv1dBase(QConv1d_NoAct):  # type: ignore
+class QConv1dBase(QConvArgsProviderMixin, QConv1d_NoAct):  # type: ignore
     def __init__(
         self,  # type: ignore
         *args: Any,

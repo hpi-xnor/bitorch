@@ -13,9 +13,9 @@ from .debug_layers import InputGraphicalDebug, InputPrintDebug, WeightGraphicalD
 from .extensions import CustomImplementationMixin
 from .pact import Pact
 from .qactivation import QActivation
-from .qconv1d import QConv1d, QConv1d_NoAct
-from .qconv2d import QConv2d, QConv2d_NoAct
-from .qconv3d import QConv3d, QConv3d_NoAct
+from .qconv1d import QConv1d, QConv1dBase, QConv1d_NoAct
+from .qconv2d import QConv2d, QConv2dBase, QConv2d_NoAct
+from .qconv3d import QConv3d, QConv3dBase, QConv3d_NoAct
 from .qembedding import QEmbedding, QEmbeddingBag
 from .qlinear import QLinear, QLinearBase
 from .register import all_layer_registries
@@ -30,6 +30,9 @@ __all__ = [
     "QConv1d",
     "QConv2d",
     "QConv3d",
+    "QConv1dBase",
+    "QConv2dBase",
+    "QConv3dBase",
     "QConv1d_NoAct",
     "QConv2d_NoAct",
     "QConv3d_NoAct",

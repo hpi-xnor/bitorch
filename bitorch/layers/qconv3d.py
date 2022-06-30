@@ -11,6 +11,7 @@ from bitorch.quantizations import Quantization
 from .config import config
 from .extensions import DefaultImplementationMixin
 from .qactivation import QActivation
+from .qconv_mixin import QConvArgsProviderMixin
 from .register import QConv3dImplementation
 
 
@@ -71,7 +72,7 @@ class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
         )
 
 
-class QConv3dBase(QConv3d_NoAct):  # type: ignore
+class QConv3dBase(QConvArgsProviderMixin, QConv3d_NoAct):  # type: ignore
     def __init__(
         self,  # type: ignore
         *args: Any,
