@@ -22,20 +22,25 @@ from bitorch.layers import QLinear
 # from .utils import create_loss_function, create_optimizer, create_activation_function, parse_layer_sizes, str2bool
 from bitorch.layers.qembedding import QEmbeddingBag
 
+
 class Weighted_Pooling_Type(Enum):
     NONE = 0
     FIXED = 1
     LEARNED = 2
+
 
 class Interaction_Operation_Type(Enum):
     PRODUCT = "product"
     CONCAT = "concat"
     SUM = "sum"
 
+
 class MLP(torch.nn.Module):
     """Mlp class for DLRM mlps. this mainly is used to properly pass shortcut data"""
     name = "MLP"
-    def __init__(self, layers: ModuleList, name: str = "MLP", shortcut_out_index: Union[int, None] = None, shortcut_in_index: Union[int, None] = None):
+
+    def __init__(self, layers: ModuleList, name: str = "MLP",
+                 shortcut_out_index: Union[int, None] = None, shortcut_in_index: Union[int, None] = None):
         super().__init__()
         self.shortcut_out_index = shortcut_out_index
         self.shortcut_in_index = shortcut_in_index
@@ -44,7 +49,7 @@ class MLP(torch.nn.Module):
         logging.info(f"shortcut_out_index {shortcut_out_index}")
         logging.info(f"shortcut_in_index {shortcut_in_index}")
 
-    def forward(self, X, shortcut_value = None):
+    def forward(self, X, shortcut_value=None):
         out = None
         Y = X
         for index, layer in enumerate(self.layers):
@@ -54,16 +59,17 @@ class MLP(torch.nn.Module):
             if index == self.shortcut_out_index:
                 out = Y
         return Y, out
-    
+
     def __str__(self) -> str:
         out = f"{self.name}\n"
-        out += "="*10
+        out += "=" * 10
         out += "\n".join(self.layers)
         return out
 
+
 def create_mlp(
-    layer_sizes: List[int],
-    quantized: bool = False) -> MLP:
+        layer_sizes: List[int],
+        quantized: bool = False) -> MLP:
     """creates a mlp module
 
     Args:
@@ -103,11 +109,19 @@ def create_mlp(
 
         if batch_norm_before_relu:
             mlp_layers.append(BatchNorm1d(output_size))
-        mlp_layers.append(Sigmoid() if idx == sigmoid_layer_idx else (create_activation_function(activation_function, bitwidth)))
+        mlp_layers.append(
+            Sigmoid() if idx == sigmoid_layer_idx else (
+                create_activation_function(
+                    activation_function, bitwidth)))
         input_size = output_size
     if sigmoid_layer_idx == -1:
         mlp_layers[-1] = Sigmoid()
-    return MLP(ModuleList(mlp_layers), name=name, shortcut_out_index=this_shortcut_out_index, shortcut_in_index=this_shortcut_in_index)
+    return MLP(
+        ModuleList(mlp_layers),
+        name=name,
+        shortcut_out_index=this_shortcut_out_index,
+        shortcut_in_index=this_shortcut_in_index)
+
 
 def create_embeddings(
         embedding_dimension: int,
@@ -122,7 +136,8 @@ def create_embeddings(
     embedding_layers = ModuleList()
     weighted_layers = []
     for layer_size in layer_sizes:
-        logging.info(f"creating embedding layer with {layer_size} * {embedding_dimension} = {layer_size * embedding_dimension} params...")
+        logging.info(
+            f"creating embedding layer with {layer_size} * {embedding_dimension} = {layer_size * embedding_dimension} params...")
         if binary_embedding:
             embedding_layers.append(QEmbeddingBag(
                 layer_size,
@@ -134,14 +149,14 @@ def create_embeddings(
         else:
             embedding_layers.append(EmbeddingBag(layer_size, embedding_dimension, mode="sum", sparse=sparse))
         embedding_weights = np.random.uniform(
-                low=-np.sqrt(1 / layer_size), high=np.sqrt(1 / layer_size), size=(layer_size, embedding_dimension)
-            ).astype(np.float32)
+            low=-np.sqrt(1 / layer_size), high=np.sqrt(1 / layer_size), size=(layer_size, embedding_dimension)
+        ).astype(np.float32)
         embedding_layers[-1].weight.data = torch.tensor(embedding_weights, requires_grad=True)
         weighted_layers.append(
             torch.ones(layer_size, dtype=torch.float32)
             if not weighted_pooling == Weighted_Pooling_Type.NONE.value
             else None)
-    
+
     return embedding_layers, weighted_layers
 
 
@@ -194,13 +209,15 @@ class DLRM(Module):
         bottom_mlp_layer_sizes, self.sc_out_index = parse_layer_sizes(bottom_mlp_layer_sizes)
         top_mlp_layer_sizes, self.sc_in_index = parse_layer_sizes(top_mlp_layer_sizes)
 
-        # computing the correct bottom and top mlp layer sizes taking into account feature dimensions and feature interaction output shapes
+        # computing the correct bottom and top mlp layer sizes taking into account
+        # feature dimensions and feature interaction output shapes
         bottom_mlp_layer_sizes = [dense_feature_size, *bottom_mlp_layer_sizes, embedding_dimension]
 
         if interaction_operation == Interaction_Operation_Type.CONCAT.value:
             top_mlp_layer_sizes = [(len(embedding_layer_sizes) + 1) * embedding_dimension, *top_mlp_layer_sizes]
         elif interaction_operation == Interaction_Operation_Type.PRODUCT.value:
-            top_mlp_layer_sizes = [embedding_dimension + (len(embedding_layer_sizes) + 1) * ((len(embedding_layer_sizes) + 1) // 2), *top_mlp_layer_sizes]
+            top_mlp_layer_sizes = [
+                embedding_dimension + (len(embedding_layer_sizes) + 1) * ((len(embedding_layer_sizes) + 1) // 2), *top_mlp_layer_sizes]
 
         self.bottom_mlp = create_mlp(
             bottom_mlp_layer_sizes,
@@ -216,61 +233,90 @@ class DLRM(Module):
     def add_argparse_arguments(parent_parser: ArgumentParser):
         parser = parent_parser.add_argument_group("DLRM Model")
         parser.add_argument("--bottom-mlp-layer-sizes", type=str, default="[512, 256, 64, 1]",
-            help="layer sizes of the bottom mlp")
+                            help="layer sizes of the bottom mlp")
         parser.add_argument("--top-mlp-layer-sizes", type=str, default="[512, 256]",
-        # parser.add_argument("--top-mlp-layer-sizes", type=int, nargs="*", default=[48, 512, 256, 1],
-            help="layer sizes of the top mlp")
-        parser.add_argument("--bottom-sigmoid-layer-idx", type=int, default=None,
+                            # parser.add_argument("--top-mlp-layer-sizes", type=int, nargs="*",
+                            # default=[48, 512, 256, 1],
+                            help="layer sizes of the top mlp")
+        parser.add_argument(
+            "--bottom-sigmoid-layer-idx",
+            type=int,
+            default=None,
             help="index of the sigmoid activation function in the bottom mlp (default is disabled, -1 is last)")
-        parser.add_argument("--top-sigmoid-layer-idx", type=int, default=-1,
+        parser.add_argument(
+            "--top-sigmoid-layer-idx",
+            type=int,
+            default=-1,
             help="index of the sigmoid activation function in the top mlp (None is disabled, -1 is last)")
         parser.add_argument("--embedding-dimension", type=int, default=16,
-            help="number of embedding dimensions")
-        parser.add_argument("--interaction-operation", choices=[Interaction_Operation_Type.CONCAT.value, Interaction_Operation_Type.PRODUCT.value], default=Interaction_Operation_Type.CONCAT.value)
-        parser.add_argument("--weighted-pooling", choices=list(Weighted_Pooling_Type), default=Weighted_Pooling_Type.NONE.value)
+                            help="number of embedding dimensions")
+        parser.add_argument(
+            "--interaction-operation",
+            choices=[
+                Interaction_Operation_Type.CONCAT.value,
+                Interaction_Operation_Type.PRODUCT.value],
+            default=Interaction_Operation_Type.CONCAT.value)
+        parser.add_argument(
+            "--weighted-pooling",
+            choices=list(Weighted_Pooling_Type),
+            default=Weighted_Pooling_Type.NONE.value)
         parser.add_argument("--loss", type=str, default="mse",
-                     help="name of loss function")
+                            help="name of loss function")
         parser.add_argument('--loss-weights', nargs="*", default=None,
                             help='list loss weights. this is only used by bce loss')
         parser.add_argument("--lr-scheduler", type=str,
-                           choices=["cosine", "step", "exponential"],
-                           help="name of the lr scheduler to use. default to none")
+                            choices=["cosine", "step", "exponential"],
+                            help="name of the lr scheduler to use. default to none")
         parser.add_argument("--lr", type=float, default=0.1,
                             help="initial learning rate (default: 0.1)")
-        parser.add_argument('--lr-factor', default=0.1, type=float,
-                            help='learning rate decay ratio. this is used only by the step and exponential lr scheduler')
+        parser.add_argument(
+            '--lr-factor',
+            default=0.1,
+            type=float,
+            help='learning rate decay ratio. this is used only by the step and exponential lr scheduler')
         parser.add_argument('--lr-steps', nargs="*", default=[30, 60, 90],
                             help='list of learning rate decay epochs as list. this is used only by the step scheduler')
         parser.add_argument('--momentum', type=float, default=0.9,
                             help='momentum value for optimizer, default is 0.9. only used for sgd optimizer')
         parser.add_argument('--optimizer', type=str, default="sgd", choices=["adam", "sgd", "sparse_adam", "radam"],
                             help='the optimizer to use. default is adam.')
-        parser.add_argument("--threshold", type=float, default=0.5, help="threshold which is used to binarize predictions")
-        parser.add_argument("--lr-num-warmup-steps", type=int, default=0, help="number of warmups steps of the lr scheduler")
+        parser.add_argument("--threshold", type=float, default=0.5,
+                            help="threshold which is used to binarize predictions")
+        parser.add_argument("--lr-num-warmup-steps", type=int, default=0,
+                            help="number of warmups steps of the lr scheduler")
         parser.add_argument("--lr-decay-start-step", type=int, default=0, help="number of steps until the lr decays")
         parser.add_argument("--lr-num-decay-steps", type=int, default=0, help="number of steps how long the lr decays")
         parser.add_argument("--full-embeddings", action="store_false", help="Disable sparse embeddings")
 
-        parser.add_argument("--add-linear-to-binary-embeddings", action="store", type=str2bool, default=False, 
-            help="whether to add an linear layer to binary embeddings")
+        parser.add_argument("--add-linear-to-binary-embeddings", action="store", type=str2bool, default=False,
+                            help="whether to add an linear layer to binary embeddings")
         parser.add_argument("--binary-embedding", action="store", type=str2bool, default=False,
-                        help="toggles use of binary embeddings in model.")
+                            help="toggles use of binary embeddings in model.")
         parser.add_argument("--binary-top-mlp", action="store", type=str2bool, default=False,
-                        help="toggles use of binary top mlp in model.")
+                            help="toggles use of binary top mlp in model.")
         parser.add_argument("--binary-bottom-mlp", action="store", type=str2bool, default=False,
-                        help="toggles use of binary bottom mlp in model.")
+                            help="toggles use of binary bottom mlp in model.")
         parser.add_argument("--batch-norm-before-relu", action="store", type=str2bool, default=False,
-                        help="toggles use of binary bottom mlp in model.")
+                            help="toggles use of binary bottom mlp in model.")
         parser.add_argument("--batch-norm-before-sign", action="store", type=str2bool, default=False,
-                        help="toggles use of binary bottom mlp in model.")
-        parser.add_argument("--activation-function", choices=["relu", "prelu", "pact"], default="relu", type=str, help="select activation function")
+                            help="toggles use of binary bottom mlp in model.")
+        parser.add_argument(
+            "--activation-function",
+            choices=[
+                "relu",
+                "prelu",
+                "pact"],
+            default="relu",
+            type=str,
+            help="select activation function")
         parser.add_argument('--top-full-precision-layers', nargs="*", default=[],
                             help='list of learning rate decay epochs as list. this is used only by the step scheduler')
         parser.add_argument('--bottom-full-precision-layers', nargs="*", default=[],
                             help='list of learning rate decay epochs as list. this is used only by the step scheduler')
         return parent_parser
 
-    def forward_embeddings(self, categorical_values_i: torch.Tensor, categorical_values_o: torch.Tensor) -> List[torch.Tensor]:
+    def forward_embeddings(self, categorical_values_i: torch.Tensor,
+                           categorical_values_o: torch.Tensor) -> List[torch.Tensor]:
         """forwards the preprocessed data through the embedding layers."""
         embedding_outputs = []
         for index, embedding_layer in enumerate(self.embedding_layers):
@@ -298,7 +344,7 @@ class DLRM(Module):
             result = torch.cat([mlp_output] + embedding_outputs, dim=1)
         else:
             raise ValueError("Interaction operation not supported!")
-        
+
         return result
 
     def forward(self, dense_values, categorical_values):
@@ -329,9 +375,9 @@ class DLRM(Module):
         y_hat = self(dense_values, (categorical_values_i, categorical_values_o))
 
         loss = self.loss_function(torch.squeeze(y_hat), torch.squeeze(y))
-        self.log_dict({ "loss": loss })
+        self.log_dict({"loss": loss})
         return loss
-    
+
     def validation_step_end(self, *args, **kwargs):
         """calculate all them metrics and log via wandb/tensorboard"""
 
@@ -384,7 +430,7 @@ class DLRM(Module):
         y_hat = torch.squeeze(self(dense_values, (categorical_values_i, categorical_values_o)))
         y = torch.squeeze(y)
         y_hat = torch.squeeze(y_hat)
-        self.validation_results.append({ "y": y, "y_hat": y_hat })
+        self.validation_results.append({"y": y, "y_hat": y_hat})
 
     def configure_optimizers(self):
         configuration = {}
@@ -396,7 +442,7 @@ class DLRM(Module):
             self.hparams.lr_decay_start_step,
             self.hparams.lr_num_decay_steps,
         )
-        if lr_scheduler != None:
+        if lr_scheduler is not None:
             configuration["lr_scheduler"] = lr_scheduler_config = {
                 # REQUIRED: The scheduler instance
                 "scheduler": lr_scheduler,
@@ -422,13 +468,16 @@ class DLRM(Module):
         return configuration
 
     def transform_categorical(self, categorical: List[torch.Tensor]):
-        categorical_batch_indices = [[torch.tensor(*np.where(category_batch[batch_num].numpy())) for batch_num in range(category_batch.size(0))] for category_batch in categorical]
-        offsets = [torch.tensor([len(index_array) for index_array in category_batch]) for category_batch in categorical_batch_indices]
+        categorical_batch_indices = [[torch.tensor(*np.where(category_batch[batch_num].numpy()))
+                                      for batch_num in range(category_batch.size(0))] for category_batch in categorical]
+        offsets = [torch.tensor([len(index_array) for index_array in category_batch])
+                   for category_batch in categorical_batch_indices]
         for category_index, category_sizes in enumerate(offsets):
             offsets[category_index] = offsets[category_index].roll(1)
             offsets[category_index][0] = 0
             for size_index in range(1, len(category_sizes)):
                 offsets[category_index][size_index] += offsets[category_index][size_index - 1]
 
-        concatenated_categorical_batch_indices = [torch.cat(category_batch) for category_batch in categorical_batch_indices]
+        concatenated_categorical_batch_indices = [
+            torch.cat(category_batch) for category_batch in categorical_batch_indices]
         return list(zip(concatenated_categorical_batch_indices, offsets))

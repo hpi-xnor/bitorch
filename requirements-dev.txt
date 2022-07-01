@@ -1,6 +1,7 @@
 build
 flake8
 mypy
+pep8
 pep8-naming
 pytest
 sphinx
