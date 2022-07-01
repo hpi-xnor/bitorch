@@ -21,5 +21,5 @@ def test_qactivation(alpha):
     assert torch.equal(quantized, y)
 
     y.backward(x)
-    expected_gradient = torch.where((x >= 0) & (x <= alpha), x, torch.tensor(0.))
+    expected_gradient = torch.where((x >= 0) & (x <= alpha), x, torch.tensor(0.0))
     assert torch.equal(expected_gradient, x.grad)

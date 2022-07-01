@@ -4,11 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.x.x] - Unreleased
+## [0.3.0] - Unreleased
+
+### Added
+
+- simple example script for MNIST
+- support for integration of bitorch's inference engine for the following layers
+  - QLinear
+  - QConv
 
 ### Changed
 
+- requirements changed:
+  - requirements for examples are now stored at their respective folders
+  - optional requirements now install everything needed to run all examples
+- code is now formatted with the black code formatter
 - using PyTorch's implementation of RAdam
+- renamed the `bitwidth` attribute of quantization functions to `bit_width`
 
 ### Fixed
 

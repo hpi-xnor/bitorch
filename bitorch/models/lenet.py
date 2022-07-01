@@ -14,8 +14,13 @@ class LeNet(Model):
     num_fc = 1000
     name = "lenet"
 
-    def generate_quant_model(self, weight_quant: str, input_quant: str,
-                             weight_quant_2: str = None, input_quant_2: str = None) -> nn.Sequential:
+    def generate_quant_model(
+        self,
+        weight_quant: str,
+        input_quant: str,
+        weight_quant_2: str = None,
+        input_quant_2: str = None,
+    ) -> nn.Sequential:
         weight_quant_2 = weight_quant_2 or weight_quant
         input_quant_2 = input_quant_2 or input_quant
 
@@ -24,25 +29,21 @@ class LeNet(Model):
             self.activation_function(),
             nn.MaxPool2d(2, 2),
             nn.BatchNorm2d(self.num_channels_conv),
-
             QConv2d(
                 self.num_channels_conv,
                 self.num_channels_conv,
                 kernel_size=5,
                 input_quantization=input_quant,
-                weight_quantization=weight_quant),
+                weight_quantization=weight_quant,
+            ),
             nn.BatchNorm2d(self.num_channels_conv),
             nn.MaxPool2d(2, 2),
             ShapePrintDebug(),
-
             nn.Flatten(),
-
             QActivation(activation=input_quant_2),
-            QLinear(self.num_channels_conv * 4 * 4,
-                    self.num_fc, weight_quantization=weight_quant_2),
+            QLinear(self.num_channels_conv * 4 * 4, self.num_fc, weight_quantization=weight_quant_2),
             nn.BatchNorm1d(self.num_fc),
             self.activation_function(),
-
             nn.Linear(self.num_fc, self.num_output),
         )
         return model
@@ -70,22 +71,17 @@ class LeNet(Model):
                 nn.BatchNorm2d(self.num_channels_conv),
                 self.activation_function(),
                 nn.MaxPool2d(2, 2),
-
                 nn.Conv2d(self.num_channels_conv, self.num_channels_conv, kernel_size=5),
                 nn.BatchNorm2d(self.num_channels_conv),
                 self.activation_function(),
                 nn.MaxPool2d(2, 2),
-
                 nn.Flatten(),
-
                 nn.Linear(self.num_channels_conv * 4 * 4, self.num_fc),
                 nn.BatchNorm1d(self.num_fc),
                 self.activation_function(),
-
                 nn.Linear(self.num_fc, self.num_output),
             )
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--lenet-version", type=int, default=0,
-                            help="choses a verion of lenet")
+        parser.add_argument("--lenet-version", type=int, default=0, help="choose a version of lenet")

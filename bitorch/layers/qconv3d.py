@@ -1,21 +1,29 @@
-"""Module containing the quantized convolution layer"""
+"""Module containing the quantized 3d convolution layer"""
+
 from typing import Union, Any
+
 from torch import Tensor
 from torch.nn import Conv3d, init
 from torch.nn.functional import pad, conv3d
 
-from bitorch.layers.config import config
+from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
-from bitorch.layers.qactivation import QActivation
+from .config import config
+from .extensions import DefaultImplementationMixin
+from .qactivation import QActivation
+from .qconv_mixin import QConvArgsProviderMixin
+from .register import QConv3dImplementation
 
 
 class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
-    def __init__(self,  # type: ignore
-                 *args: Any,
-                 weight_quantization: Union[str, Quantization] = None,
-                 pad_value: float = None,
-                 bias: bool = False,
-                 **kwargs: Any) -> None:
+    def __init__(
+        self,  # type: ignore
+        *args: Any,
+        weight_quantization: Union[str, Quantization] = None,
+        pad_value: float = None,
+        bias: bool = False,
+        **kwargs: Any,
+    ) -> None:
         """initialization function for padding and quantization.
 
         Args:
@@ -26,8 +34,7 @@ class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
         assert bias is False, "A QConv layer can not use a bias due to acceleration techniques during deployment."
         kwargs["bias"] = False
         super(QConv3d_NoAct, self).__init__(*args, **kwargs)
-        self._weight_quantize = config.get_quantization_function(
-            weight_quantization or config.weight_quantization)
+        self._weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization)
         self._pad_value = pad_value or config.padding_value
 
     def _apply_padding(self, x: Tensor) -> Tensor:
@@ -61,16 +68,19 @@ class QConv3d_NoAct(Conv3d):  # type: ignore # noqa: N801
             stride=self.stride,
             padding=0,
             dilation=self.dilation,
-            groups=self.groups)
+            groups=self.groups,
+        )
 
 
-class QConv3d(QConv3d_NoAct):  # type: ignore
-    def __init__(self,  # type: ignore
-                 *args: Any,
-                 input_quantization: Union[str, Quantization] = None,
-                 weight_quantization: Union[str, Quantization] = None,
-                 gradient_cancellation_threshold: Union[float, None] = None,
-                 **kwargs: Any) -> None:
+class QConv3dBase(QConvArgsProviderMixin, QConv3d_NoAct):  # type: ignore
+    def __init__(
+        self,  # type: ignore
+        *args: Any,
+        input_quantization: Union[str, Quantization] = None,
+        weight_quantization: Union[str, Quantization] = None,
+        gradient_cancellation_threshold: Union[float, None] = None,
+        **kwargs: Any,
+    ) -> None:
         """initialization function for quantization of inputs and weights.
 
         Args:
@@ -81,7 +91,7 @@ class QConv3d(QConv3d_NoAct):  # type: ignore
             weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                 function for weights. Defaults to None.
         """
-        super(QConv3d, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
+        super().__init__(*args, weight_quantization=weight_quantization, **kwargs)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
     def forward(self, input_tensor: Tensor) -> Tensor:
@@ -93,4 +103,15 @@ class QConv3d(QConv3d_NoAct):  # type: ignore
         Returns:
             Tensor: the activated and convoluted output tensor.
         """
-        return super(QConv3d, self).forward(self.activation(input_tensor))
+        return super().forward(self.activation(input_tensor))
+
+
+@QConv3dImplementation(RuntimeMode.DEFAULT)
+class QConv3d(DefaultImplementationMixin, QConv3dBase):
+    """
+    This class defines the default implementation of a QConv3d layer (which is actually implemented by QConv3dBase).
+
+    To implement a custom QConv3d implementation use QConv3dBase as a super class instead.
+    """
+
+    pass

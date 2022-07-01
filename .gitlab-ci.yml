@@ -2,25 +2,34 @@ image: python:3.7
 
 before_script:
   - python --version
-  - pip install -e .[dev] --extra-index-url https://download.pytorch.org/whl/cu113
-  - pwd
-  - ls -l
-  - python -c "import sys;print(sys.path)"
+  - pip install -e ".[dev]" --extra-index-url https://download.pytorch.org/whl/cu113
+
+.scheduled-only:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# Checking codestyle
 
 .codestyle:
   stage: test
   script:
     - flake8 --version
     - mypy --version
+    - black --version
     - flake8
     - mypy --config-file mypy.ini
+    - black . --check --verbose --diff --color
 
 codestyle:
   extends: .codestyle
 
-codestyle:3.8:
-  extends: .codestyle
-  image: python:3.8
+codestyle:3.10:
+  extends:
+    - .codestyle
+    - .scheduled-only
+  image: python:3.10
+
+# Running tests
 
 .test:
   stage: test
@@ -28,15 +37,38 @@ codestyle:3.8:
     - pytest --version
     - python -m pytest .
 
-test:
+test-and-coverage:
   extends: .test
+  script:
+    - pytest --version
+    - coverage run -m pytest
+    - coverage report
+    - coverage xml
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
-test:3.8:
-  extends: .test
-  image: python:3.8
+test:3.10:
+  extends:
+    - .test
+    - .scheduled-only
+  image: python:3.10
+
+# Documentation
 
 test-build-doc:
   stage: test
   script:
     - apt-get update && apt-get install -y pandoc
     - sphinx-build -b html docs/source/ docs/build/ -a
+
+test-doc-completeness:
+  extends: .scheduled-only
+  stage: test
+  script:
+    - flake8 --version
+    # explicitly select Docstring errors and ignore to overwrite config in setup.cfg
+    - flake8 --select=D1 --ignore=E501

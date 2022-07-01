@@ -6,11 +6,12 @@ from typing import Callable, List, Any, Dict
 
 @typing.no_type_check
 def build_lookup_dictionary(
-        current_module_name: str,
-        class_strings: List[str],
-        filter_by_superclass: Any = None,
-        filter_fn: Callable[[Any], bool] = None,
-        key_fn: Callable[[Any], str] = lambda x: x.name) -> Dict[str, Any]:
+    current_module_name: str,
+    class_strings: List[str],
+    filter_by_superclass: Any = None,
+    filter_fn: Callable[[Any], bool] = None,
+    key_fn: Callable[[Any], str] = lambda x: x.name,
+) -> Dict[str, Any]:
     """Builds a lookup dictionary based on a list of strings of class names.
 
     Args:
@@ -25,8 +26,10 @@ def build_lookup_dictionary(
     """
     assert filter_fn is not None or filter_by_superclass is not None, "one of the filter options must be given"
     if filter_fn is None:
+
         def filter_fn(x: Any) -> bool:
             return isinstance(x, type) and issubclass(x, filter_by_superclass) and x != filter_by_superclass
+
     lookup = {}
     current_module = importlib.import_module(current_module_name)
     for class_name in class_strings:

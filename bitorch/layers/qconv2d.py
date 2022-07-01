@@ -1,20 +1,29 @@
+"""Module containing the quantized 2d convolution layer"""
+
 from typing import Union, Any
+
 from torch import Tensor
 from torch.nn import Conv2d, init
 from torch.nn.functional import pad, conv2d
 
-from bitorch.layers.config import config
+from bitorch import RuntimeMode
 from bitorch.quantizations import Quantization
-from bitorch.layers.qactivation import QActivation
+from .config import config
+from .extensions import DefaultImplementationMixin
+from .qactivation import QActivation
+from .qconv_mixin import QConvArgsProviderMixin
+from .register import QConv2dImplementation
 
 
 class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
-    def __init__(self,  # type: ignore
-                 *args: Any,
-                 weight_quantization: Union[str, Quantization] = None,
-                 pad_value: float = None,
-                 bias: bool = False,
-                 **kwargs: Any) -> None:
+    def __init__(
+        self,  # type: ignore
+        *args: Any,
+        weight_quantization: Union[str, Quantization] = None,
+        pad_value: float = None,
+        bias: bool = False,
+        **kwargs: Any,
+    ) -> None:
         """initialization function for padding and quantization.
 
         Args:
@@ -25,8 +34,7 @@ class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
         assert bias is False, "A QConv layer can not use a bias due to acceleration techniques during deployment."
         kwargs["bias"] = False
         super(QConv2d_NoAct, self).__init__(*args, **kwargs)
-        self._weight_quantize = config.get_quantization_function(
-            weight_quantization or config.weight_quantization)
+        self._weight_quantize = config.get_quantization_function(weight_quantization or config.weight_quantization)
         self._pad_value = pad_value or config.padding_value
 
     def _apply_padding(self, x: Tensor) -> Tensor:
@@ -60,16 +68,19 @@ class QConv2d_NoAct(Conv2d):  # type: ignore # noqa: N801
             stride=self.stride,
             padding=0,
             dilation=self.dilation,
-            groups=self.groups)
+            groups=self.groups,
+        )
 
 
-class QConv2d(QConv2d_NoAct):  # type: ignore
-    def __init__(self,  # type: ignore
-                 *args: Any,
-                 input_quantization: Union[str, Quantization] = None,
-                 weight_quantization: Union[str, Quantization] = None,
-                 gradient_cancellation_threshold: Union[float, None] = None,
-                 **kwargs: Any) -> None:
+class QConv2dBase(QConvArgsProviderMixin, QConv2d_NoAct):  # type: ignore
+    def __init__(
+        self,  # type: ignore
+        *args: Any,
+        input_quantization: Union[str, Quantization] = None,
+        weight_quantization: Union[str, Quantization] = None,
+        gradient_cancellation_threshold: Union[float, None] = None,
+        **kwargs: Any,
+    ) -> None:
         """initialization function for quantization of inputs and weights.
 
         Args:
@@ -80,7 +91,7 @@ class QConv2d(QConv2d_NoAct):  # type: ignore
             weight_quantization (Union[str, Quantization], optional): quantization module or name of quantization
                 function for weights. Defaults to None.
         """
-        super(QConv2d, self).__init__(*args, weight_quantization=weight_quantization, **kwargs)
+        super().__init__(*args, weight_quantization=weight_quantization, **kwargs)
         self.activation = QActivation(input_quantization, gradient_cancellation_threshold)
 
     def forward(self, input_tensor: Tensor) -> Tensor:
@@ -92,4 +103,15 @@ class QConv2d(QConv2d_NoAct):  # type: ignore
         Returns:
             Tensor: the activated and convoluted output tensor.
         """
-        return super(QConv2d, self).forward(self.activation(input_tensor))
+        return super().forward(self.activation(input_tensor))
+
+
+@QConv2dImplementation(RuntimeMode.DEFAULT)
+class QConv2d(DefaultImplementationMixin, QConv2dBase):
+    """
+    This class defines the default implementation of a QConv2d layer (which is actually implemented by QConv2dBase).
+
+    To implement a custom QConv2d implementation use QConv2dBase as a super class instead.
+    """
+
+    pass

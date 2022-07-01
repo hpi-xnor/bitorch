@@ -19,5 +19,5 @@ class MNIST(BasicDataset):
             root=self.root_directory,
             train=self.is_train,
             transform=self.get_transform(),
-            download=download
+            download=download,
         )

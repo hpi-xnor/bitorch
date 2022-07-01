@@ -8,8 +8,9 @@ class SteHeavisideFunction(STE):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            input_tensor: torch.Tensor) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+        input_tensor: torch.Tensor,
+    ) -> torch.Tensor:
         """quantizes input tensor and forwards it.
 
         Args:
@@ -19,9 +20,11 @@ class SteHeavisideFunction(STE):
         Returns:
             torch.Tensor: the quantized input tensor
         """
-
-        quantized_tensor = torch.where(input_tensor > 0, torch.tensor(
-            1., device=input_tensor.device), torch.tensor(0., device=input_tensor.device))
+        quantized_tensor = torch.where(
+            input_tensor > 0,
+            torch.tensor(1.0, device=input_tensor.device),
+            torch.tensor(0.0, device=input_tensor.device),
+        )
         return quantized_tensor
 
 
@@ -29,7 +32,7 @@ class SteHeaviside(Quantization):
     """Module for applying the SteHeaviside quantization, using an ste in backward pass"""
 
     name = "steheaviside"
-    bitwidth = 1
+    bit_width = 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.

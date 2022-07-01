@@ -12,8 +12,13 @@ from .mnist import MNIST
 from ..util import build_lookup_dictionary
 
 __all__ = [
-    'BasicDataset', 'dataset_from_name', 'dataset_names',
-    'MNIST', 'CIFAR10', 'CIFAR100', 'ImageNet',
+    "BasicDataset",
+    "dataset_from_name",
+    "dataset_names",
+    "MNIST",
+    "CIFAR10",
+    "CIFAR100",
+    "ImageNet",
 ]
 
 
@@ -25,7 +30,7 @@ def dataset_from_name(name: str) -> Type[BasicDataset]:
     name-attribute)
 
     Args:
-        name (str): name of the dataset
+        name: name of the dataset
 
     Raises:
         ValueError: raised if no dataset under that name was found

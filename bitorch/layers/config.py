@@ -1,7 +1,6 @@
 """Config class for quantization layers. This file should be imported before the other layers."""
 
 from typing import Union
-import torch
 
 from bitorch.config import Config
 from bitorch.quantizations import quantization_from_name, Quantization
@@ -12,14 +11,14 @@ class LayerConfig(Config):
 
     name = "layer_config"
 
-    def get_quantization_function(self, quantization: Union[str, Quantization]) -> torch.nn.Module:
-        """Returns the quanitization module specified in quantization_name.
+    def get_quantization_function(self, quantization: Union[str, Quantization]) -> Quantization:
+        """Returns the quantization module specified in quantization_name.
 
         Args:
-            quantization (Union[str, Quantization]): quantization module or name of quantization function.
+            quantization: quantization module or name of quantization function.
 
         Returns:
-            torch.nn.Module: Quantization module
+            the quantization module
         """
         if isinstance(quantization, Quantization):
             return quantization

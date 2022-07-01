@@ -1,36 +1,36 @@
 import logging
 from pathlib import Path
+
 from torch.optim import Adam, SGD, RAdam
 from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR, _LRScheduler
-from typing import Union, Optional
+from typing import Union, Optional, Any
 from torch.nn import Module
 from torch.optim.optimizer import Optimizer
 
 
-def set_logging(log_file: Union[None, str], log_level: str, output_stdout: bool) -> None:
+def configure_logging(logger: Any, log_file: Union[None, str], log_level: str, output_stdout: bool) -> None:
     """configures logging module.
 
     Args:
+        logger: the logger to be configured
         log_file (str): path to log file. if omitted, logging will be forced to stdout.
         log_level (str): string name of log level (e.g. 'debug')
         output_stdout (bool): toggles stdout output. will be activated automatically if no log file was given.
             otherwise if activated, logging will be outputed both to stdout and log file.
     """
-    logger = logging.getLogger()
-
     log_level_name = log_level.upper()
     log_level = getattr(logging, log_level_name)
     logger.setLevel(log_level)
 
     logging_format = logging.Formatter(
-        '%(asctime)s - %(levelname)s [%(filename)s : %(funcName)s() : l. %(lineno)s]: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
+        "%(asctime)s - %(levelname)s [%(filename)s : %(funcName)s() : l. %(lineno)s]: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
     if log_file:
         log_file_path = Path(log_file)
         log_file_path.parent.mkdir(parents=True, exist_ok=True)
         file_handler = logging.FileHandler(log_file_path)
-        file_handler.setLevel(log_level)
         file_handler.setFormatter(logging_format)
         logger.addHandler(file_handler)
     else:
@@ -38,7 +38,6 @@ def set_logging(log_file: Union[None, str], log_level: str, output_stdout: bool)
 
     if output_stdout:
         stream = logging.StreamHandler()
-        stream.setLevel(log_level)
         stream.setFormatter(logging_format)
         logger.addHandler(stream)
 
@@ -58,6 +57,7 @@ def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Op
     Returns:
         Optimizer: the model optimizer
     """
+    name = name.lower()
     if name == "adam":
         return Adam(params=model.parameters(), lr=lr)
     elif name == "sgd":
@@ -69,11 +69,12 @@ def create_optimizer(name: str, model: Module, lr: float, momentum: float) -> Op
 
 
 def create_scheduler(
-        scheduler_name: Optional[str],
-        optimizer: Optimizer,
-        lr_factor: float,
-        lr_steps: Optional[list],
-        epochs: int) -> Union[_LRScheduler, None]:
+    scheduler_name: Optional[str],
+    optimizer: Optimizer,
+    lr_factor: float,
+    lr_steps: Optional[list],
+    epochs: int,
+) -> Union[_LRScheduler, None]:
     """creates a learning rate scheduler with the given parameters
 
     Args:

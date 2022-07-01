@@ -80,17 +80,14 @@ def create_mlp(
     input_size = layer_sizes[0]
     this_shortcut_out_index = None
     this_shortcut_in_index = None
-    mlp_layers = [] if not batch_norm else [BatchNorm1d(input_size)]
-    if full_precision_layers is None:
-        full_precision_layers = [False] * len(layer_sizes)
+    mlp_layers = []
 
     for idx, layer_size in enumerate(layer_sizes[1:]):
-        output_size = layer_size
-        if batch_norm_before_sign:
+        output_size = layer_size 
             mlp_layers.append(BatchNorm1d(input_size))
         mlp_layers.append(
-            Linear(input_size, output_size, bias=True) if not quantized or full_precision_layers[idx + 1] else
-            QLinear(input_size, output_size, bias=False)
+            QLinear(input_size, output_size, bias=False) if quantized else
+            Linear(input_size, output_size, bias=True) 
         )
 
         if idx == shortcut_out_index and this_shortcut_out_index is None:
