@@ -113,6 +113,5 @@ class DistillationModelWrapper(ModelWrapper):
             param.requires_grad = False
 
     def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor) -> torch.Tensor:
-        y_hat_student = self.forward(x_train)
         y_hat_teacher = self.teacher.forward(x_train)
-        return self._kd_loss(y_hat_student, y_hat_teacher)
+        return self._kd_loss(y_hat, y_hat_teacher)
