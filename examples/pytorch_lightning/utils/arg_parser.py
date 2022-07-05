@@ -7,6 +7,8 @@ from bitorch.datasets import dataset_names
 from bitorch import add_config_args
 from pytorch_lightning import Trainer
 
+from examples.pytorch_lightning.utils.teachers import available_teachers
+
 
 def add_logging_args(parser: ArgumentParser) -> None:
     """adds cli parameters for logging configuration
@@ -157,6 +159,23 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
     )
 
 
+def add_training_args(parser: ArgumentParser) -> None:
+    """
+    Add arguments for training strategies.
+
+    Args:
+        parser (ArgumentParser): the main argument parser
+    """
+    train = parser.add_argument_group("training", "parameters for the training strategies")
+    train.add_argument(
+        "--teacher",
+        type=str,
+        default="",
+        choices=available_teachers(),
+        help="name of the teacher model, the student is going to be trained with KD if not empty",
+    )
+
+
 def add_dataset_args(parser: ArgumentParser) -> None:
     """adds cli parameters for dataset configuration
 
@@ -257,6 +276,7 @@ def add_regular_args(parser: ArgumentParser) -> None:
     add_dataset_args(parser)
     add_optimizer_args(parser)
     add_checkpoint_args(parser)
+    add_training_args(parser)
 
     add_config_args(parser)
 

@@ -7,6 +7,8 @@ from pytorch_lightning import LightningModule
 from torch.nn import Module, CrossEntropyLoss
 from torchmetrics import Accuracy, F1Score, Precision, Recall
 
+from .kd_loss import DistributionLoss
+from .teachers import get_teacher
 from .unused_args import clean_hyperparameters
 from .utils import create_optimizer, create_scheduler
 
@@ -16,11 +18,11 @@ class ModelWrapper(LightningModule):
         self,
         model: Module,
         num_classes: int,
-        args: Namespace,
+        script_args: Namespace,
         add_f1_prec_recall: bool = False,
     ) -> None:
         super().__init__()
-        self.save_hyperparameters(clean_hyperparameters(args))
+        self.save_hyperparameters(clean_hyperparameters(script_args))
         self.loss_function = CrossEntropyLoss()
         self.model = model
         self.train_accuracy_top1 = Accuracy(num_classes=num_classes)
@@ -37,7 +39,7 @@ class ModelWrapper(LightningModule):
         x_train, y_train = batch
 
         y_hat = self.model(x_train)
-        loss = self.loss_function(y_hat, y_train)
+        loss = self.calculate_loss(x_train, y_train, y_hat)
         self.train_accuracy_top1(y_hat, y_train)
         self.train_accuracy_top5(y_hat, y_train)
         self.log_dict(
@@ -51,6 +53,9 @@ class ModelWrapper(LightningModule):
         )
         self.log("loss/train", loss, on_step=True, on_epoch=False)
         return loss
+
+    def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor):
+        return self.loss_function(y_hat, y_train)
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:  # type: ignore
         x_test, y_test = batch
@@ -96,3 +101,18 @@ class ModelWrapper(LightningModule):
             return {"optimizer": optimizer, "lr_scheduler": scheduler}
         else:
             return optimizer
+
+
+class DistillationModelWrapper(ModelWrapper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._kd_loss = DistributionLoss()
+        self.teacher = get_teacher(self.hparams.teacher)
+        # self.teacher.eval()
+        for param in self.teacher.parameters():
+            param.requires_grad = False
+
+    def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor):
+        y_hat_student = self.forward(x_train)
+        y_hat_teacher = self.teacher.forward(x_train)
+        return self._kd_loss(y_hat_student, y_hat_teacher)

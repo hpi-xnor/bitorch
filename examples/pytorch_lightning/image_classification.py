@@ -13,7 +13,7 @@ if os.environ.get("REMOTE_PYCHARM_DEBUG_SESSION", False):
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Any
+from typing import List, Any, Type
 
 import fvbitcore.nn as fv_nn
 import torch
@@ -30,7 +30,7 @@ from bitorch.models import model_from_name
 from bitorch.quantizations import Quantization
 from examples.pytorch_lightning.utils.log import CommandLineLogger
 from utils.arg_parser import create_argparser
-from utils.lightning_model import ModelWrapper
+from utils.lightning_model import ModelWrapper, DistillationModelWrapper
 from utils.utils import configure_logging
 
 logger = logging.getLogger()
@@ -91,11 +91,21 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
     model.initialize()
+
+    wrapper_class: Type[ModelWrapper] = ModelWrapper
+    if args.teacher:
+        if args.dataset != "imagenet":
+            raise ValueError(
+                f"Teacher '{args.teacher}' and dataset '{args.dataset}' selected, "
+                f"but teacher models are only supported for imagenet."
+            )
+        wrapper_class = DistillationModelWrapper
+
     if args.checkpoint_load is not None and args.pretrained:
         logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
-        model_wrapped = ModelWrapper.load_from_checkpoint(args.checkpoint_load)
+        model_wrapped = wrapper_class.load_from_checkpoint(args.checkpoint_load)
     else:
-        model_wrapped = ModelWrapper(model, dataset.num_classes, args)
+        model_wrapped = wrapper_class(model, dataset.num_classes, args)
 
     trainer = Trainer(
         strategy=args.strategy,
