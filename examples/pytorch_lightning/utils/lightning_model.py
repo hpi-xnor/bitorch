@@ -104,7 +104,7 @@ class ModelWrapper(LightningModule):
 
 
 class DistillationModelWrapper(ModelWrapper):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._kd_loss = DistributionLoss()
         self.teacher = get_teacher(self.hparams.teacher)
@@ -112,7 +112,7 @@ class DistillationModelWrapper(ModelWrapper):
         for param in self.teacher.parameters():
             param.requires_grad = False
 
-    def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor):
+    def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor) -> torch.Tensor:
         y_hat_student = self.forward(x_train)
         y_hat_teacher = self.teacher.forward(x_train)
         return self._kd_loss(y_hat_student, y_hat_teacher)

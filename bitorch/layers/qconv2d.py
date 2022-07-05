@@ -106,8 +106,7 @@ class QConv2dBase(QConvArgsProviderMixin, QConv2d_NoAct):  # type: ignore
         return super().forward(self.activation(input_tensor))
 
 
-@QConv2dImplementation(RuntimeMode.DEFAULT)
-class QConv2d(DefaultImplementationMixin, QConv2dBase):
+class QConv2dComposed(DefaultImplementationMixin, QConv2dBase):
     """
     This class defines the default implementation of a QConv2d layer (which is actually implemented by QConv2dBase).
 
@@ -115,3 +114,6 @@ class QConv2d(DefaultImplementationMixin, QConv2dBase):
     """
 
     pass
+
+
+QConv2d = QConv2dImplementation(RuntimeMode.DEFAULT)(QConv2dComposed)

@@ -7,21 +7,21 @@ from torchvision import models
 
 
 def _teachers() -> Dict[str, nn.Module]:
-    def resnet18():
+    def resnet18() -> nn.Module:
         return models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 
-    def resnet34():
+    def resnet34() -> nn.Module:
         return models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
 
-    def resnet50_v1():
+    def resnet50_v1() -> nn.Module:
         # Old weights with accuracy 76.130%
         return models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
 
-    def resnet50_v2():
+    def resnet50_v2() -> nn.Module:
         # New weights with accuracy 80.858%
         return models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
 
-    def resnet50():
+    def resnet50() -> nn.Module:
         # New weights with accuracy 80.858%
         return models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
 

@@ -23,7 +23,8 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase, WandbLogger
 from torch.utils.data import DataLoader
 
-from bitorch import apply_args_to_configuration
+import bitorch
+from bitorch import apply_args_to_configuration, RuntimeMode
 from bitorch.datasets import dataset_from_name
 from bitorch.datasets.base import Augmentation
 from bitorch.models import model_from_name
@@ -44,6 +45,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         model_args (argparse.Namespace): model specific cli arguments
     """
     configure_logging(logger, args.log_file, args.log_level, args.log_stdout)
+
+    bitorch.mode = RuntimeMode.RAW
 
     apply_args_to_configuration(args)
 
