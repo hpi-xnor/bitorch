@@ -85,20 +85,26 @@ def test_recipe():
 
 
 def test_default_impl():
-    s = Example("Hello World", val=21)
-    assert s.val == 21
-    assert s.class_name() == "BaseClass"
-    assert isinstance(s, Example.class_)
-    assert isinstance(s, LayerContainer)
+    layer = Example("Hello World", val=21)
+    assert layer.val == 21
+    assert layer.class_name() == "BaseClass"
+    assert isinstance(layer, Example.class_)
+    assert isinstance(layer, LayerContainer)
+
+    # TODO: pickling is currently only possible in RAW mode
+    # content = pickle.dumps(layer)
+    #
+    # layer_loaded = pickle.loads(content)
+    # assert layer_loaded.val == 21
 
 
 def test_train_impl():
     bitorch.mode = TEST_MODE
-    s = Example("Hello World", val=21)
-    assert s.val == 21
-    assert s.class_name() == "CustomClass"
-    assert isinstance(s, CustomLayerImplementation)
-    assert isinstance(s, LayerContainer)
+    layer = Example("Hello World", val=21)
+    assert layer.val == 21
+    assert layer.class_name() == "CustomClass"
+    assert isinstance(layer, CustomLayerImplementation)
+    assert isinstance(layer, LayerContainer)
 
 
 def test_raw_impl():
@@ -117,14 +123,14 @@ def test_raw_impl():
 
 @pytest.mark.parametrize("val, is_supported", [(150, False), (50, True)])
 def test_clone(val, is_supported):
-    s = Example("Hello World", val=val)
-    s_recipe = example_registry.get_recipe_for(s)
+    layer = Example("Hello World", val=val)
+    recipe = example_registry.get_recipe_for(layer)
     if is_supported:
-        replacement = example_registry.get_replacement(TEST_MODE, s_recipe)
+        replacement = example_registry.get_replacement(TEST_MODE, recipe)
         assert isinstance(replacement, CustomLayerImplementation)  # type: ignore
     else:
         with pytest.raises(RuntimeError) as e_info:
-            _ = example_registry.get_replacement(TEST_MODE, s_recipe)
+            _ = example_registry.get_replacement(TEST_MODE, recipe)
         error_message = str(e_info.value)
         assert e_info.typename == "RuntimeError"
         expected_key_strings = ["Example", "implementation", str(TEST_MODE), "val", "100"]

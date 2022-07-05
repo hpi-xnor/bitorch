@@ -29,8 +29,10 @@ def _teachers() -> Dict[str, nn.Module]:
 
 
 def available_teachers() -> List[str]:
+    """Return a list of all available model names (pre-trained on ImageNet)."""
     return list(_teachers().keys())
 
 
 def get_teacher(teacher_name: str) -> nn.Module:
+    """Return a model pretrained on ImageNet for a given model name."""
     return _teachers()[teacher_name]()

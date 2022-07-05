@@ -1,6 +1,6 @@
 import logging
 from argparse import Namespace
-from typing import Union
+from typing import Union, Any
 
 import torch
 from pytorch_lightning import LightningModule
@@ -54,7 +54,7 @@ class ModelWrapper(LightningModule):
         self.log("loss/train", loss, on_step=True, on_epoch=False)
         return loss
 
-    def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor):
+    def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor) -> torch.Tensor:
         return self.loss_function(y_hat, y_train)
 
     def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:  # type: ignore
@@ -104,7 +104,7 @@ class ModelWrapper(LightningModule):
 
 
 class DistillationModelWrapper(ModelWrapper):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._kd_loss = DistributionLoss()
         self.teacher = get_teacher(self.hparams.teacher)

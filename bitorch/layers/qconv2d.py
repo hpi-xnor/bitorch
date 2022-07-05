@@ -1,6 +1,6 @@
 """Module containing the quantized 2d convolution layer"""
 
-from typing import Union, Any
+from typing import Any, Type, Union
 
 from torch import Tensor
 from torch.nn import Conv2d, init
@@ -116,4 +116,4 @@ class QConv2dComposed(DefaultImplementationMixin, QConv2dBase):
     pass
 
 
-QConv2d = QConv2dImplementation(RuntimeMode.DEFAULT)(QConv2dComposed)
+QConv2d: Type[QConv2dComposed] = QConv2dImplementation(RuntimeMode.DEFAULT)(QConv2dComposed)  # type: ignore

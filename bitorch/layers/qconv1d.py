@@ -1,6 +1,6 @@
 """Module containing the quantized 1d convolution layer"""
 
-from typing import Any, Union
+from typing import Any, Type, Union
 
 from torch import Tensor
 from torch.nn import Conv1d, init
@@ -122,4 +122,4 @@ class QConv1dComposed(DefaultImplementationMixin, QConv1dBase):
     pass
 
 
-QConv1d = QConv1dImplementation(RuntimeMode.DEFAULT)(QConv1dComposed)
+QConv1d: Type[QConv1dComposed] = QConv1dImplementation(RuntimeMode.DEFAULT)(QConv1dComposed)  # type: ignore

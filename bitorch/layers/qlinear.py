@@ -1,5 +1,6 @@
 """Module containing the quantized linear layer"""
-from typing import Union, Dict, Any
+
+from typing import Any, Type, Union, Dict
 
 import torch
 from torch.nn import Linear
@@ -88,4 +89,4 @@ class QLinearComposed(DefaultImplementationMixin, QLinearBase):
     pass
 
 
-QLinear = QLinearImplementation(RuntimeMode.DEFAULT)(QLinearComposed)
+QLinear: Type[QLinearComposed] = QLinearImplementation(RuntimeMode.DEFAULT)(QLinearComposed)  # type: ignore
