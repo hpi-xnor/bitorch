@@ -107,8 +107,8 @@ class DistillationModelWrapper(ModelWrapper):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._kd_loss = DistributionLoss()
+        logging.info(f"Training with Knowledge Distillation, loading teacher {self.hparams.teacher}.")
         self.teacher = get_teacher(self.hparams.teacher)
-        # self.teacher.eval()
         for param in self.teacher.parameters():
             param.requires_grad = False
 

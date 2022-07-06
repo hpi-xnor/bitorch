@@ -14,6 +14,7 @@ from .identity import Identity
 from .sign import Sign
 from .ste_heaviside import SteHeaviside
 from .swish_sign import SwishSign
+from .progressive_sign import ProgressiveSign
 from ..util import build_lookup_dictionary
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "InputDoReFa",
     "WeightDoReFa",
     "Identity",
+    "ProgressiveSign",
     "Sign",
     "SteHeaviside",
     "SwishSign",

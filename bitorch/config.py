@@ -12,6 +12,8 @@ class Config:
     subclasses.
     """
 
+    name: str
+
     def __init__(self) -> None:
         """collects all attributes of class that are not the name as configurable attributes."""
         configurable_attributes = [
@@ -25,11 +27,11 @@ class Config:
             self._add_getter_setter_methods(attribute)
 
     def _add_getter_setter_methods(self, attribute: str) -> None:
-        def getter(self):  # type: ignore
-            return getattr(self, attribute)
+        def getter(self_):  # type: ignore
+            return getattr(self_, attribute)
 
-        def setter(self, value):  # type: ignore
-            setattr(self, attribute, value)
+        def setter(self_, value):  # type: ignore
+            setattr(self_, attribute, value)
 
         setattr(self, f"get_{attribute}", getter)
         setattr(self, f"set_{attribute}", setter)

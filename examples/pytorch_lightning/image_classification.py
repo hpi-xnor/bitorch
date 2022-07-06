@@ -1,5 +1,7 @@
 import os
 
+from examples.pytorch_lightning.utils.callbacks import ProgressiveSignScalerCallback
+
 if os.environ.get("REMOTE_PYCHARM_DEBUG_SESSION", False):
     import pydevd_pycharm
 
@@ -63,7 +65,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         loggers.append(
             WandbLogger(
                 project=args.wandb_project,
-                log_model=True,
                 name=args.wandb_experiment,
                 save_dir=str(output_dir),
             )  # type: ignore
@@ -86,6 +87,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     cmd_logger = CommandLineLogger(args.log_interval)
     callbacks.append(cmd_logger)
     configure_logging(cmd_logger.logger, args.log_file, args.log_level, args.log_stdout)
+
+    # add scaling callback for progressive sign (not be needed for all models, but should not slow down training)
+    callbacks.append(ProgressiveSignScalerCallback())
 
     if len(loggers) > 0:
         lr_monitor = LearningRateMonitor(logging_interval="step")
@@ -178,8 +182,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         ckpt_path=args.checkpoint_load if not args.pretrained else None,
     )
 
+    # backup best model to wandb
     if args.wandb_log and check_point_callback is not None:
-        wandb.run.summary["best-model-score"] = check_point_callback.best_model_score
+        wandb.run.summary["best-model-score"] = check_point_callback.best_model_score  # type: ignore
         wandb.save(check_point_callback.best_model_path)
 
 
