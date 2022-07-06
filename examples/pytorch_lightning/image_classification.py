@@ -46,6 +46,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     """
     configure_logging(logger, args.log_file, args.log_level, args.log_stdout)
 
+    # switch to RAW bitorch mode for distributed data parallel training
     bitorch.mode = RuntimeMode.RAW
 
     apply_args_to_configuration(args)
@@ -74,7 +75,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 args.checkpoint_dir,
                 save_last=True,
                 save_top_k=args.checkpoint_keep_count,
+                every_n_epochs=1,
                 monitor="metrics/test-top1-accuracy",
+                mode="max",
+                filename="{epoch:03d}",
             )
         )
 
