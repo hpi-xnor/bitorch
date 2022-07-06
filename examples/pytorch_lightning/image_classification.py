@@ -69,18 +69,18 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             )  # type: ignore
         )
     callbacks: List[Any] = []
+    check_point_callback = None
     if args.checkpoint_dir is not None:
-        callbacks.append(
-            ModelCheckpoint(
-                args.checkpoint_dir,
-                save_last=True,
-                save_top_k=args.checkpoint_keep_count,
-                every_n_epochs=1,
-                monitor="metrics/test-top1-accuracy",
-                mode="max",
-                filename="{epoch:03d}",
-            )
+        check_point_callback = ModelCheckpoint(
+            args.checkpoint_dir,
+            save_last=True,
+            save_top_k=args.checkpoint_keep_count,
+            every_n_epochs=1,
+            monitor="metrics/test-top1-accuracy",
+            mode="max",
+            filename="{epoch:03d}",
         )
+        callbacks.append(check_point_callback)
 
     # providing our own progress bar disables the default progress bar (not needed to disable later on)
     cmd_logger = CommandLineLogger(args.log_interval)
@@ -177,6 +177,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         val_dataloaders=test_loader,
         ckpt_path=args.checkpoint_load if not args.pretrained else None,
     )
+
+    if args.wandb_log and check_point_callback is not None:
+        wandb.run.summary["best-model-score"] = check_point_callback.best_model_score
+        wandb.save(check_point_callback.best_model_path)
 
 
 if __name__ == "__main__":
