@@ -112,7 +112,7 @@ class QConv1dBase(QConvArgsProviderMixin, QConv1d_NoAct):  # type: ignore
         return super().forward(self.activation(input_tensor))
 
 
-class QConv1dComposed(DefaultImplementationMixin, QConv1dBase):
+class _QConv1dComposed(DefaultImplementationMixin, QConv1dBase):
     """
     This class defines the default implementation of a QConv1d layer (which is actually implemented by QConv1dBase).
 
@@ -122,4 +122,9 @@ class QConv1dComposed(DefaultImplementationMixin, QConv1dBase):
     pass
 
 
-QConv1d: Type[QConv1dComposed] = QConv1dImplementation(RuntimeMode.DEFAULT)(QConv1dComposed)  # type: ignore
+QConv1d: Type[_QConv1dComposed] = QConv1dImplementation(RuntimeMode.DEFAULT)(_QConv1dComposed)  # type: ignore
+"""
+This class provides the current implementation of a QConv1d layer (which is actually implemented by :class:`QConv1dBase`).
+
+To implement a custom QConv1d implementation use :class:`QConv1dBase` as a super class instead.
+"""

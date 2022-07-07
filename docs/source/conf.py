@@ -52,6 +52,7 @@ autodoc_typehints = "description"
 templates_path = ["_templates"]
 
 autosummary_generate = True
+autoclass_content = "init"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

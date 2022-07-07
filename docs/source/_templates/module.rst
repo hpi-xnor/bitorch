@@ -54,6 +54,8 @@
 
 {% block modules %}
 {% if modules %}
+.. rubric:: {{ _('Modules') }}
+
 .. autosummary::
    :toctree:
    :template: module.rst
