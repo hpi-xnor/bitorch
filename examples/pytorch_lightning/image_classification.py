@@ -64,6 +64,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     if args.wandb_log:
         loggers.append(
             CustomWandbLogger(
+                args,
                 project=args.wandb_project,
                 name=args.wandb_experiment,
                 save_dir=str(output_dir),
