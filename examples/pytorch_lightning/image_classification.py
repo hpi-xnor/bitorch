@@ -134,7 +134,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     )
     augmentation_level = Augmentation.from_string(args.augmentation)
     if args.dev_run:
-        logger.info(f"This run only uses 1 % of training and validation data (--dev-run)!")
+        logger.info("This run only uses 1 % of training and validation data (--dev-run)!")
     logger.info(f"model: {args.model}")
     logger.info(f"optimizer: {args.optimizer}")
     logger.info(f"lr: {args.lr}")
