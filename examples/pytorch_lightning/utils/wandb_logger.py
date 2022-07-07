@@ -14,7 +14,8 @@ class CustomWandbLogger(WandbLogger):
     """
 
     def __init__(self, script_args: Namespace, *args: Any, **kwargs: Any) -> None:
-        wandb_tags = [script_args.model, script_args.dataset]
+        kv_tags = ["model", "dataset"]
+        wandb_tags = [f"{k}:{getattr(script_args, k, 'unknown')}" for k in kv_tags]
         if script_args.dev_run:
             wandb_tags.append("dev-run")
         if script_args.teacher:
