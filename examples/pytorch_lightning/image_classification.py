@@ -1,7 +1,5 @@
 import os
 
-from examples.pytorch_lightning.utils.callbacks import ProgressiveSignScalerCallback
-
 if os.environ.get("REMOTE_PYCHARM_DEBUG_SESSION", False):
     import pydevd_pycharm
 
@@ -22,7 +20,7 @@ import torch
 import wandb
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
-from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase, WandbLogger
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase
 from torch.utils.data import DataLoader
 
 import bitorch
@@ -31,7 +29,9 @@ from bitorch.datasets import dataset_from_name
 from bitorch.datasets.base import Augmentation
 from bitorch.models import model_from_name
 from bitorch.quantizations import Quantization
+from examples.pytorch_lightning.utils.callbacks import ProgressiveSignScalerCallback
 from examples.pytorch_lightning.utils.log import CommandLineLogger
+from examples.pytorch_lightning.utils.wandb_logger import CustomWandbLogger
 from utils.arg_parser import create_argparser
 from utils.lightning_model import ModelWrapper, DistillationModelWrapper
 from utils.utils import configure_logging
@@ -63,25 +63,26 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         loggers.append(CSVLogger(str(output_dir), name="csv"))
     if args.wandb_log:
         loggers.append(
-            WandbLogger(
+            CustomWandbLogger(
                 project=args.wandb_project,
                 name=args.wandb_experiment,
                 save_dir=str(output_dir),
+                log_model=True,
             )  # type: ignore
         )
     callbacks: List[Any] = []
-    check_point_callback = None
     if args.checkpoint_dir is not None:
-        check_point_callback = ModelCheckpoint(
-            args.checkpoint_dir,
-            save_last=True,
-            save_top_k=args.checkpoint_keep_count,
-            every_n_epochs=1,
-            monitor="metrics/test-top1-accuracy",
-            mode="max",
-            filename="{epoch:03d}",
+        callbacks.append(
+            ModelCheckpoint(
+                args.checkpoint_dir,
+                save_last=True,
+                save_top_k=args.checkpoint_keep_count,
+                every_n_epochs=1,
+                monitor="metrics/test-top1-accuracy",
+                mode="max",
+                filename="{epoch:03d}",
+            )
         )
-        callbacks.append(check_point_callback)
 
     # providing our own progress bar disables the default progress bar (not needed to disable later on)
     cmd_logger = CommandLineLogger(args.log_interval)
@@ -127,8 +128,12 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logger=loggers if len(loggers) > 0 else None,  # type: ignore
         callbacks=callbacks,  # type: ignore
         log_every_n_steps=args.log_interval,
+        limit_train_batches=0.01 if args.dev_run else None,
+        limit_val_batches=0.01 if args.dev_run else None,
     )
     augmentation_level = Augmentation.from_string(args.augmentation)
+    if args.dev_run:
+        logger.info(f"This run only uses 1 % of training and validation data (--dev-run)!")
     logger.info(f"model: {args.model}")
     logger.info(f"optimizer: {args.optimizer}")
     logger.info(f"lr: {args.lr}")
@@ -181,11 +186,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         val_dataloaders=test_loader,
         ckpt_path=args.checkpoint_load if not args.pretrained else None,
     )
-
-    # backup best model to wandb
-    if args.wandb_log and check_point_callback is not None:
-        wandb.run.summary["best-model-score"] = check_point_callback.best_model_score  # type: ignore
-        wandb.save(check_point_callback.best_model_path)
 
 
 if __name__ == "__main__":

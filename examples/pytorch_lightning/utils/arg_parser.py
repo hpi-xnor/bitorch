@@ -292,6 +292,11 @@ def add_regular_args(parser: ArgumentParser) -> None:
         action="store_true",
         help="explicitly use the cpu. overwrites gpu settings",
     )
+    parser.add_argument(
+        "--dev-run",
+        action="store_true",
+        help="use only 1% of training/validation data for testing purposes",
+    )
 
 
 def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
