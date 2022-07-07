@@ -1,5 +1,5 @@
 bitorch
 fvbitcore
-pytorch_lightning
+pytorch_lightning~=1.6.0
 sklearn
-wandb
+wandb~=0.12.0
