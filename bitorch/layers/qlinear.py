@@ -79,7 +79,7 @@ class QLinearBase(Linear):
         return linear(self.activation(x), self.weight_quantization(self.weight), self.bias)
 
 
-class QLinearComposed(DefaultImplementationMixin, QLinearBase):
+class _QLinearComposed(DefaultImplementationMixin, QLinearBase):
     """
     This class defines the default implementation of a QLinear layer (which is actually implemented by QLinearBase).
 
@@ -89,4 +89,9 @@ class QLinearComposed(DefaultImplementationMixin, QLinearBase):
     pass
 
 
-QLinear: Type[QLinearComposed] = QLinearImplementation(RuntimeMode.DEFAULT)(QLinearComposed)  # type: ignore
+QLinear: Type[_QLinearComposed] = QLinearImplementation(RuntimeMode.DEFAULT)(_QLinearComposed)  # type: ignore
+"""
+This class provides the current implementation of a QLinear layer (which is actually implemented by :class:`QLinearBase`).
+
+To implement a custom QLinear implementation use :class:`QLinearBase` as a super class instead.
+"""

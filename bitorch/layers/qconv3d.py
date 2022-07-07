@@ -106,7 +106,7 @@ class QConv3dBase(QConvArgsProviderMixin, QConv3d_NoAct):  # type: ignore
         return super().forward(self.activation(input_tensor))
 
 
-class QConv3dComposed(DefaultImplementationMixin, QConv3dBase):
+class _QConv3dComposed(DefaultImplementationMixin, QConv3dBase):
     """
     This class defines the default implementation of a QConv3d layer (which is actually implemented by QConv3dBase).
 
@@ -116,4 +116,9 @@ class QConv3dComposed(DefaultImplementationMixin, QConv3dBase):
     pass
 
 
-QConv3d: Type[QConv3dComposed] = QConv3dImplementation(RuntimeMode.DEFAULT)(QConv3dComposed)  # type: ignore
+QConv3d: Type[_QConv3dComposed] = QConv3dImplementation(RuntimeMode.DEFAULT)(_QConv3dComposed)  # type: ignore
+"""
+This class provides the current implementation of a QConv3d layer (which is actually implemented by :class:`QConv3dBase`).
+
+To implement a custom QConv3d implementation use :class:`QConv3dBase` as a super class instead.
+"""
