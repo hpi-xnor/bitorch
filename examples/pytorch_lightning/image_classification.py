@@ -13,24 +13,27 @@ if os.environ.get("REMOTE_PYCHARM_DEBUG_SESSION", False):
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Any
+from typing import List, Any, Type
 
 import fvbitcore.nn as fv_nn
 import torch
 import wandb
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
-from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase, WandbLogger
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase
 from torch.utils.data import DataLoader
 
-from bitorch import apply_args_to_configuration
+import bitorch
+from bitorch import apply_args_to_configuration, RuntimeMode
 from bitorch.datasets import dataset_from_name
 from bitorch.datasets.base import Augmentation
 from bitorch.models import model_from_name
 from bitorch.quantizations import Quantization
+from examples.pytorch_lightning.utils.callbacks import ProgressiveSignScalerCallback
 from examples.pytorch_lightning.utils.log import CommandLineLogger
+from examples.pytorch_lightning.utils.wandb_logger import CustomWandbLogger
 from utils.arg_parser import create_argparser
-from utils.lightning_model import ModelWrapper
+from utils.lightning_model import ModelWrapper, DistillationModelWrapper
 from utils.utils import configure_logging
 
 logger = logging.getLogger()
@@ -45,6 +48,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     """
     configure_logging(logger, args.log_file, args.log_level, args.log_stdout)
 
+    # switch to RAW bitorch mode for distributed data parallel training
+    bitorch.mode = RuntimeMode.RAW
+
     apply_args_to_configuration(args)
 
     output_dir = Path(args.result_directory)
@@ -57,11 +63,12 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         loggers.append(CSVLogger(str(output_dir), name="csv"))
     if args.wandb_log:
         loggers.append(
-            WandbLogger(
+            CustomWandbLogger(
+                args,
                 project=args.wandb_project,
-                log_model=True,
                 name=args.wandb_experiment,
                 save_dir=str(output_dir),
+                log_model=True,
             )  # type: ignore
         )
     callbacks: List[Any] = []
@@ -71,7 +78,10 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 args.checkpoint_dir,
                 save_last=True,
                 save_top_k=args.checkpoint_keep_count,
+                every_n_epochs=1,
                 monitor="metrics/test-top1-accuracy",
+                mode="max",
+                filename="{epoch:03d}",
             )
         )
 
@@ -79,6 +89,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     cmd_logger = CommandLineLogger(args.log_interval)
     callbacks.append(cmd_logger)
     configure_logging(cmd_logger.logger, args.log_file, args.log_level, args.log_stdout)
+
+    # add scaling callback for progressive sign (not be needed for all models, but should not slow down training)
+    callbacks.append(ProgressiveSignScalerCallback())
 
     if len(loggers) > 0:
         lr_monitor = LearningRateMonitor(logging_interval="step")
@@ -91,11 +104,21 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
     model.initialize()
+
+    wrapper_class: Type[ModelWrapper] = ModelWrapper
+    if args.teacher:
+        if args.dataset != "imagenet":
+            raise ValueError(
+                f"Teacher '{args.teacher}' and dataset '{args.dataset}' selected, "
+                f"but teacher models are only supported for imagenet."
+            )
+        wrapper_class = DistillationModelWrapper
+
     if args.checkpoint_load is not None and args.pretrained:
         logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
-        model_wrapped = ModelWrapper.load_from_checkpoint(args.checkpoint_load)
+        model_wrapped = wrapper_class.load_from_checkpoint(args.checkpoint_load)
     else:
-        model_wrapped = ModelWrapper(model, dataset.num_classes, args)
+        model_wrapped = wrapper_class(model, dataset.num_classes, args)
 
     trainer = Trainer(
         strategy=args.strategy,
@@ -106,8 +129,12 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logger=loggers if len(loggers) > 0 else None,  # type: ignore
         callbacks=callbacks,  # type: ignore
         log_every_n_steps=args.log_interval,
+        limit_train_batches=0.01 if args.dev_run else None,
+        limit_val_batches=0.01 if args.dev_run else None,
     )
     augmentation_level = Augmentation.from_string(args.augmentation)
+    if args.dev_run:
+        logger.info("This run only uses 1 % of training and validation data (--dev-run)!")
     logger.info(f"model: {args.model}")
     logger.info(f"optimizer: {args.optimizer}")
     logger.info(f"lr: {args.lr}")

@@ -44,7 +44,6 @@ class QuantizedMLP(nn.Module):
         x = self.bn1(x)
 
         x = self.fc2(x)
-        x = x.to(dtype=torch.float32)  # todo: fix in inference engine
         x = self.act2(x)
         x = self.bn2(x)
 
@@ -164,7 +163,6 @@ def main():
 
     if args.model == "mlp":
         model = QuantizedMLP().to(device)
-        print(model)
     else:
         model = Net().to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)

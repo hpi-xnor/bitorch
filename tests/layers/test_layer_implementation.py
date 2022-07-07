@@ -1,3 +1,4 @@
+import pickle
 from typing import Any
 
 import pytest
@@ -12,7 +13,7 @@ from bitorch.layers.extensions.layer_container import LayerContainer
 TEST_MODE = RuntimeMode.INFERENCE_AUTO
 
 
-class LayerBase:
+class ExampleBase:
     def __init__(self, s: str, val: int = 42) -> None:
         self.s = s
         self.val = val
@@ -21,26 +22,29 @@ class LayerBase:
         return f"{self.s}: {self.val} - made by {self.class_name()}"
 
     def class_name(self) -> str:
-        return self.__class__.__name__
+        return "BaseClass"
 
 
-test_registry = LayerRegistry("Layer")
+example_registry = LayerRegistry("Example")
 
 
-class LayerImplementation(LayerImplementation):
+class ExampleImplementation(LayerImplementation):
     def __init__(self, *args):
-        super().__init__(test_registry, *args)
+        super().__init__(example_registry, *args)
 
 
-@LayerImplementation(RuntimeMode.DEFAULT)
-class Layer(DefaultImplementationMixin, LayerBase):
-    """Designate the LayerBase as the Default Mode"""
+class ExampleComposed(DefaultImplementationMixin, ExampleBase):
+    """Compose the default implementation"""
 
     pass
 
 
-@LayerImplementation(TEST_MODE)
-class CustomLayerImplementation(CustomImplementationMixin, LayerBase):
+# create the decorated default implementation
+Example = ExampleImplementation(RuntimeMode.DEFAULT)(ExampleComposed)
+
+
+@ExampleImplementation(TEST_MODE)
+class CustomLayerImplementation(CustomImplementationMixin, ExampleBase):
     @classmethod
     def can_clone(cls, recipe: LayerRecipe) -> bool:
         # assume this test class can only clone layers with 'vals' lower than 100
@@ -55,69 +59,80 @@ class CustomLayerImplementation(CustomImplementationMixin, LayerBase):
         return f"{self.s}: {self.val} - made by {self.class_name()}"
 
     def class_name(self) -> str:
-        return self.__class__.__name__
+        return "CustomClass"
 
 
 @pytest.fixture(scope="function", autouse=True)
 def clean_environment():
-    test_registry.clear()
+    example_registry.clear()
     bitorch.mode = RuntimeMode.DEFAULT
     yield None
-    test_registry.clear()
+    example_registry.clear()
     bitorch.mode = RuntimeMode.DEFAULT
 
 
 def test_recipe():
-    s1 = Layer("Hello World", val=21)
-    s2 = Layer("Hello World", 21)
+    s1 = Example("Hello World", val=21)
+    s2 = Example("Hello World", 21)
 
-    s1_recipe = test_registry.get_recipe_for(s1)
+    s1_recipe = example_registry.get_recipe_for(s1)
     assert s1_recipe.args[0] == "Hello World"
     assert s1_recipe.kwargs["val"] == 21
 
-    s2_recipe = test_registry.get_recipe_for(s2)
+    s2_recipe = example_registry.get_recipe_for(s2)
     assert s2_recipe.args[0] == "Hello World"
     assert s2_recipe.args[1] == 21
 
 
 def test_default_impl():
-    s = Layer("Hello World", val=21)
-    assert s.val == 21
-    assert s.class_name() == "Layer"
-    assert isinstance(s, Layer.class_)
-    assert isinstance(s, LayerContainer)
+    layer = Example("Hello World", val=21)
+    assert layer.val == 21
+    assert layer.class_name() == "BaseClass"
+    assert isinstance(layer, Example.class_)
+    assert isinstance(layer, LayerContainer)
+
+    # TODO: pickling is currently only possible in RAW mode
+    # content = pickle.dumps(layer)
+    #
+    # layer_loaded = pickle.loads(content)
+    # assert layer_loaded.val == 21
 
 
 def test_train_impl():
     bitorch.mode = TEST_MODE
-    s = Layer("Hello World", val=21)
-    assert s.val == 21
-    assert s.class_name() == "CustomLayerImplementation"
-    assert isinstance(s, CustomLayerImplementation)
-    assert isinstance(s, LayerContainer)
+    layer = Example("Hello World", val=21)
+    assert layer.val == 21
+    assert layer.class_name() == "CustomClass"
+    assert isinstance(layer, CustomLayerImplementation)
+    assert isinstance(layer, LayerContainer)
 
 
 def test_raw_impl():
     bitorch.mode = RuntimeMode.RAW
-    s = Layer("Hello World", val=21)
-    assert s.val == 21
-    assert s.class_name() == "Layer"
-    assert isinstance(s, Layer.class_)
-    assert not isinstance(s, LayerContainer)
+    layer = Example("Hello World", val=21)
+    assert layer.val == 21
+    assert layer.class_name() == "BaseClass"
+    assert isinstance(layer, Example.class_)
+    assert not isinstance(layer, LayerContainer)
+
+    content = pickle.dumps(layer)
+
+    layer_loaded = pickle.loads(content)
+    assert layer_loaded.val == 21
 
 
 @pytest.mark.parametrize("val, is_supported", [(150, False), (50, True)])
 def test_clone(val, is_supported):
-    s = Layer("Hello World", val=val)
-    s_recipe = test_registry.get_recipe_for(s)
+    layer = Example("Hello World", val=val)
+    recipe = example_registry.get_recipe_for(layer)
     if is_supported:
-        replacement = test_registry.get_replacement(TEST_MODE, s_recipe)
+        replacement = example_registry.get_replacement(TEST_MODE, recipe)
         assert isinstance(replacement, CustomLayerImplementation)  # type: ignore
     else:
         with pytest.raises(RuntimeError) as e_info:
-            _ = test_registry.get_replacement(TEST_MODE, s_recipe)
+            _ = example_registry.get_replacement(TEST_MODE, recipe)
         error_message = str(e_info.value)
         assert e_info.typename == "RuntimeError"
-        expected_key_strings = ["Layer", "implementation", str(TEST_MODE), "val", "100"]
+        expected_key_strings = ["Example", "implementation", str(TEST_MODE), "val", "100"]
         for key in expected_key_strings:
             assert key in error_message

@@ -46,7 +46,8 @@ setuptools.setup(
     install_requires=_get_requirements("requirements.txt"),
     extras_require={
         "dev": _get_requirements("requirements-dev.txt"),
-        "opt": _get_requirements(*_get_files_recursively("requirements*.txt", root="examples")),
+        # "opt": _get_requirements(*_get_files_recursively("requirements*.txt", root="examples")),
+        "opt": _get_requirements("examples/pytorch_lightning/requirements.txt"),
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
