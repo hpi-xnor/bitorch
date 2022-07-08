@@ -89,7 +89,7 @@ class ProgressiveSign(Quantization):
 
     @staticmethod
     def default_transform(x: float) -> float:
-        return 1 - (5 ** (-3 * x))
+        return 1 - (2 ** (-10 * x))
 
     def transform(self, x: float) -> float:
         """Transform x for a steady temperature increase, higher at the beginning, and much less at the end."""

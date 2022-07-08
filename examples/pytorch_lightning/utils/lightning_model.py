@@ -25,6 +25,8 @@ class ModelWrapper(LightningModule):
         self.save_hyperparameters(clean_hyperparameters(script_args))
         self.loss_function = CrossEntropyLoss()
         self.model = model
+        self.batch_accuracy_top1 = Accuracy(num_classes=num_classes)
+        self.batch_accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
         self.train_accuracy_top1 = Accuracy(num_classes=num_classes)
         self.train_accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
         self.accuracy_top1 = Accuracy(num_classes=num_classes)
@@ -40,12 +42,16 @@ class ModelWrapper(LightningModule):
 
         y_hat = self.model(x_train)
         loss = self.calculate_loss(x_train, y_train, y_hat)
+
+        self.batch_accuracy_top1(y_hat, y_train)
+        self.batch_accuracy_top5(y_hat, y_train)
         self.train_accuracy_top1(y_hat, y_train)
         self.train_accuracy_top5(y_hat, y_train)
+
         self.log_dict(
             {
-                "metrics/train-top1-accuracy": self.train_accuracy_top1,
-                "metrics/train-top5-accuracy": self.train_accuracy_top5,
+                "metrics/batch-top1-accuracy": self.batch_accuracy_top1,
+                "metrics/batch-top5-accuracy": self.batch_accuracy_top5,
             },
             prog_bar=True,
             on_step=True,
@@ -69,6 +75,8 @@ class ModelWrapper(LightningModule):
         metrics_dict = {
             "metrics/test-top1-accuracy": self.accuracy_top1,
             "metrics/test-top5-accuracy": self.accuracy_top5,
+            "metrics/train-top1-accuracy": self.train_accuracy_top1,
+            "metrics/train-top5-accuracy": self.train_accuracy_top5,
             "loss/test": loss,
         }
 
