@@ -52,12 +52,20 @@ class ModelWrapper(LightningModule):
             {
                 "metrics/batch-top1-accuracy": self.batch_accuracy_top1,
                 "metrics/batch-top5-accuracy": self.batch_accuracy_top5,
+                "loss/train": loss,
             },
             prog_bar=True,
             on_step=True,
             on_epoch=False,
         )
-        self.log("loss/train", loss, on_step=True, on_epoch=False)
+        self.log_dict(
+            {
+                "metrics/train-top1-accuracy": self.train_accuracy_top1,
+                "metrics/train-top5-accuracy": self.train_accuracy_top5,
+            },
+            on_step=False,
+            on_epoch=True,
+        )
         return loss
 
     def calculate_loss(self, x_train: torch.Tensor, y_train: torch.Tensor, y_hat: torch.Tensor) -> torch.Tensor:
@@ -75,8 +83,6 @@ class ModelWrapper(LightningModule):
         metrics_dict = {
             "metrics/test-top1-accuracy": self.accuracy_top1,
             "metrics/test-top5-accuracy": self.accuracy_top5,
-            "metrics/train-top1-accuracy": self.train_accuracy_top1,
-            "metrics/train-top5-accuracy": self.train_accuracy_top5,
             "loss/test": loss,
         }
 
