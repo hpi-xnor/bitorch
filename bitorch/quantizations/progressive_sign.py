@@ -110,7 +110,7 @@ class ProgressiveSign(Quantization):
         if alpha is None:
             alpha = config.progressive_sign_alpha
         if beta is None:
-            beta = config.progressive_sign_alpha
+            beta = config.progressive_sign_beta
         return 1 - (alpha ** (-beta * scale))
 
     def transform(self, scale: float) -> float:
