@@ -48,7 +48,6 @@ def create_mlp(
 
     for layer_size in layer_sizes[1:]:
         output_size = layer_size
-        print(input_size, output_size)
         mlp_layers.append(BatchNorm1d(input_size))
         mlp_layers.append(
             QLinear(input_size, output_size, bias=False) if quantized else
@@ -138,8 +137,6 @@ class DLRM(Model):
         elif interaction_operation == Interaction_Operation_Type.PRODUCT.value:
             top_mlp_layer_sizes = [
                 embedding_dimension + (len(embedding_layer_sizes) + 1) * ((len(embedding_layer_sizes) + 1) // 2), *top_mlp_layer_sizes]
-        print(bottom_mlp_layer_sizes)
-        print(top_mlp_layer_sizes)
         self.bottom_mlp = create_mlp(
             bottom_mlp_layer_sizes,
             quantized=binary_bottom_mlp,
