@@ -164,12 +164,12 @@ class DLRM(Model):
             choices=[
                 Interaction_Operation_Type.CONCAT.value,
                 Interaction_Operation_Type.PRODUCT.value],
-            default=Interaction_Operation_Type.CONCAT.value)
+            default=Interaction_Operation_Type.PRODUCT.value)
         parser.add_argument("--dense-embeddings", action="store_false", help="Disable sparse embeddings")
 
-        parser.add_argument("--binary-embedding", action="store_true", default=False,
+        parser.add_argument("--binary-embedding", action="store_true", default=True,
                             help="toggles use of binary embeddings in model.")
-        parser.add_argument("--binary-top-mlp", action="store_true", default=False,
+        parser.add_argument("--binary-top-mlp", action="store_true", default=True,
                             help="toggles use of binary top mlp in model.")
         parser.add_argument("--binary-bottom-mlp", action="store_true", default=False,
                             help="toggles use of binary bottom mlp in model.")
