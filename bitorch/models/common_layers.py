@@ -5,6 +5,8 @@ from torch import nn
 def get_initial_layers(variant: str, input_channels: int, output_channels: int) -> List[nn.Module]:
     """Get commonly used layers to extract initial features from the image."""
     layers: List[nn.Module] = []
+    if variant == "thumbnail":
+        layers.append(nn.Conv2D(input_channels, kernel_size=3, strides=1, padding=1, use_bias=False))
     if variant == "imagenet":
         layers.append(nn.Conv2d(input_channels, output_channels, kernel_size=7, stride=2, padding=3, bias=False))
         layers.append(nn.BatchNorm2d(output_channels, momentum=0.9))

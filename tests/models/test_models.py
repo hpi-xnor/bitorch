@@ -13,6 +13,10 @@ from bitorch.models import (
     ResnetE,
     ResnetE18,
     ResnetE34,
+    DenseNet28,
+    DenseNet37,
+    DenseNet45,
+    DenseNetFlex,
 )
 import torch
 import numpy as np
@@ -30,6 +34,10 @@ TEST_INPUT_DATA = [
     [Resnet18V2, {}, ALL_DATASETS],
     [Resnet34V2, {}, ALL_DATASETS],
     [Resnet50V2, {}, ALL_DATASETS],
+    [DenseNet28, {}, ALL_DATASETS],
+    [DenseNet37, {}, ALL_DATASETS],
+    [DenseNet45, {}, ALL_DATASETS],
+    [DenseNetFlex, {"flex_block_config": [[6, 6, 6, 5]]}, ALL_DATASETS],
     [ResnetE, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
     [ResnetE18, {}, RGB_DATASETS],
     [ResnetE34, {}, RGB_DATASETS],

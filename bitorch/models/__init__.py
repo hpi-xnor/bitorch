@@ -20,6 +20,13 @@ from .resnet import (
     Resnet50V1,
     Resnet50V2,
 )
+from .densenet import (
+    DenseNet,
+    DenseNet28,
+    DenseNet37,
+    DenseNet45,
+    DenseNetFlex,
+)
 from .resnet_e import (
     ResnetE,
     ResnetE18,
@@ -42,6 +49,11 @@ __all__ = [
     "ResnetE",
     "ResnetE18",
     "ResnetE34",
+    "DenseNet",
+    "DenseNet28",
+    "DenseNet37",
+    "DenseNet45",
+    "DenseNetFlex",
 ]
 
 
