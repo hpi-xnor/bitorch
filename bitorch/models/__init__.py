@@ -27,6 +27,17 @@ from .densenet import (
     DenseNet45,
     DenseNetFlex,
 )
+from .meliusnet import (
+    MeliusNet,
+    MeliusNet22,
+    MeliusNet23,
+    MeliusNet42,
+    MeliusNet59,
+    MeliusNeta,
+    MeliusNetb,
+    MeliusNetc,
+    MeliusNetFlex,
+)
 from .resnet_e import (
     ResnetE,
     ResnetE18,
@@ -54,6 +65,15 @@ __all__ = [
     "DenseNet37",
     "DenseNet45",
     "DenseNetFlex",
+    "MeliusNet",
+    "MeliusNet22",
+    "MeliusNet23",
+    "MeliusNet42",
+    "MeliusNet59",
+    "MeliusNeta",
+    "MeliusNetb",
+    "MeliusNetc",
+    "MeliusNetFlex",
 ]
 
 

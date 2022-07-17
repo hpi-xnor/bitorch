@@ -1,6 +1,6 @@
 import logging
 import argparse
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type, Union
 
 import torch
 from torch import nn
@@ -136,9 +136,76 @@ class BaseNetDense(Module):
         self.num_features = num_out_features
 
 
-class SpecificDenseNet(BaseNetDense):
+class _DenseNet(BaseNetDense):
     def _add_base_block_structure(self, layer_num: int, dilation: int) -> None:
         self._add_dense_layer(layer_num, dilation)
+
+
+def basedensenet_constructor(
+    spec: dict,
+    model: Type[BaseNetDense],
+    num_layers: Optional[Union[int, str]],
+    num_init_features: int,
+    growth_rate: int,
+    bn_size: int,
+    dropout: float,
+    dilated: bool,
+    flex_block_config: Optional[List[int]],
+    classes: int = 1000,
+    initial_layers: str = "imagenet",
+    image_channels: int = 3,
+) -> Module:
+    """Creates a densenet of the given model type with given layer numbers.
+
+    Args:
+        spec (dict): specification that holds block config, reduction factors and downsample layer names
+        model (Type[BaseNetDense]): the model to instantiate.
+        num_layers (int): number of layers to be build.
+        num_init_features (int, optional): number of initial features.
+        growth_rate (int, optional): growth rate of the channels.
+        bn_size (int, optional): size of the bottleneck.
+        dropout (float, optional): dropout percentage in dense layers.
+        dilated (bool, optional): whether to use dilation in convolutions.
+        flex_block_config (List[int], optional) number of blocks in a flex model.
+        classes (int, optional): number of output classes. Defaults to 1000.
+        initial_layers (str, optional): name of set of initial layers to be used. Defaults to "imagenet".
+        image_channels (int, optional): number of channels of input images. Defaults to 3.
+
+    Raises:
+        ValueError: raised if no specification for given num_layers is listed in the given spec dict,
+                    block config is not given as a list of ints,
+                    number of reductions is incorrect
+
+    Returns:
+        Module: instance of model
+    """
+    if num_layers not in spec:
+        raise ValueError(f"No DenseNet spec for {num_layers} available!")
+
+    block_config, reduction_factor, downsampling = spec[num_layers]
+
+    if num_layers is None and flex_block_config is not None:
+        block_config = flex_block_config
+
+    reduction = [1 / x for x in reduction_factor]
+    if not isinstance(block_config, List):
+        raise ValueError(f"block config {block_config} must be a list")
+    if not len(reduction) == len(block_config) - 1:
+        raise ValueError(f'"wrong number of reductions, should be {len(block_config) - 1}"')
+
+    return model(
+        num_init_features,
+        growth_rate,
+        block_config,
+        reduction,
+        bn_size,
+        downsampling,
+        initial_layers,
+        dropout,
+        classes,
+        image_channels,
+        dilated,
+    )
 
 
 """
@@ -170,7 +237,9 @@ class DenseNet(Model):
         flex_block_config: List[int] = None,
     ) -> None:
         super(DenseNet, self).__init__(dataset)
-        self._model = self.create_densenet(
+        self._model = basedensenet_constructor(
+            self.densenet_spec,
+            _DenseNet,
             num_layers,
             num_init_features,
             growth_rate,
@@ -183,69 +252,6 @@ class DenseNet(Model):
             self._dataset.shape[1],
         )
         logging.info(f"building DenseNet with {str(num_layers)} layers...")
-
-    def create_densenet(
-        self,
-        num_layers: Optional[int],
-        num_init_features: int,
-        growth_rate: int,
-        bn_size: int,
-        dropout: float,
-        dilated: bool,
-        flex_block_config: Optional[List[int]],
-        classes: int = 1000,
-        initial_layers: str = "imagenet",
-        image_channels: int = 3,
-    ) -> Module:
-        """Creates a densenet complying to given version and layer number.
-
-        Args:
-            num_layers (int): number of layers to be build.
-            num_init_features (int, optional): number of initial features.
-            growth_rate (int, optional): growth rate of the channels.
-            bn_size (int, optional): size of the bottleneck.
-            dropout (float, optional): dropout percentage in dense layers.
-            dilated (bool, optional): whether to use dilation in convolutions.
-            flex_block_config (List[int], optional) number of blocks in a flex model.
-            classes (int, optional): number of output classes. Defaults to 1000.
-            initial_layers (str, optional): name of set of initial layers to be used. Defaults to "imagenet".
-            image_channels (int, optional): number of channels of input images. Defaults to 3.
-
-        Raises:
-            ValueError: raised if no densenet specification for given num_layers is listed in the densenet_spec dict,
-                        block config is not given as a list of ints,
-                        number of reductions is incorrect
-
-        Returns:
-            Module: densenet model
-        """
-        if num_layers not in self.densenet_spec:
-            raise ValueError(f"No DenseNet spec for {num_layers} available!")
-
-        block_config, reduction_factor, downsampling = self.densenet_spec[num_layers]
-
-        if num_layers is None and flex_block_config is not None:
-            block_config = flex_block_config
-
-        reduction = [1 / x for x in reduction_factor]
-        if not isinstance(block_config, List):
-            raise ValueError(f"block config {block_config} must be a list")
-        if not len(reduction) == len(block_config) - 1:
-            raise ValueError(f'"wrong number of reductions, should be {len(block_config) - 1}"')
-
-        return SpecificDenseNet(
-            num_init_features,
-            growth_rate,
-            block_config,
-            reduction,
-            bn_size,
-            downsampling,
-            initial_layers,
-            dropout,
-            classes,
-            image_channels,
-            dilated,
-        )
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
