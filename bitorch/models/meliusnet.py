@@ -1,4 +1,15 @@
-from .densenet import *
+import argparse
+import logging
+from typing import Optional, Union, List, Any
+
+import torch
+from torch import nn
+from torch.nn import Module
+
+from .densenet import BaseNetDense, DenseNet, DOWNSAMPLE_STRUCT, basedensenet_constructor
+from .base import Model
+from bitorch.layers import QConv2d
+from bitorch.datasets import BasicDataset
 
 
 # Blocks
@@ -26,7 +37,7 @@ class ImprovementBlock(Module):
         parts = []
         for add_x, slice_begin, slice_end in zip(self.slices_add_x, self.slices[:-1], self.slices[1:]):
             length = slice_end - slice_begin
-            if length is 0:
+            if length == 0:
                 continue
             result = torch.narrow(residual, dim=1, start=slice_begin, length=length)
             if add_x:
