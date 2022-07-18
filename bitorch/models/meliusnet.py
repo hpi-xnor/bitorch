@@ -1,12 +1,12 @@
 import argparse
 import logging
-from typing import Optional, Union, List, Any
+from typing import Optional, List, Any
 
 import torch
 from torch import nn
 from torch.nn import Module
 
-from .densenet import BaseNetDense, DenseNet, DOWNSAMPLE_STRUCT, basedensenet_constructor
+from .densenet import BaseNetDense, DOWNSAMPLE_STRUCT, basedensenet_constructor
 from .base import Model
 from bitorch.layers import QConv2d
 from bitorch.datasets import BasicDataset
@@ -61,11 +61,11 @@ class MeliusNet(Model):
     meliusnet_spec = {
         # name: block_config,     reduction_factors,                  downsampling
         None: (None, [1 / 2, 1 / 2, 1 / 2], DOWNSAMPLE_STRUCT),
-        23: ([2, 4, 6, 6], [128 / 192, 192 / 384, 288 / 576], DOWNSAMPLE_STRUCT.replace("fp_conv", "cs,fp_conv:8")),
-        22: ([4, 5, 4, 4], [160 / 320, 224 / 480, 256 / 480], DOWNSAMPLE_STRUCT),
-        29: ([4, 6, 8, 6], [128 / 320, 192 / 512, 256 / 704], DOWNSAMPLE_STRUCT),
-        42: ([5, 8, 14, 10], [160 / 384, 256 / 672, 416 / 1152], DOWNSAMPLE_STRUCT),
-        59: ([6, 12, 24, 12], [192 / 448, 320 / 960, 544 / 1856], DOWNSAMPLE_STRUCT),
+        "23": ([2, 4, 6, 6], [128 / 192, 192 / 384, 288 / 576], DOWNSAMPLE_STRUCT.replace("fp_conv", "cs,fp_conv:8")),
+        "22": ([4, 5, 4, 4], [160 / 320, 224 / 480, 256 / 480], DOWNSAMPLE_STRUCT),
+        "29": ([4, 6, 8, 6], [128 / 320, 192 / 512, 256 / 704], DOWNSAMPLE_STRUCT),
+        "42": ([5, 8, 14, 10], [160 / 384, 256 / 672, 416 / 1152], DOWNSAMPLE_STRUCT),
+        "59": ([6, 12, 24, 12], [192 / 448, 320 / 960, 544 / 1856], DOWNSAMPLE_STRUCT),
         "a": ([4, 5, 5, 6], [160 / 320, 256 / 480, 288 / 576], DOWNSAMPLE_STRUCT.replace("fp_conv", "cs,fp_conv:4")),
         "b": ([4, 6, 8, 6], [160 / 320, 224 / 544, 320 / 736], DOWNSAMPLE_STRUCT.replace("fp_conv", "cs,fp_conv:2")),
         "c": ([3, 5, 10, 6], [128 / 256, 192 / 448, 288 / 832], DOWNSAMPLE_STRUCT.replace("fp_conv", "cs,fp_conv:4")),
@@ -73,7 +73,7 @@ class MeliusNet(Model):
 
     def __init__(
         self,
-        num_layers: Optional[Union[int, str]],
+        num_layers: Optional[str],
         dataset: BasicDataset,
         num_init_features: int = 64,
         growth_rate: int = 64,
@@ -97,22 +97,22 @@ class MeliusNet(Model):
             self._dataset.name,
             self._dataset.shape[1],
         )
-        logging.info(f"building DenseNet with {str(num_layers)} layers...")
+        logging.info(f"building MeliusNet with {str(num_layers)} layers...")
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            "--densenet-num-layers",
-            type=int,
-            choices=[None, 28, 37, 45],
+            "--melius-num-layers",
+            type=str,
+            choices=[None, "22", "23", "29", "42", "59", "a", "b", "c"],
             required=True,
-            help="number of layers to be used inside densenet",
+            help="number of layers to be used inside meliusnet",
         )
         parser.add_argument(
             "--reduction",
             type=str,
             required=False,
-            help='divide channels by this number in transition blocks (3 values, e.g. "2,2.5,3")',
+            help="divide channels by this number in transition blocks",
         )
         parser.add_argument("--growth-rate", type=int, required=False, help="add this many features each block")
         parser.add_argument(
@@ -126,8 +126,8 @@ class MeliusNet(Model):
         )
 
 
-class MeliusNetFlex(DenseNet):
-    """DenseNet-Flex model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy??"
+class MeliusNetFlex(MeliusNet):
+    """MeliusNet-Flex model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
@@ -154,7 +154,7 @@ class MeliusNet22(MeliusNet):
     name = "meliusnet22"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNet22, self).__init__(22, *args, **kwargs)
+        super(MeliusNet22, self).__init__("22", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
@@ -169,7 +169,7 @@ class MeliusNet23(MeliusNet):
     name = "meliusnet23"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNet23, self).__init__(23, *args, **kwargs)
+        super(MeliusNet23, self).__init__("23", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
@@ -184,7 +184,7 @@ class MeliusNet29(MeliusNet):
     name = "meliusnet29"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNet29, self).__init__(29, *args, **kwargs)
+        super(MeliusNet29, self).__init__("29", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
@@ -199,7 +199,7 @@ class MeliusNet42(MeliusNet):
     name = "meliusnet42"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNet42, self).__init__(42, *args, **kwargs)
+        super(MeliusNet42, self).__init__("42", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
@@ -214,7 +214,7 @@ class MeliusNet59(MeliusNet):
     name = "meliusnet59"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNet59, self).__init__(59, *args, **kwargs)
+        super(MeliusNet59, self).__init__("59", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

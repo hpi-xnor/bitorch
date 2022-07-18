@@ -180,7 +180,7 @@ def basedensenet_constructor(
         Module: instance of model
     """
     if num_layers not in spec:
-        raise ValueError(f"No DenseNet spec for {num_layers} available!")
+        raise ValueError(f"No spec for {num_layers} available!")
 
     block_config, reduction_factor, downsampling = spec[num_layers]
 
