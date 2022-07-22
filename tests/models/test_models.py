@@ -22,9 +22,9 @@ from bitorch.models import (
     MeliusNetFlex,
     MeliusNet23,
     MeliusNet59,
-    MeliusNeta,
-    MeliusNetb,
-    MeliusNetc,
+    MeliusNetA,
+    MeliusNetB,
+    MeliusNetC,
 )
 import torch
 import numpy as np
@@ -50,9 +50,9 @@ TEST_INPUT_DATA = [
     [MeliusNet23, {}, ALL_DATASETS],
     [MeliusNet42, {}, ALL_DATASETS],
     [MeliusNet59, {}, ALL_DATASETS],
-    [MeliusNeta, {}, ALL_DATASETS],
-    [MeliusNetb, {}, ALL_DATASETS],
-    [MeliusNetc, {}, ALL_DATASETS],
+    [MeliusNetA, {}, ALL_DATASETS],
+    [MeliusNetB, {}, ALL_DATASETS],
+    [MeliusNetC, {}, ALL_DATASETS],
     [MeliusNetFlex, {"flex_block_config": [[6, 6, 6, 5]]}, ALL_DATASETS],
     [ResnetE, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
     [ResnetE18, {}, RGB_DATASETS],

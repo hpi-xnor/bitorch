@@ -33,9 +33,9 @@ from .meliusnet import (
     MeliusNet23,
     MeliusNet42,
     MeliusNet59,
-    MeliusNeta,
-    MeliusNetb,
-    MeliusNetc,
+    MeliusNetA,
+    MeliusNetB,
+    MeliusNetC,
     MeliusNetFlex,
 )
 from .resnet_e import (
@@ -70,9 +70,9 @@ __all__ = [
     "MeliusNet23",
     "MeliusNet42",
     "MeliusNet59",
-    "MeliusNeta",
-    "MeliusNetb",
-    "MeliusNetc",
+    "MeliusNetA",
+    "MeliusNetB",
+    "MeliusNetC",
     "MeliusNetFlex",
 ]
 

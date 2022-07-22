@@ -114,9 +114,17 @@ class MeliusNet(Model):
             required=False,
             help="divide channels by this number in transition blocks",
         )
-        parser.add_argument("--growth-rate", type=int, required=False, help="add this many features each block")
         parser.add_argument(
-            "--init-features", type=int, required=False, help="start with this many filters in the first layer"
+            "--growth-rate",
+            type=int,
+            required=False,
+            help="add this many features each block",
+        )
+        parser.add_argument(
+            "--init-features",
+            type=int,
+            required=False,
+            help="start with this many filters in the first layer",
         )
         parser.add_argument(
             "--downsample-structure",
@@ -138,6 +146,7 @@ class MeliusNetFlex(MeliusNet):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        super().add_argparse_arguments(parser)  # type: ignore
         parser.add_argument(
             "--block-config",
             type=str,
@@ -221,7 +230,7 @@ class MeliusNet59(MeliusNet):
         pass
 
 
-class MeliusNeta(MeliusNet):
+class MeliusNetA(MeliusNet):
     """MeliusNet-a model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -229,14 +238,14 @@ class MeliusNeta(MeliusNet):
     name = "meliusneta"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNeta, self).__init__("a", *args, **kwargs)
+        super(MeliusNetA, self).__init__("a", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class MeliusNetb(MeliusNet):
+class MeliusNetB(MeliusNet):
     """MeliusNet-b model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -244,14 +253,14 @@ class MeliusNetb(MeliusNet):
     name = "meliusnetb"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNetb, self).__init__("b", *args, **kwargs)
+        super(MeliusNetB, self).__init__("b", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         pass
 
 
-class MeliusNetc(MeliusNet):
+class MeliusNetC(MeliusNet):
     """MeliusNet-c model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -259,7 +268,7 @@ class MeliusNetc(MeliusNet):
     name = "meliusnetc"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super(MeliusNetc, self).__init__("c", *args, **kwargs)
+        super(MeliusNetC, self).__init__("c", *args, **kwargs)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

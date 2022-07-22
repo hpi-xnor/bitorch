@@ -268,9 +268,17 @@ class DenseNet(Model):
             required=False,
             help='divide channels by this number in transition blocks (3 values, e.g. "2,2.5,3")',
         )
-        parser.add_argument("--growth-rate", type=int, required=False, help="add this many features each block")
         parser.add_argument(
-            "--init-features", type=int, required=False, help="start with this many filters in the first layer"
+            "--growth-rate",
+            type=int,
+            required=False,
+            help="add this many features each block",
+        )
+        parser.add_argument(
+            "--init-features",
+            type=int,
+            required=False,
+            help="start with this many filters in the first layer",
         )
         parser.add_argument(
             "--downsample-structure",
@@ -281,8 +289,10 @@ class DenseNet(Model):
 
 
 class DenseNetFlex(DenseNet):
-    """DenseNet-Flex model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
-    <https://arxiv.org/pdf/1906.08637.pdf>` paper.
+    """DenseNet-Flex model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"
+    <https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html>` paper.
+
+
     """
 
     name = "densenetflex"
@@ -301,8 +311,11 @@ class DenseNetFlex(DenseNet):
 
 
 class DenseNet28(DenseNet):
-    """DenseNet-28 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
-    <https://arxiv.org/pdf/1906.08637.pdf>` paper.
+    """
+    DenseNet-28 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
+
+    .. _"BinaryDenseNet: Developing an Architecture for Binary Neural Networks":
+    https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
     """
 
     name = "densenet28"
@@ -316,8 +329,11 @@ class DenseNet28(DenseNet):
 
 
 class DenseNet37(DenseNet):
-    """DenseNet-37 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
-    <https://arxiv.org/pdf/1906.08637.pdf>` paper.
+    """
+    DenseNet-37 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
+
+    .. _"BinaryDenseNet: Developing an Architecture for Binary Neural Networks":
+    https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
     """
 
     name = "densenet37"
@@ -331,8 +347,11 @@ class DenseNet37(DenseNet):
 
 
 class DenseNet45(DenseNet):
-    """DenseNet-45 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
-    <https://arxiv.org/pdf/1906.08637.pdf>` paper.
+    """
+    DenseNet-45 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
+
+    .. _"BinaryDenseNet: Developing an Architecture for Binary Neural Networks":
+    https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
     """
 
     name = "densenet45"

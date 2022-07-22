@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- new models:
+  - [MeliusNet](bitorch/models/meliusnet.py)
+  - [BinaryDenseNet](bitorch/models/densenet.py)
 - simple example script for MNIST
 - support for integration of bitorch's inference engine for the following layers
   - QLinear
