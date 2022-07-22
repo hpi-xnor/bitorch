@@ -14,7 +14,7 @@ class SignFunction(STE):
         ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
         input_tensor: torch.Tensor,
     ) -> torch.Tensor:
-        """Binarize the input tensor using the sign function
+        """Binarize the input tensor using the sign function.
 
         Args:
             ctx (Any): autograd context
@@ -29,7 +29,7 @@ class SignFunction(STE):
 
 
 class Sign(Quantization):
-    """Module for applying the sign function with straight through estimator in backward pass"""
+    """Module for applying the sign function with straight through estimator in backward pass."""
 
     name = "sign"
     bit_width = 1

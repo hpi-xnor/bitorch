@@ -5,11 +5,27 @@ from typing import Any, Callable, Optional, Union
 import torch
 import torch.nn.functional as F
 
+from bitorch.config import Config
 from .base import Quantization, STE
-from .config import config
 from .sign import SignFunction
 
 EPSILON = 1e-7
+
+
+class ProgressiveSignConfig(Config):
+    name = "progressive_sign_config"
+
+    # scaling of progressive sign function, should be zero at the start of the training, and (close to) one at the end
+    progressive_sign_scale = 0.0
+
+    # alpha of default progressive sign transform function, should be between 2 and 10
+    progressive_sign_alpha = 2
+
+    # beta of default progressive sign transform function, should be between 2 and 10
+    progressive_sign_beta = 10
+
+
+config = ProgressiveSignConfig()
 
 
 class ProgressiveSignFunctionTrain(STE):
@@ -105,7 +121,7 @@ class ProgressiveSign(Quantization):
         Args:
             scale: the current scale
             alpha: base of default exponential function
-            beta: factor of scale exponent
+            beta: (negative) factor of scale exponent
         """
         if alpha is None:
             alpha = config.progressive_sign_alpha
