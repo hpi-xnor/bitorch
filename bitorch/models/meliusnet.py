@@ -201,7 +201,7 @@ class MeliusNet29(MeliusNet):
 
 
 class MeliusNet42(MeliusNet):
-    """MeliusNet-22 model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
+    """MeliusNet-42 model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
