@@ -13,7 +13,7 @@ if os.environ.get("REMOTE_PYCHARM_DEBUG_SESSION", False):
 import argparse
 import logging
 from pathlib import Path
-from typing import List, Any
+from typing import List, Any, Tuple
 
 import fvbitcore.nn as fv_nn
 import wandb
@@ -39,20 +39,22 @@ from bitorch.datasets import datasets_by_name
 logger = logging.getLogger()
 
 
-def make_dlrm_dataloaders(dataset_dir, download, ignore_size, batch_size, batch_size_test, num_workers):
-    # train_dataset, test_dataset = Criteo.get_train_and_test(  # type: ignore
-    #     root_directory=dataset_dir, download=download, augmentation=None
-    # )
+def make_dlrm_dataloaders(dataset_dir: Path, download: bool, ignore_size: float, batch_size: int, batch_size_test: int, num_workers: int) -> Tuple[DataLoader, DataLoader, List[int], int]:
+    """Creates test and train dataloaders for dlrm
+
+    Args:
+        dataset_dir (Path): path to dataset (to be stored or existent)
+        download (bool): weather dataset should be downloaded
+        ignore_size (dloat): portion of dataset to ignore while training
+        batch_size (int): batch size
+        batch_size_test (int): batch size to be used in test loader (might be larger)
+        num_workers (int): number of workers to be used in dataloader
+
+    Returns:
+        Tuple[Dataloader, Dataloader, int, int]: the dataloaders, the size of the dense features and the size of embedding layers
+    """
     logging.info("loading Criteo dataset...")
     dataset = Criteo(True, root_directory=dataset_dir, download=download, augmentation=None).dataset
-
-    # train_indices = np.arange(len(train_dataset))
-    # np.random.shuffle(train_indices)
-    # train_subset_random_sampler = SubsetRandomSampler(train_indices[:int((1 - ignore_size) * len(train_dataset))])
-
-    # val_indices = np.arange(len(test_dataset))
-    # np.random.shuffle(val_indices)
-    # val_subset_random_sampler = SubsetRandomSampler(val_indices[:int((1 - ignore_size) * len(test_dataset))])
 
     train_dataset = SplitCriteoDataset(dataset, "train", ignore_size=ignore_size)
     test_dataset = SplitCriteoDataset(dataset, "test", ignore_size=ignore_size)
@@ -165,39 +167,12 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         callbacks=callbacks,  # type: ignore
         log_every_n_steps=args.log_interval,
     )
-    # augmentation_level = Augmentation.from_string(args.augmentation)
     logger.info(f"model: {args.model}")
     logger.info(f"optimizer: {args.optimizer}")
     logger.info(f"lr: {args.lr}")
     logger.info(f"max_epochs: {args.max_epochs}")
-    # if args.fake_data:
-    #     logger.info(f"dummy dataset: {dataset.name} (not using real data!)")
-    #     train_dataset, test_dataset = dataset.get_dummy_train_and_test_datasets()  # type: ignore
-    # else:
-    #     logger.info(f"dataset: {dataset.name}")
-    #     train_dataset, test_dataset = dataset.get_train_and_test(  # type: ignore
-    #         root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
-    #     )
-    # train_loader = DataLoader(
-    #     train_dataset,
-    #     batch_size=args.batch_size,
-    #     num_workers=args.num_workers,
-    #     shuffle=True,
-    #     pin_memory=True,
-    #     persistent_workers=True,
-    # )  # type: ignore
-    # test_loader = DataLoader(
-    #     test_dataset,
-    #     batch_size=args.batch_size,
-    #     num_workers=args.num_workers,
-    #     shuffle=False,
-    #     pin_memory=True,
-    #     persistent_workers=True,
-    # )  # type: ignore
-
     data_point = iter(train_loader).next()
     data_point = (data_point[0], (data_point[1], data_point[2]))
-    # data_point = torch.zeros(iter(train_loader).next().shape)
     computational_intensity = fv_nn.FlopCountAnalysis(model, inputs=data_point, quantization_base_class=Quantization)
 
     stats, table = fv_nn.flop_count_table(computational_intensity, automatic_qmodules=True)

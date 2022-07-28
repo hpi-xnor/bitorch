@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import Any, List, Union
 import logging
 import torch
 from torch.nn import (
@@ -11,6 +11,7 @@ from torch.nn import (
     EmbeddingBag,
     ModuleList,
     BatchNorm1d,
+    Module
 )
 import numpy as np
 from bitorch.datasets.base import BasicDataset
@@ -21,7 +22,9 @@ from bitorch.models.base import Model
 from bitorch.layers.qembedding import QEmbeddingBag
 
 
-def parse_layer_sizes(layer_sizes_str: str) -> List[int]:
+def parse_layer_sizes(layer_sizes_str: Union[List[int], str]) -> List[int]:
+    if isinstance(layer_sizes_str, list):
+        return [int(size) for size in layer_sizes_str]
     layer_sizes_str = layer_sizes_str.replace('[', '').replace(']', '')
     return [int(size) for size in layer_sizes_str.split(",")]
 
@@ -44,7 +47,7 @@ def create_mlp(
             all other layers will have relu activation.
     """
     input_size = layer_sizes[0]
-    mlp_layers = []
+    mlp_layers: List[Module] = []
 
     for layer_size in layer_sizes[1:]:
         output_size = layer_size
@@ -73,7 +76,7 @@ def create_embeddings(
         embedding_dimension: int,
         layer_sizes: List[int],
         quantized: bool,
-        sparse=False) -> Tuple[ModuleList, List[Union[None, torch.Tensor]]]:
+        sparse: bool = False) -> ModuleList:
     """creates the embedding layers for each category."""
     if sparse:
         logging.info("USING SPARSE EMBEDDINGS")
@@ -102,7 +105,7 @@ class DLRM(Model):
     name = "dlrm"
     total_size = 1.0
     inference_speed = 1.0
-    validation_results = []
+    validation_results: List[dict] = []
 
     def __init__(
             self,
@@ -110,13 +113,13 @@ class DLRM(Model):
             dense_feature_size: int,
             embedding_dimension: int,
             embedding_layer_sizes: List[int],
-            bottom_mlp_layer_sizes: List[int],
-            top_mlp_layer_sizes: List[int],
+            bottom_mlp_layer_sizes: Union[List[int], str],
+            top_mlp_layer_sizes: Union[List[int], str],
             interaction_operation: Interaction_Operation_Type,
             binary_bottom_mlp: bool,
             binary_top_mlp: bool,
             binary_embedding: bool,
-            **kwargs) -> None:
+            **kwargs: Any) -> None:
         super().__init__(dataset)
         self.interaction_operation = interaction_operation
         self.embedding_layers = create_embeddings(
@@ -148,7 +151,7 @@ class DLRM(Model):
         self.top_mlp[-1] = Sigmoid()
 
     @staticmethod
-    def add_argparse_arguments(parent_parser: ArgumentParser):
+    def add_argparse_arguments(parent_parser: ArgumentParser) -> None:
         parser = parent_parser.add_argument_group("DLRM Model")
         parser.add_argument("--bottom-mlp-layer-sizes", type=str, default="[512, 256, 64]",
                             help="layer sizes of the bottom mlp")
@@ -170,7 +173,6 @@ class DLRM(Model):
                             help="toggles use of binary top mlp in model.")
         parser.add_argument("--binary-bottom-mlp", action="store_true", default=False,
                             help="toggles use of binary bottom mlp in model.")
-        return parent_parser
 
     def forward_embeddings(self, categorical_values_i: torch.Tensor,
                            categorical_values_o: torch.Tensor) -> List[torch.Tensor]:
@@ -182,7 +184,7 @@ class DLRM(Model):
             embedding_outputs.append(embedding_layer(index_group, offset_group))
         return embedding_outputs
 
-    def feature_interaction(self, mlp_output: torch.Tensor, embedding_outputs: List[torch.Tensor]):
+    def feature_interaction(self, mlp_output: torch.Tensor, embedding_outputs: List[torch.Tensor]) -> torch.Tensor:
         if self.interaction_operation == Interaction_Operation_Type.PRODUCT.value:
             batch_size, dimension = mlp_output.shape
             concated_values = torch.cat([mlp_output] + embedding_outputs, dim=1).view((batch_size, -1, dimension))
@@ -199,7 +201,7 @@ class DLRM(Model):
 
         return result
 
-    def forward(self, dense_values, categorical_values):
+    def forward(self, dense_values: torch.Tensor, categorical_values: torch.Tensor) -> torch.Tensor:  # type: ignore
         mlp_output = self.bottom_mlp(dense_values)
         embedding_outputs = self.forward_embeddings(*categorical_values)
         feature_interactions = self.feature_interaction(mlp_output, embedding_outputs)

@@ -1,6 +1,8 @@
 import gc
+from typing import Tuple
 from torch.utils.data import Dataset
 import logging
+import torch
 import os
 import numpy as np
 from bitorch.datasets.base import BasicDataset
@@ -9,21 +11,17 @@ from facebook_dataloading.dataloading_fb import CriteoDataset
 
 class SplitCriteoDataset(Dataset):
     """Dataset to get items from a dataset for each split. Useful if dataset creation takes a lot of time and can be done exactly once."""
-    def __init__(self, dataset: BasicDataset, split: str, train_split_fraction: float = 0.9, ignore_size: float = 0.0):
+    def __init__(self, dataset: BasicDataset, split: str, train_split_fraction: float = 0.9, ignore_size: float = 0.0) -> None:
         self.dataset = dataset
-
-        # split_index = int(train_split_fraction * len(dataset))
-        # self.indices = list(range(len(dataset)))
-        # self.indices = self.indices[:split_index] if split == "train" else self.indices[split_index:]
         self.indices = self.dataset.train_indices if split == "train" else self.dataset.test_indices
 
         dataset_size = int(len(self.indices) * (1.0 - ignore_size))
         self.indices = np.random.choice(self.indices, size=dataset_size, replace=False)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         return self.dataset[self.indices[idx]]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.indices)
 
 

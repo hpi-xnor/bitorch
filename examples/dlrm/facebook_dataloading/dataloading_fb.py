@@ -1,3 +1,4 @@
+# type: ignore
 # Copyright (c) Facebook, Inc. and its affiliates.
 #
 # This source code is licensed under the MIT license found in the
@@ -22,6 +23,7 @@ import gc
 from os import path
 import sys
 import logging
+from typing import Any, List, Tuple
 
 from . import data_utils
 
@@ -44,17 +46,17 @@ class CriteoDataset(Dataset):
 
     def __init__(
             self,
-            dataset,
-            max_ind_range,
-            sub_sample_rate,
-            randomize,
-            split="train",
-            raw_path="",
-            pro_data="",
-            memory_map=False,
-            dataset_multiprocessing=False,
-            store_all_indices=False,
-    ):
+            dataset: str,
+            max_ind_range: int,
+            sub_sample_rate: int,
+            randomize: bool,
+            split: str = "train",
+            raw_path: str = "",
+            pro_data: str = "",
+            memory_map: str = False,
+            dataset_multiprocessing: str = False,
+            store_all_indices: str = False,
+    ) -> None:
         # dataset
         # tar_fea = 1   # single target
         den_fea = 13  # 13 dense  features
@@ -138,41 +140,6 @@ class CriteoDataset(Dataset):
                 self.val_size = num_samples - self.test_size
             else:
                 sys.exit("ERROR: dataset split is neither none, nor train or test.")
-
-            '''
-            # text
-            logging.debug("text")
-            for i in range(days):
-                fi = self.npzfile + "_{0}".format(i)
-                with open(fi) as data:
-                    ttt = 0; nnn = 0
-                    for _j, line in enumerate(data):
-                        ttt +=1
-                        if np.int32(line[0]) > 0:
-                            nnn +=1
-                    logging.debug("day=" + str(i) + " total=" + str(ttt) + " non-zeros="
-                          + str(nnn) + " ratio=" +str((nnn * 100.) / ttt) + "%")
-            # processed
-            logging.debug("processed")
-            for i in range(days):
-                fi = self.npzfile + "_{0}_processed.npz".format(i)
-                with np.load(fi) as data:
-                    yyy = data["y"]
-                ttt = len(yyy)
-                nnn = np.count_nonzero(yyy)
-                logging.debug("day=" + str(i) + " total=" + str(ttt) + " non-zeros="
-                      + str(nnn) + " ratio=" +str((nnn * 100.) / ttt) + "%")
-            # reordered
-            logging.debug("reordered")
-            for i in range(days):
-                fi = self.npzfile + "_{0}_reordered.npz".format(i)
-                with np.load(fi) as data:
-                    yyy = data["y"]
-                ttt = len(yyy)
-                nnn = np.count_nonzero(yyy)
-                logging.debug("day=" + str(i) + " total=" + str(ttt) + " non-zeros="
-                      + str(nnn) + " ratio=" +str((nnn * 100.) / ttt) + "%")
-            '''
 
             # load unique counts
             with np.load(self.d_path + self.d_file + "_fea_count.npz") as data:
@@ -278,7 +245,7 @@ class CriteoDataset(Dataset):
 
             logging.debug("Split data according to indices...")
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
 
         if isinstance(index, slice):
             return [
@@ -317,7 +284,7 @@ class CriteoDataset(Dataset):
         else:
             return self.X_int[i], self.X_cat[i], self.y[i]
 
-    def _default_preprocess(self, X_int, X_cat, y):
+    def _default_preprocess(self, X_int: torch.Tensor, X_cat: torch.Tensor, y: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         X_int = torch.log(torch.tensor(X_int, dtype=torch.float) + 1)
         if self.max_ind_range > 0:
             X_cat = torch.tensor(X_cat % self.max_ind_range, dtype=torch.long)
@@ -327,7 +294,7 @@ class CriteoDataset(Dataset):
 
         return X_int, X_cat, y
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self.memory_map:
             if self.split == 'none':
                 return self.offset_per_file[-1]
@@ -343,7 +310,7 @@ class CriteoDataset(Dataset):
             return len(self.y)
 
 
-def collate_wrapper_criteo_offset(list_of_tuples):
+def collate_wrapper_criteo_offset(list_of_tuples: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     # where each tuple is (X_int, X_cat, y)
     # transposed_data = np.array(list(zip(*list_of_tuples)), dtype=np.float32)
     # transposed_data = list(zip(*list_of_tuples))
@@ -363,8 +330,8 @@ def collate_wrapper_criteo_offset(list_of_tuples):
 
 
 # Conversion from offset to length
-def offset_to_length_converter(lS_o, lS_i):
-    def diff(tensor):
+def offset_to_length_converter(lS_o: torch.Tensor, lS_i: torch.Tensor) -> torch.Tensor:
+    def diff(tensor: torch.Tensor) -> torch.Tensor:
         return tensor[1:] - tensor[:-1]
 
     return torch.stack(
@@ -375,10 +342,10 @@ def offset_to_length_converter(lS_o, lS_i):
     )
 
 
-def collate_wrapper_criteo_length(list_of_tuples):
+def collate_wrapper_criteo_length(list_of_tuples: List[Any]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     # where each tuple is (X_int, X_cat, y)
     # transposed_data = list(zip(*list_of_tuples))
-    
+
     transposed_data = list(np.array(i) for i in zip(*list_of_tuples))
     # transposed_data = np.array(list(zip(*list_of_tuples)), dtype=np.float32)
     X_int = torch.log(torch.tensor(transposed_data[0], dtype=torch.float) + 1)
