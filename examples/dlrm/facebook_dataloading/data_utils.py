@@ -52,17 +52,27 @@ from typing import Any, Union
 import numpy as np
 
 
-def processCriteoAdData(d_path: str, d_file: str, npzfile: str, i: int, convertDicts: dict, pre_comp_counts: bool) -> None:
-    # Process Kaggle Display Advertising Challenge or Terabyte Dataset
-    # by converting unicode strings in X_cat to integers and
-    # converting negative integer values in X_int.
-    #
-    # Loads data in the form "{kaggle|terabyte}_day_i.npz" where i is the day.
-    #
-    # Inputs:
-    #   d_path (str): path for {kaggle|terabyte}_day_i.npz files
-    #   i (int): splits in the dataset (typically 0 to 7 or 0 to 24)
+def processCriteoAdData(
+        d_path: str,
+        d_file: str,
+        npzfile: str,
+        i: int,
+        convertDicts: dict,
+        pre_comp_counts: bool) -> None:
+    """Process Kaggle Display Advertising Challenge or Terabyte Dataset
+    by converting unicode strings in X_cat to integers and
+    converting negative integer values in X_int.
 
+    Loads data in the form "{kaggle|terabyte}_day_i.npz" where i is the day.
+
+    Args:
+        d_path (str): path for {kaggle|terabyte}_day_i.npz files
+        d_file (str): _description_
+        npzfile (str): _description_
+        i (int): splits in the dataset (typically 0 to 7 or 0 to 24)
+        convertDicts (dict): _description_
+        pre_comp_counts (bool): _description_
+    """
     # process data if not all files exist
     filename_i = npzfile + "_{0}_processed.npz".format(i)
 
@@ -108,15 +118,16 @@ def concatCriteoAdData(
         memory_map: Any,
         o_filename: Any
 ) -> str:
-    # Concatenates different days and saves the result.
-    #
-    # Inputs:
-    #   days (int): total number of days in the dataset (typically 7 or 24)
-    #   d_path (str): path for {kaggle|terabyte}_day_i.npz files
-    #   o_filename (str): output file name
-    #
-    # Output:
-    #   o_file (str): output file path
+    """Concatenates different days and saves the result.
+
+    Args:
+      days (int): total number of days in the dataset (typically 7 or 24)
+      d_path (str): path for {kaggle|terabyte}_day_i.npz files
+      o_filename (str): output file name
+
+    Return:
+      o_file (str): output file path
+    """
 
     if memory_map:
         # dataset break up per fea
@@ -324,15 +335,16 @@ def getCriteoAdData(
         memory_map: bool = False,
         dataset_multiprocessing: bool = False,
 ) -> str:
-    # Passes through entire dataset and defines dictionaries for categorical
-    # features and determines the number of total categories.
-    #
-    # Inputs:
-    #    datafile : path to downloaded raw data file
-    #    o_filename (str): saves results under o_filename if filename is not ""
-    #
-    # Output:
-    #   o_file (str): output file path
+    """Passes through entire dataset and defines dictionaries for categorical
+    features and determines the number of total categories.
+
+    Inputs:
+       datafile : path to downloaded raw data file
+       o_filename (str): saves results under o_filename if filename is not ""
+
+    Output:
+      o_file (str): output file path
+    """
 
     # split the datafile into path and filename
     lstr = datafile.split("/")
@@ -381,7 +393,10 @@ def getCriteoAdData(
                         nf.write(line)
                 nf.close()
             else:
-                sys.exit("ERROR: Criteo Kaggle Display Ad Challenge Dataset path is invalid; please download from https://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset")
+                sys.exit(
+                    "ERROR: Criteo Kaggle Display Ad Challenge Dataset path is invalid; please download from "
+                    "https://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset"
+                )
         else:
             # WARNING: The raw data consist of day_0.gz,... ,day_23.gz text files
             # Each line in the file is a sample, consisting of 13 continuous and
@@ -399,7 +414,10 @@ def getCriteoAdData(
                     total_per_file.append(total_per_file_count)
                     total_count += total_per_file_count
                 else:
-                    sys.exit("ERROR: Criteo Terabyte Dataset path is invalid; please download from https://labs.criteo.com/2013/12/download-terabyte-click-logs")
+                    sys.exit(
+                        "ERROR: Criteo Terabyte Dataset path is invalid; please download "
+                        "from https://labs.criteo.com/2013/12/download-terabyte-click-logs"
+                    )
 
     # process a file worth of data and reinitialize data
     # note that a file main contain a single or multiple splits

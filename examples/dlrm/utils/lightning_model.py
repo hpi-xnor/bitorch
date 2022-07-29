@@ -15,8 +15,8 @@ from .utils import create_optimizer, create_scheduler
 
 
 class ModelWrapper(LightningModule):
-    """Wrapper class for a pytorch model to fully utilize pytorch lightning functionality
-    """
+    """Wrapper class for a pytorch model to fully utilize pytorch lightning functionality"""
+
     def __init__(
         self,
         model: Module,
@@ -74,7 +74,6 @@ class ModelWrapper(LightningModule):
 
     def validation_step_end(self, *args: Any, **kwargs: Any) -> Any:
         """calculate all them metrics and log via wandb/tensorboard"""
-
         y = torch.cat(list(map(lambda x: x["y"], self.validation_results)))
         y_hat = torch.cat(list(map(lambda x: x["y_hat"], self.validation_results)))
         loss = self.loss_function(y, y_hat)

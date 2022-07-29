@@ -23,6 +23,15 @@ from bitorch.layers.qembedding import QEmbeddingBag
 
 
 def parse_layer_sizes(layer_sizes_str: Union[List[int], str]) -> List[int]:
+    """parses layer sizes passed as string via cli arg
+
+    Args:
+        layer_sizes_str (Union[List[int], str]): either list of layer sizes in which case the input is just returned or
+        a string in format '[layer size a, layer size b, etc]'
+
+    Returns:
+        List[int]: list of layer sizes
+    """
     if isinstance(layer_sizes_str, list):
         return [int(size) for size in layer_sizes_str]
     layer_sizes_str = layer_sizes_str.replace('[', '').replace(']', '')
@@ -83,7 +92,8 @@ def create_embeddings(
     embedding_layers = ModuleList()
     for layer_size in layer_sizes:
         logging.info(
-            f"creating embedding layer with {layer_size} * {embedding_dimension} = {layer_size * embedding_dimension} params...")
+            f"creating embedding layer with {layer_size} * {embedding_dimension} = "
+            f"{layer_size * embedding_dimension} params...")
         if quantized:
             embedding_layers.append(QEmbeddingBag(
                 layer_size,
@@ -139,7 +149,9 @@ class DLRM(Model):
             top_mlp_layer_sizes = [(len(embedding_layer_sizes) + 1) * embedding_dimension, *top_mlp_layer_sizes]
         elif interaction_operation == Interaction_Operation_Type.PRODUCT.value:
             top_mlp_layer_sizes = [
-                embedding_dimension + (len(embedding_layer_sizes) + 1) * ((len(embedding_layer_sizes) + 1) // 2), *top_mlp_layer_sizes]
+                embedding_dimension + (len(embedding_layer_sizes) + 1) * ((len(embedding_layer_sizes) + 1) // 2),
+                *top_mlp_layer_sizes
+            ]
         self.bottom_mlp = create_mlp(
             bottom_mlp_layer_sizes,
             quantized=binary_bottom_mlp,

@@ -284,7 +284,11 @@ class CriteoDataset(Dataset):
         else:
             return self.X_int[i], self.X_cat[i], self.y[i]
 
-    def _default_preprocess(self, X_int: torch.Tensor, X_cat: torch.Tensor, y: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def _default_preprocess(
+            self,
+            X_int: torch.Tensor,
+            X_cat: torch.Tensor,
+            y: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         X_int = torch.log(torch.tensor(X_int, dtype=torch.float) + 1)
         if self.max_ind_range > 0:
             X_cat = torch.tensor(X_cat % self.max_ind_range, dtype=torch.long)
@@ -310,7 +314,16 @@ class CriteoDataset(Dataset):
             return len(self.y)
 
 
-def collate_wrapper_criteo_offset(list_of_tuples: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def collate_wrapper_criteo_offset(
+        list_of_tuples: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """collates the input features into processabel tensors
+
+    Args:
+        list_of_tuples (List[torch.Tensor]): input tensors
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]: output
+    """
     # where each tuple is (X_int, X_cat, y)
     # transposed_data = np.array(list(zip(*list_of_tuples)), dtype=np.float32)
     # transposed_data = list(zip(*list_of_tuples))
@@ -331,6 +344,15 @@ def collate_wrapper_criteo_offset(list_of_tuples: List[torch.Tensor]) -> Tuple[t
 
 # Conversion from offset to length
 def offset_to_length_converter(lS_o: torch.Tensor, lS_i: torch.Tensor) -> torch.Tensor:
+    """converts the offsets of categorical features into tensors containing length
+
+    Args:
+        lS_o (torch.Tensor): offset tensors
+        lS_i (torch.Tensor): indices
+
+    Returns:
+        torch.Tensor: lengths
+    """
     def diff(tensor: torch.Tensor) -> torch.Tensor:
         return tensor[1:] - tensor[:-1]
 
@@ -342,10 +364,16 @@ def offset_to_length_converter(lS_o: torch.Tensor, lS_i: torch.Tensor) -> torch.
     )
 
 
-def collate_wrapper_criteo_length(list_of_tuples: List[Any]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    # where each tuple is (X_int, X_cat, y)
-    # transposed_data = list(zip(*list_of_tuples))
+def collate_wrapper_criteo_length(
+        list_of_tuples: List[Any]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """collates the input features into processabel tensors
 
+    Args:
+        list_of_tuples (List[torch.Tensor]): input tensors
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]: output
+    """
     transposed_data = list(np.array(i) for i in zip(*list_of_tuples))
     # transposed_data = np.array(list(zip(*list_of_tuples)), dtype=np.float32)
     X_int = torch.log(torch.tensor(transposed_data[0], dtype=torch.float) + 1)
