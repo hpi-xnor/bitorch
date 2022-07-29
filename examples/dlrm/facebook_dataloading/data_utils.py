@@ -128,7 +128,6 @@ def concatCriteoAdData(
     Return:
       o_file (str): output file path
     """
-
     if memory_map:
         # dataset break up per fea
         # tar_fea = 1   # single target
@@ -345,7 +344,6 @@ def getCriteoAdData(
     Output:
       o_file (str): output file path
     """
-
     # split the datafile into path and filename
     lstr = datafile.split("/")
     d_path = "/".join(lstr[0:-1]) + "/"
