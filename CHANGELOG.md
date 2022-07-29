@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - support for integration of bitorch's inference engine for the following layers
   - QLinear
   - QConv
+- a quantized DLRM version, derived from [this](https://github.com/facebookresearch/dlrm) implementation
+- example code for training the quantized DLRM model
 
 ### Changed
 
