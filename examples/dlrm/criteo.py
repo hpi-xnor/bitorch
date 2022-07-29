@@ -11,7 +11,10 @@ from facebook_dataloading.dataloading_fb import CriteoDataset
 
 class SplitCriteoDataset(Dataset):
     """Dataset to get items from a dataset for each split. Useful if dataset creation takes a lot of time and can be done exactly once."""
-    def __init__(self, dataset: BasicDataset, split: str, train_split_fraction: float = 0.9, ignore_size: float = 0.0) -> None:
+
+    def __init__(
+        self, dataset: BasicDataset, split: str, train_split_fraction: float = 0.9, ignore_size: float = 0.0
+    ) -> None:
         self.dataset = dataset
         self.indices = self.dataset.train_indices if split == "train" else self.dataset.test_indices
 
@@ -30,7 +33,7 @@ class Criteo(BasicDataset):
 
     num_train_samples = 60000
     num_val_samples = 10000
-    dataset_url = 'http://go.criteo.net/criteo-research-kaggle-display-advertising-challenge-dataset.tar.gz'
+    dataset_url = "http://go.criteo.net/criteo-research-kaggle-display-advertising-challenge-dataset.tar.gz"
 
     def get_dataset(self, download: bool = True) -> Dataset:
         try:
@@ -43,7 +46,7 @@ class Criteo(BasicDataset):
                 if result != 0:
                     raise Exception("Download failed")
                 logging.info("FINISHED DOWNLOAD")
-            if not (self.root_directory / 'train.txt').exists():
+            if not (self.root_directory / "train.txt").exists():
                 logging.info("EXTRACTING CRITEO DATASET")
                 result = os.system(f"tar -xf {str(self.root_directory / 'criteo.tar.gz')} -C {self.root_directory}")
                 if result != 0:

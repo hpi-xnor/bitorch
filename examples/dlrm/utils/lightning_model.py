@@ -86,16 +86,19 @@ class ModelWrapper(LightningModule):
         roc_auc = metrics.roc_auc_score(y_array, y_hat.cpu())
         precision = metrics.precision_score(y_array, y_hat_array)
         recall = metrics.recall_score(y_array, y_hat_array)
-        self.log_dict({
-            "val_los": loss,
-            "val_rmse": rmse,
-            "roc_auc": roc_auc,
-            "precision": precision,
-            "recall": recall,
-            "balanced accuracy": balanced_accuracy,
-            "accuracy": accuracy,
-            "f1 score": f1,
-        }, prog_bar=True)
+        self.log_dict(
+            {
+                "val_los": loss,
+                "val_rmse": rmse,
+                "roc_auc": roc_auc,
+                "precision": precision,
+                "recall": recall,
+                "balanced accuracy": balanced_accuracy,
+                "accuracy": accuracy,
+                "f1 score": f1,
+            },
+            prog_bar=True,
+        )
         return super().validation_step_end(*args, **kwargs)
 
     def on_validation_start(self) -> None:

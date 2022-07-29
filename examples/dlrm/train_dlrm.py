@@ -39,7 +39,9 @@ from bitorch.datasets import datasets_by_name
 logger = logging.getLogger()
 
 
-def make_dlrm_dataloaders(dataset_dir: Path, download: bool, ignore_size: float, batch_size: int, batch_size_test: int, num_workers: int) -> Tuple[DataLoader, DataLoader, List[int], int]:
+def make_dlrm_dataloaders(
+    dataset_dir: Path, download: bool, ignore_size: float, batch_size: int, batch_size_test: int, num_workers: int
+) -> Tuple[DataLoader, DataLoader, List[int], int]:
     """Creates test and train dataloaders for dlrm
 
     Args:
