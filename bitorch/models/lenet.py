@@ -12,7 +12,7 @@ class LeNet(Model):
     num_channels_conv = 64
     activation_function = nn.Tanh
     num_fc = 1000
-    name = "lenet"
+    name = "LeNet"
 
     def generate_quant_model(
         self,

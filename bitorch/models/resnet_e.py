@@ -198,7 +198,7 @@ ResNet-e specifications
 
 class ResnetE(Model):
 
-    name = "resnete"
+    name = "ResnetE"
 
     resnet_spec = {
         18: ([2, 2, 2, 2], [64, 64, 128, 256, 512]),
@@ -253,7 +253,7 @@ class ResnetE18(ResnetE):
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "resnete18"
+    name = "ResnetE18"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE18, self).__init__(18, *args, **kwargs)
@@ -268,7 +268,7 @@ class ResnetE34(ResnetE):
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "resnete34"
+    name = "ResnetE34"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE34, self).__init__(34, *args, **kwargs)

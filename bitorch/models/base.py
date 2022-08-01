@@ -15,7 +15,7 @@ from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
 class Model(nn.Module):
     """Base class for Bitorch models"""
 
-    name = "None"
+    name = ""
 
     def __init__(self, dataset: Union[BasicDataset, Type[BasicDataset]]) -> None:
         super(Model, self).__init__()

@@ -77,7 +77,7 @@ __all__ = [
 ]
 
 
-models_by_name = build_lookup_dictionary(__name__, __all__, Model)
+models_by_name = build_lookup_dictionary(__name__, __all__, Model, key_fn=lambda x: x.name.lower())
 
 
 def model_from_name(name: str) -> Type[Model]:
@@ -93,9 +93,9 @@ def model_from_name(name: str) -> Type[Model]:
     Returns:
         Model: the model
     """
-    if name not in models_by_name:
+    if name.lower() not in models_by_name:
         raise ValueError(f"{name} model not found!")
-    return models_by_name[name]
+    return models_by_name[name.lower()]
 
 
 def model_names() -> List:

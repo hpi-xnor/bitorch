@@ -216,7 +216,7 @@ DOWNSAMPLE_STRUCT = "bn,max_pool,relu,fp_conv"
 
 
 class DenseNet(Model):
-    name = "densenet"
+    name = "DenseNet"
     densenet_spec = {
         # block_config, reduction_factor, downsampling
         None: (None, [1 / 2, 1 / 2, 1 / 2], DOWNSAMPLE_STRUCT),
@@ -295,7 +295,7 @@ class DenseNetFlex(DenseNet):
 
     """
 
-    name = "densenetflex"
+    name = "DenseNetFlex"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(DenseNetFlex, self).__init__(None, *args, **kwargs)
@@ -318,7 +318,7 @@ class DenseNet28(DenseNet):
     https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
     """
 
-    name = "densenet28"
+    name = "DenseNet28"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(DenseNet28, self).__init__(28, *args, **kwargs)
@@ -336,7 +336,7 @@ class DenseNet37(DenseNet):
     https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
     """
 
-    name = "densenet37"
+    name = "DenseNet37"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(DenseNet37, self).__init__(37, *args, **kwargs)
@@ -354,7 +354,7 @@ class DenseNet45(DenseNet):
     https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
     """
 
-    name = "densenet45"
+    name = "DenseNet45"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(DenseNet45, self).__init__(45, *args, **kwargs)

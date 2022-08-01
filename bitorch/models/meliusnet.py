@@ -56,7 +56,7 @@ class _MeliusNet(BaseNetDense):
 
 
 class MeliusNet(Model):
-    name = "meliusnet"
+    name = "MeliusNet"
 
     meliusnet_spec = {
         # name: block_config,     reduction_factors,                  downsampling
@@ -139,7 +139,7 @@ class MeliusNetFlex(MeliusNet):
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnetflex"
+    name = "MeliusNetFlex"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNetFlex, self).__init__(None, *args, **kwargs)
@@ -160,7 +160,7 @@ class MeliusNet22(MeliusNet):
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnet22"
+    name = "MeliusNet22"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet22, self).__init__("22", *args, **kwargs)
@@ -175,7 +175,7 @@ class MeliusNet23(MeliusNet):
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnet23"
+    name = "MeliusNet23"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet23, self).__init__("23", *args, **kwargs)
@@ -190,7 +190,7 @@ class MeliusNet29(MeliusNet):
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnet29"
+    name = "MeliusNet29"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet29, self).__init__("29", *args, **kwargs)
@@ -205,7 +205,7 @@ class MeliusNet42(MeliusNet):
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnet42"
+    name = "MeliusNet42"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet42, self).__init__("42", *args, **kwargs)
@@ -220,7 +220,7 @@ class MeliusNet59(MeliusNet):
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnet59"
+    name = "MeliusNet59"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet59, self).__init__("59", *args, **kwargs)
@@ -231,11 +231,11 @@ class MeliusNet59(MeliusNet):
 
 
 class MeliusNetA(MeliusNet):
-    """MeliusNet-a model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
+    """MeliusNet-A model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusneta"
+    name = "MeliusNetA"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNetA, self).__init__("a", *args, **kwargs)
@@ -246,11 +246,11 @@ class MeliusNetA(MeliusNet):
 
 
 class MeliusNetB(MeliusNet):
-    """MeliusNet-b model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
+    """MeliusNet-B model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnetb"
+    name = "MeliusNetB"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNetB, self).__init__("b", *args, **kwargs)
@@ -261,11 +261,11 @@ class MeliusNetB(MeliusNet):
 
 
 class MeliusNetC(MeliusNet):
-    """MeliusNet-c model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
+    """MeliusNet-C model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
 
-    name = "meliusnetc"
+    name = "MeliusNetC"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNetC, self).__init__("c", *args, **kwargs)
