@@ -64,7 +64,6 @@ TEST_INPUT_DATA = [
 @pytest.mark.parametrize("model_class, model_kwargs, datasets_to_test", TEST_INPUT_DATA)
 @pytest.mark.parametrize("dataset", ALL_DATASETS)
 def test_models(model_class, model_kwargs, datasets_to_test, dataset) -> None:
-    assert models_by_name[model_class.name] is model_class
     if dataset not in datasets_to_test:
         pytest.skip(f"Model '{model_class.name}' does not need to work with the dataset '{dataset.name}'.")
 
