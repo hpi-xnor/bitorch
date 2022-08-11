@@ -102,7 +102,7 @@ class MeliusNet(Model):
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            "--melius-num-layers",
+            "--num-layers",
             type=str,
             choices=[None, "22", "23", "29", "42", "59", "a", "b", "c"],
             required=True,
@@ -146,7 +146,7 @@ class MeliusNetFlex(MeliusNet):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        super().add_argparse_arguments(parser)  # type: ignore
+        MeliusNet.add_argparse_arguments(parser)
         parser.add_argument(
             "--block-config",
             type=str,

@@ -256,7 +256,7 @@ class DenseNet(Model):
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            "--densenet-num-layers",
+            "--num-layers",
             type=int,
             choices=[None, 28, 37, 45],
             required=True,
@@ -302,6 +302,7 @@ class DenseNetFlex(DenseNet):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
+        DenseNet.add_argparse_arguments(parser)
         parser.add_argument(
             "--block-config",
             type=str,
