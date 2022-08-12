@@ -12,7 +12,7 @@ class LeNet(Model):
     num_channels_conv = 64
     activation_function = nn.Tanh
     num_fc = 1000
-    name = "lenet"
+    name = "LeNet"
 
     def generate_quant_model(
         self,
@@ -84,4 +84,4 @@ class LeNet(Model):
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--lenet-version", type=int, default=0, help="choose a version of lenet")
+        parser.add_argument("--version", type=int, default=0, help="choose a version of lenet")

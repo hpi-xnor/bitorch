@@ -33,11 +33,11 @@ def build_lookup_dictionary(
     lookup = {}
     current_module = importlib.import_module(current_module_name)
     for class_name in class_strings:
-        # current_module = sys.modules.get(current_module_name, None)
         if not hasattr(current_module, class_name):
             continue
         class_ = getattr(current_module, class_name)
         if filter_fn(class_):
-            lookup[key_fn(class_)] = class_
+            transformed_key = key_fn(class_)
+            lookup[transformed_key] = class_
 
     return lookup

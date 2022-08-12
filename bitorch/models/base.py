@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import Union, Type
+from typing import Union, Type, Any
 
 import torch
 from torch import nn
@@ -15,7 +15,7 @@ from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
 class Model(nn.Module):
     """Base class for Bitorch models"""
 
-    name = "None"
+    name = ""
 
     def __init__(self, dataset: Union[BasicDataset, Type[BasicDataset]]) -> None:
         super(Model, self).__init__()
@@ -84,3 +84,18 @@ class Model(nn.Module):
 
     def convert(self, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> "Model":
         return convert(self, new_mode, device, verbose)
+
+
+class NoArgparseArgsMixin:
+    """
+    Mixin for Models which subclass an existing Model, but do not have any argparse arguments anymore.
+
+    By using this Mixin, there is no special Parser displayed for the class.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+
+    @staticmethod
+    def add_argparse_arguments(parser: ArgumentParser) -> None:
+        pass

@@ -20,6 +20,24 @@ from .resnet import (
     Resnet50V1,
     Resnet50V2,
 )
+from .densenet import (
+    DenseNet,
+    DenseNet28,
+    DenseNet37,
+    DenseNet45,
+    DenseNetFlex,
+)
+from .meliusnet import (
+    MeliusNet,
+    MeliusNet22,
+    MeliusNet23,
+    MeliusNet42,
+    MeliusNet59,
+    MeliusNetA,
+    MeliusNetB,
+    MeliusNetC,
+    MeliusNetFlex,
+)
 from .resnet_e import (
     ResnetE,
     ResnetE18,
@@ -42,10 +60,24 @@ __all__ = [
     "ResnetE",
     "ResnetE18",
     "ResnetE34",
+    "DenseNet",
+    "DenseNet28",
+    "DenseNet37",
+    "DenseNet45",
+    "DenseNetFlex",
+    "MeliusNet",
+    "MeliusNet22",
+    "MeliusNet23",
+    "MeliusNet42",
+    "MeliusNet59",
+    "MeliusNetA",
+    "MeliusNetB",
+    "MeliusNetC",
+    "MeliusNetFlex",
 ]
 
 
-models_by_name = build_lookup_dictionary(__name__, __all__, Model)
+models_by_name = build_lookup_dictionary(__name__, __all__, Model, key_fn=lambda x: x.name.lower())
 
 
 def model_from_name(name: str) -> Type[Model]:
@@ -61,9 +93,9 @@ def model_from_name(name: str) -> Type[Model]:
     Returns:
         Model: the model
     """
-    if name not in models_by_name:
+    if name.lower() not in models_by_name:
         raise ValueError(f"{name} model not found!")
-    return models_by_name[name]
+    return models_by_name[name.lower()]
 
 
 def model_names() -> List:
