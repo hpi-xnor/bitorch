@@ -226,8 +226,8 @@ class DenseNet(Model):
 
     def __init__(
         self,
-        input_shape: List[int],
         num_layers: Optional[int],
+        input_shape: List[int],
         num_classes: int = 0,
         num_init_features: int = 64,
         growth_rate: int = 64,

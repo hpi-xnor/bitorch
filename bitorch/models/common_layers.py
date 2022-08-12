@@ -1,9 +1,10 @@
-from statistics import variance
 from typing import List, Optional, Union
 from torch import nn
 
 
-def get_initial_layers(variant: Optional[Union[List[int], str]], input_channels: int, output_channels: int) -> List[nn.Module]:
+def get_initial_layers(
+    variant: Optional[Union[List[int], str]], input_channels: int, output_channels: int
+) -> List[nn.Module]:
     """returns the initial layers for the given variant"""
     layers: List[nn.Module] = []
     if variant == (224, 224) or variant == "imagenet":
