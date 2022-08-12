@@ -33,6 +33,7 @@
 
    .. autosummary::
       :template: class.rst
+      :toctree:
    {% for item in classes %}
       {{ item }}
    {%- endfor %}
@@ -53,6 +54,8 @@
 
 {% block modules %}
 {% if modules %}
+.. rubric:: {{ _('Modules') }}
+
 .. autosummary::
    :toctree:
    :template: module.rst

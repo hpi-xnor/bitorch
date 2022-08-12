@@ -1,5 +1,6 @@
 """Module containing the quantized linear layer"""
-from typing import Union, Dict, Any
+
+from typing import Any, Type, Union, Dict
 
 import torch
 from torch.nn import Linear
@@ -78,8 +79,7 @@ class QLinearBase(Linear):
         return linear(self.activation(x), self.weight_quantization(self.weight), self.bias)
 
 
-@QLinearImplementation(RuntimeMode.DEFAULT)
-class QLinear(DefaultImplementationMixin, QLinearBase):
+class _QLinearComposed(DefaultImplementationMixin, QLinearBase):
     """
     This class defines the default implementation of a QLinear layer (which is actually implemented by QLinearBase).
 
@@ -87,3 +87,11 @@ class QLinear(DefaultImplementationMixin, QLinearBase):
     """
 
     pass
+
+
+QLinear: Type[_QLinearComposed] = QLinearImplementation(RuntimeMode.DEFAULT)(_QLinearComposed)  # type: ignore
+"""
+This class provides the current implementation of a QLinear layer (which is actually implemented by :class:`QLinearBase`).
+
+To implement a custom QLinear implementation use :class:`QLinearBase` as a super class instead.
+"""

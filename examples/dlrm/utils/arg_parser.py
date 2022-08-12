@@ -5,6 +5,7 @@ from typing import Tuple
 from bitorch.models import model_from_name, model_names
 from bitorch.datasets import dataset_names
 from bitorch import add_config_args
+from ....bitorch.models.dlrm import DLRM
 from pytorch_lightning import Trainer
 
 
@@ -271,14 +272,6 @@ def add_regular_args(parser: ArgumentParser) -> None:
     add_checkpoint_args(parser)
 
     add_config_args(parser)
-
-    parser.add_argument(
-        "--model",
-        type=str.lower,
-        choices=model_names(),
-        required=True,
-        help="name of the model to be trained",
-    )
     parser.add_argument(
         "--cpu",
         action="store_true",
@@ -297,9 +290,9 @@ def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
     add_regular_args(parser)
 
     if help_in_args():
-        add_all_model_args(parser)
+        model_group = parser.add_argument_group("DLRM", "parameters for DLRM model")
+        DLRM.add_argparse_arguments(model_group)
     args, _ = parser.parse_known_args()
 
-    model_class = model_from_name(args.model)
-    model_parser = create_model_argparser(model_class)
+    model_parser = create_model_argparser(DLRM)
     return parser, model_parser

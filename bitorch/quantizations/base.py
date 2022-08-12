@@ -1,11 +1,12 @@
 """Quantization superclass implementation"""
 
-import torch
 import typing
-from torch import nn
-from torch.autograd.function import Function
 from typing import Any
 from warnings import warn
+
+import torch
+from torch import nn
+from torch.autograd.function import Function
 
 
 class STE(Function):
@@ -17,16 +18,7 @@ class STE(Function):
         ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
         input_tensor: torch.Tensor,
     ) -> torch.Tensor:
-        """just fowards the unchanged input_tensor.
-
-        Args:
-            ctx (Any): autograd context
-            input_tensor (torch.Tensor): input tensor
-
-        Returns:
-            torch.Tensor: the unchanged input tensor
-        """
-        return input_tensor
+        raise NotImplementedError("Forwards pass of STE should be implemented by subclass.")
 
     @staticmethod
     @typing.no_type_check
@@ -55,7 +47,7 @@ class Quantization(nn.Module):
         return self.bit_width
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
-        """Quantize the input tensor.
+        """Apply the quantization function to the input tensor.
 
         It is recommended to use a torch.Function to also manipulate backwards behavior.
         See the implementations of sign or dorefa quantization functions for more examples.

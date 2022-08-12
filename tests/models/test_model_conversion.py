@@ -8,7 +8,7 @@ from torch.nn import functional as F
 import bitorch
 import bitorch.runtime_mode
 from bitorch import RuntimeMode
-from bitorch.datasets import MNIST
+from examples.pytorch_lightning.datasets import MNIST
 from bitorch.layers import QConv2d, QLinear
 from bitorch.layers.extensions.layer_implementation import CustomImplementationMixin
 from bitorch.layers.extensions import LayerRecipe
@@ -17,10 +17,8 @@ from bitorch.layers.qlinear import QLinearBase
 from bitorch.layers.register import (
     q_linear_registry,
     QLinearImplementation,
-    q_conv1d_registry,
     q_conv2d_registry,
     QConv2dImplementation,
-    q_conv3d_registry,
 )
 from bitorch.models import Model
 
@@ -29,7 +27,7 @@ TEST_MODE = RuntimeMode.INFERENCE_AUTO
 
 class _TestModel(Model):
     def __init__(self):
-        super().__init__(dataset=MNIST)
+        super().__init__(input_shape=MNIST.shape, num_classes=MNIST.num_classes)
         self.q_conv2d = QConv2d(1, 32, 3, 1, 1)
         self.q_linear = QLinear(784, 64)
         self._model = nn.Sequential(

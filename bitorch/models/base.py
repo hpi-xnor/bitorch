@@ -1,11 +1,10 @@
 from argparse import ArgumentParser
-from typing import Union, Type
+from typing import List
 
 import torch
 from torch import nn
 
 from bitorch import RuntimeMode
-from bitorch.datasets.base import BasicDataset
 from bitorch.layers import convert
 from bitorch.layers.qconv1d import QConv1dBase, QConv1d_NoAct
 from bitorch.layers.qconv2d import QConv2dBase, QConv2d_NoAct
@@ -17,10 +16,11 @@ class Model(nn.Module):
 
     name = "None"
 
-    def __init__(self, dataset: Union[BasicDataset, Type[BasicDataset]]) -> None:
+    def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()
         self._model = nn.Module()
-        self._dataset = dataset
+        self._input_shape = input_shape
+        self._num_classes = num_classes
 
     @staticmethod
     def add_argparse_arguments(parser: ArgumentParser) -> None:

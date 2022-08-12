@@ -1,6 +1,6 @@
 """Module containing the quantized 3d convolution layer"""
 
-from typing import Union, Any
+from typing import Any, Type, Union
 
 from torch import Tensor
 from torch.nn import Conv3d, init
@@ -106,8 +106,7 @@ class QConv3dBase(QConvArgsProviderMixin, QConv3d_NoAct):  # type: ignore
         return super().forward(self.activation(input_tensor))
 
 
-@QConv3dImplementation(RuntimeMode.DEFAULT)
-class QConv3d(DefaultImplementationMixin, QConv3dBase):
+class _QConv3dComposed(DefaultImplementationMixin, QConv3dBase):
     """
     This class defines the default implementation of a QConv3d layer (which is actually implemented by QConv3dBase).
 
@@ -115,3 +114,11 @@ class QConv3d(DefaultImplementationMixin, QConv3dBase):
     """
 
     pass
+
+
+QConv3d: Type[_QConv3dComposed] = QConv3dImplementation(RuntimeMode.DEFAULT)(_QConv3dComposed)  # type: ignore
+"""
+This class provides the current implementation of a QConv3d layer (which is actually implemented by :class:`QConv3dBase`).
+
+To implement a custom QConv3d implementation use :class:`QConv3dBase` as a super class instead.
+"""

@@ -46,12 +46,13 @@ extensions = [
 ]
 
 # Generate type hints
-autodoc_typehints = "description"
+# autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
 autosummary_generate = True
+# autoclass_content = "init"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
