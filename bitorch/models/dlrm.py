@@ -100,7 +100,7 @@ def create_embeddings(
 
 
 class DLRM(Model):
-    name = "dlrm"
+    name = "DLRM"
     total_size = 1.0
     inference_speed = 1.0
     validation_results: List[dict] = []
@@ -112,7 +112,7 @@ class DLRM(Model):
         input_shape: List[int] = [],
         bottom_mlp_layer_sizes: Union[List[int], str] = [512, 256, 64],
         top_mlp_layer_sizes: Union[List[int], str] = [512, 256, 1],
-        interaction_operation: Interaction_Operation_Type = Interaction_Operation_Type.PRODUCT.value,
+        interaction_operation: str = Interaction_Operation_Type.PRODUCT.value,
         binary_bottom_mlp: bool = False,
         binary_top_mlp: bool = True,
         binary_embedding: bool = True,
