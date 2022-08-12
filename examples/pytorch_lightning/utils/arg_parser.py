@@ -1,7 +1,7 @@
 import argparse
 import sys
 from argparse import ArgumentParser
-from typing import Tuple, List, Type, Any
+from typing import Tuple, List, Type, Any, Optional, Sequence
 
 from pytorch_lightning import Trainer
 
@@ -16,13 +16,13 @@ class _HeadArgumentParser(ArgumentParser):
     _informational_sub_parsers: List[ArgumentParser]
 
     def print_help(self, *args: Any) -> None:
-        super(*args).print_help(*args)
+        super().print_help(*args)
         if hasattr(self, "_informational_sub_parsers"):
             for parser in self._informational_sub_parsers:
                 print("\n")
                 parser.print_help()
 
-    def add_informational_subparsers(self, sub_parsers: List[ArgumentParser]):
+    def add_informational_subparsers(self, sub_parsers: List[ArgumentParser]) -> None:
         self._informational_sub_parsers = sub_parsers
 
 
@@ -262,13 +262,15 @@ def create_model_argparser(model_class: Type[Model]) -> ArgumentParser:
     return model_parser
 
 
-def help_in_args() -> bool:
+def help_in_args(cmd_args: Optional[Sequence[str]] = None) -> bool:
     """determines if script was called with a --help or -h flag
 
     Returns:
         bool: True if help flag was set, False otherwise
     """
-    passed_args = sys.argv[1:]
+    passed_args = cmd_args
+    if passed_args is None:
+        passed_args = sys.argv[1:]
     if "--help" in passed_args or "-h" in passed_args:
         return True
     return False
@@ -322,7 +324,7 @@ def add_regular_args(parser: ArgumentParser) -> None:
     )
 
 
-def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
+def create_argparser(cmd_args: Optional[Sequence[str]] = None) -> Tuple[ArgumentParser, ArgumentParser]:
     """creates a main argument parser for general options and a model parser for model specific options
 
     Returns:
@@ -332,9 +334,9 @@ def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
 
     add_regular_args(parser)
 
-    if help_in_args():
+    if help_in_args(cmd_args):
         parser.add_informational_subparsers(create_list_of_all_model_parsers())
-    args, _ = parser.parse_known_args()
+    args, _ = parser.parse_known_args(cmd_args)
 
     model_class = model_from_name(args.model)
     model_parser = create_model_argparser(model_class)

@@ -1,9 +1,9 @@
 import pytest
-from argparse import ArgumentParser
 
 
-# this test checks for naming conflicts by adding all arguments to one parser
 def test_argparse():
     arg_parser = pytest.importorskip("examples.pytorch_lightning.utils.arg_parser")
-    parser = arg_parser.create_argparser()
-    # parser.parse_args(['main.py', '-h'])
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        _ = arg_parser.create_argparser(["main.py", "-h"])
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 0
