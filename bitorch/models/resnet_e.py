@@ -2,7 +2,7 @@
 Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
 <https://arxiv.org/abs/1906.08637>`_ paper.
 """
-from .base import Model
+from .base import Model, NoArgparseArgsMixin
 from typing import List, Any
 import torch
 import argparse
@@ -216,7 +216,7 @@ ResNet-e specifications
 
 class ResnetE(Model):
 
-    name = "resnete"
+    name = "ResnetE"
 
     resnet_spec = {
         18: ([2, 2, 2, 2], [64, 64, 128, 256, 512]),
@@ -252,7 +252,7 @@ class ResnetE(Model):
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
-            "--resnetE-num-layers",
+            "--num-layers",
             type=int,
             choices=[18, 34],
             required=True,
@@ -260,31 +260,23 @@ class ResnetE(Model):
         )
 
 
-class ResnetE18(ResnetE):
+class ResnetE18(NoArgparseArgsMixin, ResnetE):
     """ResNetE-18 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "resnete18"
+    name = "ResnetE18"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE18, self).__init__(18, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class ResnetE34(ResnetE):
+class ResnetE34(NoArgparseArgsMixin, ResnetE):
     """ResNetE-34 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "resnete34"
+    name = "ResnetE34"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE34, self).__init__(34, *args, **kwargs)
-
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass

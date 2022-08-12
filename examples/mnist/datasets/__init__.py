@@ -6,8 +6,6 @@ i.e. MNIST, CIFAR 10 and 100 and ImageNet.
 from typing import List, Type
 
 from .base import BasicDataset
-from .cifar import CIFAR10, CIFAR100
-from .imagenet import ImageNet
 from .mnist import MNIST
 
 __all__ = [
@@ -15,9 +13,6 @@ __all__ = [
     "dataset_from_name",
     "dataset_names",
     "MNIST",
-    "CIFAR10",
-    "CIFAR100",
-    "ImageNet",
 ]
 
 
@@ -34,7 +29,7 @@ def dataset_from_name(name: str) -> Type[BasicDataset]:
     Returns:
         dataset: the dataset
     """
-    for dataset_class in [CIFAR10, CIFAR100, ImageNet, MNIST]:
+    for dataset_class in [MNIST]:
         if dataset_class.name == name:
             return dataset_class
     raise Exception(f"unknown dataset: {name}")
@@ -46,4 +41,4 @@ def dataset_names() -> List[str]:
     Returns:
         List: the dataset names
     """
-    return [dataset_class.name for dataset_class in [CIFAR10, CIFAR100, ImageNet, MNIST]]
+    return [dataset_class.name for dataset_class in [MNIST]]

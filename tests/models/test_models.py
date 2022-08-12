@@ -12,6 +12,18 @@ from bitorch.models import (
     ResnetE18,
     ResnetE34,
     DLRM,
+    DenseNet28,
+    DenseNet37,
+    DenseNet45,
+    DenseNetFlex,
+    MeliusNet22,
+    MeliusNet42,
+    MeliusNetFlex,
+    MeliusNet23,
+    MeliusNet59,
+    MeliusNetA,
+    MeliusNetB,
+    MeliusNetC,
 )
 import torch
 import numpy as np
@@ -41,6 +53,18 @@ TEST_INPUT_DATA = [
     [Resnet18V2, {}, ALL_IMAGE_DATASETS],
     [Resnet34V2, {}, ALL_IMAGE_DATASETS],
     [Resnet50V2, {}, ALL_IMAGE_DATASETS],
+    [DenseNet28, {}, ALL_IMAGE_DATASETS],
+    [DenseNet37, {}, ALL_IMAGE_DATASETS],
+    [DenseNet45, {}, ALL_IMAGE_DATASETS],
+    [DenseNetFlex, {"flex_block_config": [[6, 6, 6, 5]]}, ALL_IMAGE_DATASETS],
+    [MeliusNet22, {}, ALL_IMAGE_DATASETS],
+    [MeliusNet23, {}, ALL_IMAGE_DATASETS],
+    [MeliusNet42, {}, ALL_IMAGE_DATASETS],
+    [MeliusNet59, {}, ALL_IMAGE_DATASETS],
+    [MeliusNetA, {}, ALL_IMAGE_DATASETS],
+    [MeliusNetB, {}, ALL_IMAGE_DATASETS],
+    [MeliusNetC, {}, ALL_IMAGE_DATASETS],
+    [MeliusNetFlex, {"flex_block_config": [[6, 6, 6, 5]]}, ALL_IMAGE_DATASETS],
     [ResnetE, {"resnete_num_layers": [18, 34]}, RGB_DATASETS],
     [ResnetE18, {}, RGB_DATASETS],
     [ResnetE34, {}, RGB_DATASETS],
@@ -52,7 +76,7 @@ TEST_INPUT_DATA = [
 @pytest.mark.parametrize("model_class, model_kwargs, datasets_to_test", TEST_INPUT_DATA)
 @pytest.mark.parametrize("dataset", [MNIST, CIFAR10, CIFAR100, IMAGENET, CRITEO])
 def test_models(model_class, model_kwargs, datasets_to_test, dataset) -> None:
-    assert models_by_name[model_class.name] is model_class
+    assert models_by_name[model_class.name.lower()] is model_class
     if dataset not in datasets_to_test:
         pytest.skip(f"Model '{model_class.name}' does not need to work with the dataset '{dataset[2]}'.")
 

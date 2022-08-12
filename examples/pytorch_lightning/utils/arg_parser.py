@@ -1,13 +1,29 @@
-from argparse import ArgumentParser
+import argparse
 import sys
-from typing import Tuple
+from argparse import ArgumentParser
+from typing import Tuple, List, Type, Any, Optional, Sequence
 
-from bitorch.models import model_from_name, model_names
-from ..datasets import dataset_names  # type: ignore
-from bitorch import add_config_args
 from pytorch_lightning import Trainer
 
+from bitorch import add_config_args
+from ..datasets import dataset_names  # type: ignore
+from bitorch.models import model_from_name, model_names, Model
+from bitorch.models.base import NoArgparseArgsMixin
 from examples.pytorch_lightning.utils.teachers import available_teachers
+
+
+class _HeadArgumentParser(ArgumentParser):
+    _informational_sub_parsers: List[ArgumentParser]
+
+    def print_help(self, *args: Any) -> None:
+        super().print_help(*args)
+        if hasattr(self, "_informational_sub_parsers"):
+            for parser in self._informational_sub_parsers:
+                print("\n")
+                parser.print_help()
+
+    def add_informational_subparsers(self, sub_parsers: List[ArgumentParser]) -> None:
+        self._informational_sub_parsers = sub_parsers
 
 
 def add_logging_args(parser: ArgumentParser) -> None:
@@ -228,7 +244,7 @@ def add_dataset_args(parser: ArgumentParser) -> None:
     )
 
 
-def create_model_argparser(model_class: object) -> ArgumentParser:
+def create_model_argparser(model_class: Type[Model]) -> ArgumentParser:
     """adds model specific cli arguments from model_class object
 
     Args:
@@ -237,32 +253,41 @@ def create_model_argparser(model_class: object) -> ArgumentParser:
     Returns:
         ArgumentParser: cli argument parser
     """
-    model_parser = ArgumentParser(add_help=False)
+    model_parser = argparse.ArgumentParser(
+        description=f"Additional arguments for {model_class.name} (--model {model_class.name.lower()})",
+        add_help=False,
+        usage=argparse.SUPPRESS,
+    )
     model_class.add_argparse_arguments(model_parser)
     return model_parser
 
 
-def help_in_args() -> bool:
+def help_in_args(cmd_args: Optional[Sequence[str]] = None) -> bool:
     """determines if script was called with a --help or -h flag
 
     Returns:
         bool: True if help flag was set, False otherwise
     """
-    passed_args = sys.argv[1:]
+    passed_args = cmd_args
+    if passed_args is None:
+        passed_args = sys.argv[1:]
     if "--help" in passed_args or "-h" in passed_args:
         return True
     return False
 
 
-def add_all_model_args(parser: ArgumentParser) -> None:
-    """iterates through all existent models and adds their specific cli args to parser
-
-    Args:
-        parser (ArgumentParser): the main cli argument parser
-    """
+def create_list_of_all_model_parsers() -> List[ArgumentParser]:
+    """iterates through all existent models and adds a parser for each one"""
+    all_model_parsers = []
     for model_name in model_names():
-        model_group = parser.add_argument_group(model_name, f"parameters for {model_name} model")
-        model_from_name(model_name).add_argparse_arguments(model_group)  # type: ignore
+        model_class = model_from_name(model_name)
+        if model_class.add_argparse_arguments == Model.add_argparse_arguments:
+            continue
+        if model_class.add_argparse_arguments == NoArgparseArgsMixin.add_argparse_arguments:
+            continue
+        model_parser = create_model_argparser(model_class)
+        all_model_parsers.append(model_parser)
+    return all_model_parsers
 
 
 def add_regular_args(parser: ArgumentParser) -> None:
@@ -295,23 +320,23 @@ def add_regular_args(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--dev-run",
         action="store_true",
-        help="use only 1% of training/validation data for testing purposes",
+        help="use only 1%% of training/validation data for testing purposes",
     )
 
 
-def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
+def create_argparser(cmd_args: Optional[Sequence[str]] = None) -> Tuple[ArgumentParser, ArgumentParser]:
     """creates a main argument parser for general options and a model parser for model specific options
 
     Returns:
         Tuple[ArgumentParser, ArgumentParser]: the main and model argument parser
     """
-    parser = ArgumentParser(description="Bitorch Image Classification")
+    parser = _HeadArgumentParser(description="Bitorch Image Classification")
 
     add_regular_args(parser)
 
-    if help_in_args():
-        add_all_model_args(parser)
-    args, _ = parser.parse_known_args()
+    if help_in_args(cmd_args):
+        parser.add_informational_subparsers(create_list_of_all_model_parsers())
+    args, _ = parser.parse_known_args(cmd_args)
 
     model_class = model_from_name(args.model)
     model_parser = create_model_argparser(model_class)
