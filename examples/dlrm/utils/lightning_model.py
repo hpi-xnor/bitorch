@@ -2,7 +2,7 @@ import numpy as np
 from sklearn import metrics
 import logging
 from argparse import Namespace
-from typing import Union
+from typing import Union, Any, List
 
 import torch
 import torch.nn.functional as F
@@ -15,6 +15,8 @@ from .utils import create_optimizer, create_scheduler
 
 
 class ModelWrapper(LightningModule):
+    """Wrapper class for a pytorch model to fully utilize pytorch lightning functionality"""
+
     def __init__(
         self,
         model: Module,
@@ -51,7 +53,7 @@ class ModelWrapper(LightningModule):
         else:
             return optimizer
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:  # type: ignore
         dense_values, categorical_values_i, categorical_values_o, y = batch
         if isinstance(categorical_values_i, list):
             for el in categorical_values_i:
@@ -70,9 +72,8 @@ class ModelWrapper(LightningModule):
         self.log_dict({"loss/train": loss})
         return loss
 
-    def validation_step_end(self, *args, **kwargs):
+    def validation_step_end(self, *args: Any, **kwargs: Any) -> Any:
         """calculate all them metrics and log via wandb/tensorboard"""
-
         y = torch.cat(list(map(lambda x: x["y"], self.validation_results)))
         y_hat = torch.cat(list(map(lambda x: x["y_hat"], self.validation_results)))
         loss = self.loss_function(y, y_hat)
@@ -85,23 +86,26 @@ class ModelWrapper(LightningModule):
         roc_auc = metrics.roc_auc_score(y_array, y_hat.cpu())
         precision = metrics.precision_score(y_array, y_hat_array)
         recall = metrics.recall_score(y_array, y_hat_array)
-        self.log_dict({
-            "val_los": loss,
-            "val_rmse": rmse,
-            "roc_auc": roc_auc,
-            "precision": precision,
-            "recall": recall,
-            "balanced accuracy": balanced_accuracy,
-            "accuracy": accuracy,
-            "f1 score": f1,
-        }, prog_bar=True)
+        self.log_dict(
+            {
+                "val_los": loss,
+                "val_rmse": rmse,
+                "roc_auc": roc_auc,
+                "precision": precision,
+                "recall": recall,
+                "balanced accuracy": balanced_accuracy,
+                "accuracy": accuracy,
+                "f1 score": f1,
+            },
+            prog_bar=True,
+        )
         return super().validation_step_end(*args, **kwargs)
 
     def on_validation_start(self) -> None:
-        self.validation_results = []
+        self.validation_results: List[dict] = []
         return super().on_validation_start()
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: torch.Tensor, batch_idx: int) -> None:  # type: ignore
         dense_values, categorical_values_i, categorical_values_o, y = batch
         dense_values = dense_values.to(self.device)
         if isinstance(categorical_values_i, list):
