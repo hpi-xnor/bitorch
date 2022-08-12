@@ -68,7 +68,7 @@ class Criteo(BasicDataset):
             raw_path=str(self.root_directory / "train.txt"),
             pro_data=str(self.root_directory / "preprocessed.npz"),
             memory_map=False,
-            dataset_multiprocessing=False,
+            dataset_multiprocessing=True,
             store_all_indices=True,
         )
         gc.collect()
