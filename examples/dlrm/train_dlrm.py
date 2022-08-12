@@ -23,7 +23,6 @@ from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLog
 from torch.utils.data import DataLoader
 
 from bitorch import apply_args_to_configuration
-from bitorch.datasets import dataset_from_name
 from bitorch.models import DLRM
 from bitorch.quantizations import Quantization
 
@@ -32,9 +31,8 @@ from utils.lightning_model import ModelWrapper
 from utils.utils import configure_logging
 from utils.log import CommandLineLogger
 
-from criteo import Criteo, SplitCriteoDataset
+from datasets.criteo import Criteo, SplitCriteoDataset
 from facebook_dataloading.dataloading_fb import collate_wrapper_criteo_offset
-from bitorch.datasets import datasets_by_name
 
 logger = logging.getLogger()
 
@@ -56,7 +54,7 @@ def make_dlrm_dataloaders(
         Tuple[Dataloader, Dataloader, int, int]: the dataloaders, the size of the dense features and the size of embedding layers
     """
     logging.info("loading Criteo dataset...")
-    dataset = Criteo(True, root_directory=dataset_dir, download=download, augmentation=None).dataset
+    dataset = Criteo(True, root_directory=dataset_dir, download=download).dataset
 
     train_dataset = SplitCriteoDataset(dataset, "train", ignore_size=ignore_size)
     test_dataset = SplitCriteoDataset(dataset, "test", ignore_size=ignore_size)
@@ -133,8 +131,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         lr_monitor = LearningRateMonitor(logging_interval="step")
         callbacks.append(lr_monitor)
 
-    datasets_by_name["criteo"] = Criteo
-    dataset = dataset_from_name(args.dataset)
     if args.dataset == "criteo":
         train_loader, test_loader, dense_feature_size, embedding_layer_sizes = make_dlrm_dataloaders(
             args.dataset_dir,
@@ -151,7 +147,11 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model_kwargs = vars(model_args)
     logger.debug(f"got model args as dict: {model_kwargs}")
 
-    model = DLRM(**model_kwargs, embedding_layer_sizes=embedding_layer_sizes, dataset=dataset, dense_feature_size=dense_feature_size)  # type: ignore
+    data_point = iter(train_loader).next()
+    data_point = (data_point[0], (data_point[1], data_point[2]))
+    print("DATA SHAPE:", (data_point[0].shape, (data_point[1].shape, data_point[2].shape)))
+
+    model = DLRM(**model_kwargs, embedding_layer_sizes=embedding_layer_sizes, input_shape=[], dense_feature_size=dense_feature_size)  # type: ignore
     model.initialize()
     if args.checkpoint_load is not None and args.pretrained:
         logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
@@ -173,8 +173,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     logger.info(f"optimizer: {args.optimizer}")
     logger.info(f"lr: {args.lr}")
     logger.info(f"max_epochs: {args.max_epochs}")
-    data_point = iter(train_loader).next()
-    data_point = (data_point[0], (data_point[1], data_point[2]))
     computational_intensity = fv_nn.FlopCountAnalysis(model, inputs=data_point, quantization_base_class=Quantization)
 
     stats, table = fv_nn.flop_count_table(computational_intensity, automatic_qmodules=True)

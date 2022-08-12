@@ -3,9 +3,8 @@ import sys
 from typing import Tuple
 
 from bitorch.models import model_from_name, model_names
-from bitorch.datasets import dataset_names
 from bitorch import add_config_args
-from ....bitorch.models.dlrm import DLRM
+from bitorch.models.dlrm import DLRM
 from pytorch_lightning import Trainer
 
 
@@ -168,8 +167,8 @@ def add_dataset_args(parser: ArgumentParser) -> None:
     data.add_argument(
         "--dataset",
         type=str,
-        default="cifar10",
-        choices=dataset_names() + ["criteo"],
+        default="criteo",
+        choices=["criteo"],
         help="name of the dataset to be used for training",
     )
     data.add_argument(

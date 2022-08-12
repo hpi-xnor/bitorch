@@ -5,7 +5,6 @@ import logging
 import torch
 from torch.nn import Linear, Sequential, PReLU, Sigmoid, EmbeddingBag, ModuleList, BatchNorm1d, Module
 import numpy as np
-from bitorch.datasets.base import BasicDataset
 from bitorch.layers import QLinear
 from bitorch.models.base import Model
 
@@ -108,7 +107,7 @@ class DLRM(Model):
 
     def __init__(
         self,
-        dataset: BasicDataset,
+        input_shape: List[int],
         dense_feature_size: int,
         embedding_dimension: int,
         embedding_layer_sizes: List[int],
@@ -120,7 +119,7 @@ class DLRM(Model):
         binary_embedding: bool,
         **kwargs: Any,
     ) -> None:
-        super().__init__(dataset)
+        super().__init__(input_shape)
         self.interaction_operation = interaction_operation
         self.embedding_layers = create_embeddings(
             embedding_dimension,
