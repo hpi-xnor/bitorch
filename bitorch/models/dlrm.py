@@ -107,16 +107,16 @@ class DLRM(Model):
 
     def __init__(
         self,
-        input_shape: List[int],
         dense_feature_size: int,
-        embedding_dimension: int,
         embedding_layer_sizes: List[int],
-        bottom_mlp_layer_sizes: Union[List[int], str],
-        top_mlp_layer_sizes: Union[List[int], str],
-        interaction_operation: Interaction_Operation_Type,
-        binary_bottom_mlp: bool,
-        binary_top_mlp: bool,
-        binary_embedding: bool,
+        input_shape: List[int] = [],
+        bottom_mlp_layer_sizes: Union[List[int], str] = [512, 256, 64],
+        top_mlp_layer_sizes: Union[List[int], str] = [512, 256, 1],
+        interaction_operation: Interaction_Operation_Type = Interaction_Operation_Type.PRODUCT,
+        binary_bottom_mlp: bool = False,
+        binary_top_mlp: bool = True,
+        binary_embedding: bool = True,
+        embedding_dimension: int = 16,
         **kwargs: Any,
     ) -> None:
         super().__init__(input_shape)

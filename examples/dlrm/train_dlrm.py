@@ -148,8 +148,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     logger.debug(f"got model args as dict: {model_kwargs}")
 
     data_point = iter(train_loader).next()
-    data_point = (data_point[0], (data_point[1], data_point[2]))
+    print("DATA SHAPE:", (type(data_point[0]), (type(data_point[1]), type(data_point[2]))))
     print("DATA SHAPE:", (data_point[0].shape, (data_point[1].shape, data_point[2].shape)))
+    data_point = (data_point[0], (data_point[1], data_point[2]))
 
     model = DLRM(**model_kwargs, embedding_layer_sizes=embedding_layer_sizes, input_shape=[], dense_feature_size=dense_feature_size)  # type: ignore
     model.initialize()
@@ -169,7 +170,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         callbacks=callbacks,  # type: ignore
         log_every_n_steps=args.log_interval,
     )
-    logger.info(f"model: {args.model}")
+    logger.info("model: DLRM")
     logger.info(f"optimizer: {args.optimizer}")
     logger.info(f"lr: {args.lr}")
     logger.info(f"max_epochs: {args.max_epochs}")
