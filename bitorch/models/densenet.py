@@ -6,7 +6,7 @@ import torch
 from torch import nn
 from torch.nn import Module, ChannelShuffle
 
-from .base import Model
+from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d
 from bitorch.models.common_layers import get_initial_layers
 from bitorch.datasets.base import BasicDataset
@@ -289,10 +289,9 @@ class DenseNet(Model):
 
 
 class DenseNetFlex(DenseNet):
-    """DenseNet-Flex model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"
+    """
+    Flexible BinaryDenseNet model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"
     <https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html>` paper.
-
-
     """
 
     name = "DenseNetFlex"
@@ -311,9 +310,9 @@ class DenseNetFlex(DenseNet):
         )
 
 
-class DenseNet28(DenseNet):
+class DenseNet28(NoArgparseArgsMixin, DenseNet):
     """
-    DenseNet-28 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
+    BinaryDenseNet-28 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
 
     .. _"BinaryDenseNet: Developing an Architecture for Binary Neural Networks":
     https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
@@ -324,14 +323,10 @@ class DenseNet28(DenseNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(DenseNet28, self).__init__(28, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class DenseNet37(DenseNet):
+class DenseNet37(NoArgparseArgsMixin, DenseNet):
     """
-    DenseNet-37 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
+    BinaryDenseNet-37 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
 
     .. _"BinaryDenseNet: Developing an Architecture for Binary Neural Networks":
     https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
@@ -342,14 +337,10 @@ class DenseNet37(DenseNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(DenseNet37, self).__init__(37, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class DenseNet45(DenseNet):
+class DenseNet45(NoArgparseArgsMixin, DenseNet):
     """
-    DenseNet-45 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
+    BinaryDenseNet-45 model from `"BinaryDenseNet: Developing an Architecture for Binary Neural Networks"` paper.
 
     .. _"BinaryDenseNet: Developing an Architecture for Binary Neural Networks":
     https://openaccess.thecvf.com/content_ICCVW_2019/html/NeurArch/Bethge_BinaryDenseNet_Developing_an_Architecture_for_Binary_Neural_Networks_ICCVW_2019_paper.html
@@ -359,7 +350,3 @@ class DenseNet45(DenseNet):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(DenseNet45, self).__init__(45, *args, **kwargs)
-
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass

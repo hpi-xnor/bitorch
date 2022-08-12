@@ -7,7 +7,7 @@ from torch import nn
 from torch.nn import Module
 
 from .densenet import BaseNetDense, DOWNSAMPLE_STRUCT, basedensenet_constructor
-from .base import Model
+from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d
 from bitorch.datasets import BasicDataset
 
@@ -155,7 +155,7 @@ class MeliusNetFlex(MeliusNet):
         )
 
 
-class MeliusNet22(MeliusNet):
+class MeliusNet22(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-22 model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -165,12 +165,8 @@ class MeliusNet22(MeliusNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet22, self).__init__("22", *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class MeliusNet23(MeliusNet):
+class MeliusNet23(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-23 model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -180,12 +176,8 @@ class MeliusNet23(MeliusNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet23, self).__init__("23", *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class MeliusNet29(MeliusNet):
+class MeliusNet29(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-29 model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -195,12 +187,8 @@ class MeliusNet29(MeliusNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet29, self).__init__("29", *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class MeliusNet42(MeliusNet):
+class MeliusNet42(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-42 model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -210,12 +198,8 @@ class MeliusNet42(MeliusNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet42, self).__init__("42", *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class MeliusNet59(MeliusNet):
+class MeliusNet59(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-59 model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -225,12 +209,8 @@ class MeliusNet59(MeliusNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNet59, self).__init__("59", *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class MeliusNetA(MeliusNet):
+class MeliusNetA(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-A model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -240,12 +220,8 @@ class MeliusNetA(MeliusNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNetA, self).__init__("a", *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class MeliusNetB(MeliusNet):
+class MeliusNetB(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-B model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -255,12 +231,8 @@ class MeliusNetB(MeliusNet):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNetB, self).__init__("b", *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class MeliusNetC(MeliusNet):
+class MeliusNetC(NoArgparseArgsMixin, MeliusNet):
     """MeliusNet-C model from `"MeliusNet: Can Binary Neural Networks Achieve MobileNet-level Accuracy?"
     <https://arxiv.org/abs/2001.05936>` paper.
     """
@@ -269,7 +241,3 @@ class MeliusNetC(MeliusNet):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(MeliusNetC, self).__init__("c", *args, **kwargs)
-
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass

@@ -8,7 +8,22 @@ from pytorch_lightning import Trainer
 from bitorch import add_config_args
 from bitorch.datasets import dataset_names
 from bitorch.models import model_from_name, model_names, Model
+from bitorch.models.base import NoArgparseArgsMixin
 from examples.pytorch_lightning.utils.teachers import available_teachers
+
+
+class _HeadArgumentParser(ArgumentParser):
+    _informational_sub_parsers: List[ArgumentParser]
+
+    def print_help(self, *args: Any) -> None:
+        super(*args).print_help(*args)
+        if hasattr(self, "_informational_sub_parsers"):
+            for parser in self._informational_sub_parsers:
+                print("\n")
+                parser.print_help()
+
+    def add_informational_subparsers(self, sub_parsers: List[ArgumentParser]):
+        self._informational_sub_parsers = sub_parsers
 
 
 def add_logging_args(parser: ArgumentParser) -> None:
@@ -238,7 +253,11 @@ def create_model_argparser(model_class: Type[Model]) -> ArgumentParser:
     Returns:
         ArgumentParser: cli argument parser
     """
-    model_parser = ArgumentParser(add_help=False)
+    model_parser = argparse.ArgumentParser(
+        description=f"Additional arguments for {model_class.name} (--model {model_class.name.lower()})",
+        add_help=False,
+        usage=argparse.SUPPRESS,
+    )
     model_class.add_argparse_arguments(model_parser)
     return model_parser
 
@@ -255,12 +274,16 @@ def help_in_args() -> bool:
     return False
 
 
-def get_all_model_parsers() -> List[ArgumentParser]:
+def create_list_of_all_model_parsers() -> List[ArgumentParser]:
     """iterates through all existent models and adds a parser for each one"""
     all_model_parsers = []
     for model_name in model_names():
-        model_parser = argparse.ArgumentParser(f"Parser for arguments of {model_name}")
-        model_from_name(model_name).add_argparse_arguments(model_parser)  # type: ignore
+        model_class = model_from_name(model_name)
+        if model_class.add_argparse_arguments == Model.add_argparse_arguments:
+            continue
+        if model_class.add_argparse_arguments == NoArgparseArgsMixin.add_argparse_arguments:
+            continue
+        model_parser = create_model_argparser(model_class)
         all_model_parsers.append(model_parser)
     return all_model_parsers
 
@@ -295,21 +318,8 @@ def add_regular_args(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--dev-run",
         action="store_true",
-        help="use only 1% of training/validation data for testing purposes",
+        help="use only 1%% of training/validation data for testing purposes",
     )
-
-
-class _CustomArgumentParser(ArgumentParser):
-    _sub_parsers: List[ArgumentParser]
-
-    def print_help(self, *args: Any) -> None:
-        super(*args)
-        # if hasattr(self, "_sub_parsers"):
-        #     for parser in self._sub_parsers:
-        #         parser.print_help()
-
-    def set_sub_parsers(self, sub_parsers: List[ArgumentParser]):
-        self._sub_parsers = sub_parsers
 
 
 def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
@@ -318,12 +328,12 @@ def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
     Returns:
         Tuple[ArgumentParser, ArgumentParser]: the main and model argument parser
     """
-    parser = _CustomArgumentParser(description="Bitorch Image Classification")
+    parser = _HeadArgumentParser(description="Bitorch Image Classification")
 
     add_regular_args(parser)
 
     if help_in_args():
-        parser.set_sub_parsers(get_all_model_parsers())
+        parser.add_informational_subparsers(create_list_of_all_model_parsers())
     args, _ = parser.parse_known_args()
 
     model_class = model_from_name(args.model)
