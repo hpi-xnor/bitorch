@@ -17,10 +17,8 @@ from bitorch.layers.qlinear import QLinearBase
 from bitorch.layers.register import (
     q_linear_registry,
     QLinearImplementation,
-    q_conv1d_registry,
     q_conv2d_registry,
     QConv2dImplementation,
-    q_conv3d_registry,
 )
 from bitorch.models import Model
 
