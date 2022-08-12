@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - code is now formatted with the black code formatter
 - using PyTorch's implementation of RAdam
 - renamed the `bitwidth` attribute of quantization functions to `bit_width`
+- moved the image datasets out of the bitorch core package into the image classification example
 
 ### Fixed
 
