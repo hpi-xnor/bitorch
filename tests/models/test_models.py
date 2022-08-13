@@ -89,12 +89,19 @@ def test_models(model_class, model_kwargs, datasets_to_test, dataset) -> None:
         if dataset is IMAGENET:
             batch_sizes_to_test = [1, 2]
         for batch_size in batch_sizes_to_test:
-            if model_class.name == "dlrm":
-                model = model_class(dense_feature_size=dataset[0][0][1], embedding_layer_sizes=[100] * dataset[0][1][0][0], **combination)
+            if model_class.name == "DLRM":
+                model = model_class(
+                    dense_feature_size=dataset[0][0][1],
+                    embedding_layer_sizes=[100] * dataset[0][1][0][0],
+                    **combination,
+                )
                 dataset[0][0][0] = batch_size
                 dataset[0][1][0][1] = batch_size
                 dataset[0][1][1][1] = batch_size
-                input_values = (torch.Tensor(np.random.uniform(0, 1.0, dataset[0][0])), (torch.zeros(dataset[0][1][0], dtype=int), torch.zeros(dataset[0][1][1], dtype=int)))
+                input_values = (
+                    torch.Tensor(np.random.uniform(0, 1.0, dataset[0][0])),
+                    (torch.zeros(dataset[0][1][0], dtype=int), torch.zeros(dataset[0][1][1], dtype=int)),
+                )
                 output = model(*input_values)
             else:
                 input_shape = list(dataset[0])
