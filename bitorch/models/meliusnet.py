@@ -18,15 +18,18 @@ class ImprovementBlock(Module):
 
     def __init__(self, channels: int, in_channels: int, dilation: int = 1):
         super(ImprovementBlock, self).__init__()
-        self.body = nn.Sequential()
-        self.body.append(nn.BatchNorm2d(in_channels))
-        self.body.append(QConv2d(in_channels, channels, kernel_size=3, stride=1, padding=dilation, dilation=dilation))
+        self.body_layers: List[Module] = []
+        self.body_layers.append(nn.BatchNorm2d(in_channels))
+        self.body_layers.append(
+            QConv2d(in_channels, channels, kernel_size=3, stride=1, padding=dilation, dilation=dilation)
+        )
 
         self.use_sliced_addition = channels != in_channels
         if self.use_sliced_addition:
             assert channels < in_channels
             self.slices = [0, in_channels - channels, in_channels]
             self.slices_add_x = [False, True]
+        self.body = nn.Sequential(*self.body_layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
