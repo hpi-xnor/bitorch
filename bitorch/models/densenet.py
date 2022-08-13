@@ -17,7 +17,7 @@ class DenseLayer(Module):
         super(DenseLayer, self).__init__()
         self.dropout = dropout
         self.num_features = num_features
-        self.features = nn.Sequential()
+        self.features = []
         if bn_size == 0:
             # no bottleneck
             self._add_conv_block(
@@ -26,6 +26,7 @@ class DenseLayer(Module):
         else:
             self._add_conv_block(QConv2d(self.num_features, bn_size * growth_rate, kernel_size=1))
             self._add_conv_block(QConv2d(bn_size * growth_rate, growth_rate, kernel_size=3, padding=1))
+        self.features = nn.Sequential(*self.features)
 
     def _add_conv_block(self, layer: Module) -> None:
         self.features.append(nn.BatchNorm2d(self.num_features))
