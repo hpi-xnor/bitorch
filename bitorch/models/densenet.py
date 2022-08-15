@@ -17,7 +17,7 @@ class DenseLayer(Module):
         super(DenseLayer, self).__init__()
         self.dropout = dropout
         self.num_features = num_features
-        self.features = nn.Sequential()
+        self.feature_list: List[Module] = []
         if bn_size == 0:
             # no bottleneck
             self._add_conv_block(
@@ -26,12 +26,13 @@ class DenseLayer(Module):
         else:
             self._add_conv_block(QConv2d(self.num_features, bn_size * growth_rate, kernel_size=1))
             self._add_conv_block(QConv2d(bn_size * growth_rate, growth_rate, kernel_size=3, padding=1))
+        self.features = nn.Sequential(*self.feature_list)
 
     def _add_conv_block(self, layer: Module) -> None:
-        self.features.append(nn.BatchNorm2d(self.num_features))
-        self.features.append(layer)
+        self.feature_list.append(nn.BatchNorm2d(self.num_features))
+        self.feature_list.append(layer)
         if self.dropout:
-            self.features.append(nn.Dropout(self.dropout))
+            self.feature_list.append(nn.Dropout(self.dropout))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         ident = x
@@ -106,31 +107,33 @@ class BaseNetDense(Module):
         num_out_features = self.num_features // self.reduction_rates[transition_num]
         num_out_features = int(round(num_out_features / 32)) * 32
 
-        transition = nn.Sequential()
+        transition_layers: List[Module] = []
 
         for layer in self.downsample_struct.split(","):
             if layer == "bn":
-                transition.append(nn.BatchNorm2d(self.num_features))
+                transition_layers.append(nn.BatchNorm2d(self.num_features))
             elif layer == "relu":
-                transition.append(nn.ReLU())
+                transition_layers.append(nn.ReLU())
             elif layer == "q_conv":
-                transition.append(QConv2d(self.num_features, num_out_features, kernel_size=1))
+                transition_layers.append(QConv2d(self.num_features, num_out_features, kernel_size=1))
             elif "fp_conv" in layer:
                 groups = 1
                 if ":" in layer:
                     groups = int(layer.split(":")[1])
-                transition.append(
+                transition_layers.append(
                     nn.Conv2d(self.num_features, num_out_features, kernel_size=1, groups=groups, bias=False)
                 )
             elif layer == "pool" and dilation == 1:
-                transition.append(nn.AvgPool2d(2, stride=2))
+                transition_layers.append(nn.AvgPool2d(2, stride=2))
             elif layer == "max_pool" and dilation == 1:
-                transition.append(nn.MaxPool2d(2, stride=2))
+                transition_layers.append(nn.MaxPool2d(2, stride=2))
             elif "cs" in layer:
                 groups = 16
                 if ":" in layer:
                     groups = int(layer.split(":")[1])
-                transition.append(ChannelShuffle(groups))
+                transition_layers.append(ChannelShuffle(groups))
+
+        transition = nn.Sequential(*transition_layers)
 
         self.features.add_module("Transition_%d" % (transition_num + 1), transition)
         self.num_features = num_out_features
