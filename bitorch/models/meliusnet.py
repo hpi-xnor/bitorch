@@ -9,7 +9,6 @@ from torch.nn import Module
 from .densenet import BaseNetDense, DOWNSAMPLE_STRUCT, basedensenet_constructor
 from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d
-from bitorch.datasets import BasicDataset
 
 
 # Blocks
@@ -77,7 +76,8 @@ class MeliusNet(Model):
     def __init__(
         self,
         num_layers: Optional[str],
-        dataset: BasicDataset,
+        input_shape: List[int],
+        num_classes: int = 0,
         num_init_features: int = 64,
         growth_rate: int = 64,
         bn_size: int = 0,
@@ -85,7 +85,7 @@ class MeliusNet(Model):
         dilated: bool = False,
         flex_block_config: List[int] = None,
     ) -> None:
-        super(MeliusNet, self).__init__(dataset)
+        super(MeliusNet, self).__init__(input_shape, num_classes)
         self._model = basedensenet_constructor(
             self.meliusnet_spec,
             _MeliusNet,
@@ -96,9 +96,9 @@ class MeliusNet(Model):
             dropout,
             dilated,
             flex_block_config,
-            self._dataset.num_classes,
-            self._dataset.name,
-            self._dataset.shape[1],
+            self._num_classes,
+            self._input_shape[-2:],
+            self._input_shape[1],
         )
         logging.info(f"building MeliusNet with {str(num_layers)} layers...")
 

@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from torchvision.datasets import cifar
 from torchvision.transforms import transforms
 
-from .base import BasicDataset, Augmentation
+from .base import BasicDataset
 
 __all__ = ["CIFAR10", "CIFAR100"]
 
@@ -15,7 +15,7 @@ class CIFAR(BasicDataset, ABC):
     num_val_samples = 10000
 
     @classmethod
-    def train_transform(cls, augmentation: Augmentation = Augmentation.DEFAULT) -> transforms.Compose:
+    def train_transform(cls) -> transforms.Compose:
         return transforms.Compose(
             [
                 transforms.RandomCrop(32, padding=4),

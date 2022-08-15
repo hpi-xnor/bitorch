@@ -14,7 +14,8 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
 import bitorch.layers as qnn
-from bitorch import datasets as bitorch_datasets, RuntimeMode
+from bitorch import RuntimeMode
+from datasets import MNIST
 from bitorch.layers import convert
 import bitorch_inference_engine
 
@@ -156,7 +157,7 @@ def main():
         train_kwargs.update(cuda_kwargs)
         test_kwargs.update(cuda_kwargs)
 
-    train_dataset, test_dataset = bitorch_datasets.MNIST.get_train_and_test(download=True)
+    train_dataset, test_dataset = MNIST.get_train_and_test(download=True)
 
     train_loader = torch.utils.data.DataLoader(train_dataset, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(test_dataset, **test_kwargs)

@@ -6,7 +6,7 @@ from typing import Tuple, List, Type, Any, Optional, Sequence
 from pytorch_lightning import Trainer
 
 from bitorch import add_config_args
-from bitorch.datasets import dataset_names
+from ..datasets import dataset_names  # type: ignore
 from bitorch.models import model_from_name, model_names, Model
 from bitorch.models.base import NoArgparseArgsMixin
 from examples.pytorch_lightning.utils.teachers import available_teachers

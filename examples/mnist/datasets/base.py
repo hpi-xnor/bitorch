@@ -1,6 +1,5 @@
 import logging
 import os
-from enum import Enum
 from pathlib import Path
 from typing import Optional, Tuple, Any
 
@@ -8,25 +7,7 @@ import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
 
-from bitorch.datasets.dummy_dataset import DummyDataset
-
-
-class Augmentation(Enum):
-    NONE = -1
-    DEFAULT = 0
-    LOW = 1
-    MEDIUM = 2
-    HIGH = 3
-
-    @staticmethod
-    def from_string(level: str) -> "Augmentation":
-        return {
-            "none": Augmentation.NONE,
-            "default": Augmentation.DEFAULT,
-            "low": Augmentation.LOW,
-            "medium": Augmentation.MEDIUM,
-            "high": Augmentation.HIGH,
-        }[level]
+from ..datasets.dummy_dataset import DummyDataset
 
 
 class BasicDataset(Dataset):
@@ -38,44 +19,31 @@ class BasicDataset(Dataset):
     num_train_samples = 0
     num_val_samples = 0
 
-    def __init__(
-        self,
-        train: bool,
-        root_directory: str = None,
-        download: bool = False,
-        augmentation: Augmentation = Augmentation.DEFAULT,
-    ) -> None:
+    def __init__(self, train: bool, root_directory: str = None, download: bool = False) -> None:
         """initializes the dataset.
 
         Args:
             train (bool): whether the train or test dataset is wanted
             root_directory (str): path to main dataset storage directory
             download (bool): whether train/test should be downloaded if it does not exist
-            augmentation (Augmentation): the level of augmentation (only for train dataset)
 
         Returns:
             Dataset: the created test/train dataset
         """
         super(BasicDataset, self).__init__()
         self.is_train = train
-        self.augmentation_level = augmentation
         self._download = download
         self.root_directory = self.get_dataset_root_directory(root_directory)
         self.dataset = self.get_dataset(download)
 
     @classmethod
-    def get_train_and_test(
-        cls,
-        root_directory: Optional[str] = None,
-        download: bool = False,
-        augmentation: Augmentation = Augmentation.DEFAULT,
-    ) -> Tuple["BasicDataset", "BasicDataset"]:
+    def get_train_and_test(cls, root_directory: str, download: bool = False) -> Tuple["BasicDataset", "BasicDataset"]:
         """creates a pair of train and test dataset.
 
         Returns:
             Tuple: the train and test dataset
         """
-        return cls(True, root_directory, download, augmentation), cls(False, root_directory, download)
+        return cls(True, root_directory, download), cls(False, root_directory, download)
 
     @classmethod
     def get_dummy_train_and_test_datasets(cls) -> Tuple[DummyDataset, DummyDataset]:
@@ -125,7 +93,7 @@ class BasicDataset(Dataset):
 
     def get_transform(self) -> Any:
         if self.is_train:
-            return self.train_transform(self.augmentation_level)
+            return self.train_transform()
         return self.test_transform()
 
     @classmethod
@@ -138,8 +106,8 @@ class BasicDataset(Dataset):
         return transforms.Compose([transforms.ToTensor(), cls.get_normalize_transform()])
 
     @classmethod
-    def train_transform(cls, augmentation: Augmentation = Augmentation.DEFAULT) -> Any:
-        """get the transform for the training data (should consider the current augmentation_level).
+    def train_transform(cls) -> Any:
+        """get the transform for the training data.
 
         Returns:
             transform: the transform pipeline

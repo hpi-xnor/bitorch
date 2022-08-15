@@ -25,8 +25,7 @@ from torch.utils.data import DataLoader
 
 import bitorch
 from bitorch import apply_args_to_configuration, RuntimeMode
-from bitorch.datasets import dataset_from_name
-from bitorch.datasets.base import Augmentation
+from datasets import dataset_from_name
 from bitorch.models import model_from_name
 from bitorch.quantizations import Quantization
 from examples.pytorch_lightning.utils.callbacks import ProgressiveSignScalerCallback
@@ -102,7 +101,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model_kwargs = vars(model_args)
     logger.debug(f"got model args as dict: {model_kwargs}")
 
-    model = model_from_name(args.model)(**model_kwargs, dataset=dataset)  # type: ignore
+    model = model_from_name(args.model)(**model_kwargs, input_shape=dataset.shape, num_classes=dataset.num_classes)  # type: ignore
     model.initialize()
 
     wrapper_class: Type[ModelWrapper] = ModelWrapper
@@ -132,7 +131,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         limit_train_batches=0.01 if args.dev_run else None,
         limit_val_batches=0.01 if args.dev_run else None,
     )
-    augmentation_level = Augmentation.from_string(args.augmentation)
     if args.dev_run:
         logger.info("This run only uses 1 % of training and validation data (--dev-run)!")
     logger.info(f"model: {args.model}")
@@ -145,7 +143,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     else:
         logger.info(f"dataset: {dataset.name}")
         train_dataset, test_dataset = dataset.get_train_and_test(  # type: ignore
-            root_directory=args.dataset_dir, download=args.download, augmentation=augmentation_level
+            root_directory=args.dataset_dir, download=args.download
         )
     train_loader = DataLoader(
         train_dataset,

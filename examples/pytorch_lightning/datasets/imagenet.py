@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from .base import BasicDataset, Augmentation
+from .base import BasicDataset
 
 
 class ImageNet(BasicDataset):
@@ -29,7 +29,7 @@ class ImageNet(BasicDataset):
         return ImageFolder(directory, transform=self.get_transform())
 
     @classmethod
-    def train_transform(cls, augmentation: Augmentation = Augmentation.DEFAULT) -> transforms.Compose:
+    def train_transform(cls) -> transforms.Compose:
         crop_scale = 0.08
         return transforms.Compose(
             [

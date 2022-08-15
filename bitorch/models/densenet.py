@@ -9,7 +9,6 @@ from torch.nn import Module, ChannelShuffle
 from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d
 from bitorch.models.common_layers import get_initial_layers
-from bitorch.datasets.base import BasicDataset
 
 
 class DenseLayer(Module):
@@ -54,7 +53,7 @@ class BaseNetDense(Module):
         reduction: List[float],
         bn_size: int,
         downsample: str,
-        initial_layers: str = "imagenet",
+        image_resolution: List[int] = None,
         dropout: float = 0,
         classes: int = 1000,
         image_channels: int = 3,
@@ -70,7 +69,7 @@ class BaseNetDense(Module):
         self.reduction_rates = reduction
         self.num_features = num_init_features
 
-        self.features = nn.Sequential(*get_initial_layers(initial_layers, image_channels, self.num_features))
+        self.features = nn.Sequential(*get_initial_layers(image_resolution, image_channels, self.num_features))
         # Add dense blocks
         for i, repeat_num in enumerate(block_config):
             self._make_repeated_base_blocks(repeat_num, i)
@@ -155,7 +154,7 @@ def basedensenet_constructor(
     dilated: bool,
     flex_block_config: Optional[List[int]],
     classes: int = 1000,
-    initial_layers: str = "imagenet",
+    image_resolution: List[int] = None,
     image_channels: int = 3,
 ) -> Module:
     """Creates a densenet of the given model type with given layer numbers.
@@ -171,7 +170,7 @@ def basedensenet_constructor(
         dilated (bool, optional): whether to use dilation in convolutions.
         flex_block_config (List[int], optional) number of blocks in a flex model.
         classes (int, optional): number of output classes. Defaults to 1000.
-        initial_layers (str, optional): name of set of initial layers to be used. Defaults to "imagenet".
+        image_resolution (List[int], optional): determines set of initial layers to be used. Defaults to None.
         image_channels (int, optional): number of channels of input images. Defaults to 3.
 
     Raises:
@@ -203,7 +202,7 @@ def basedensenet_constructor(
         reduction,
         bn_size,
         downsampling,
-        initial_layers,
+        image_resolution,
         dropout,
         classes,
         image_channels,
@@ -231,7 +230,8 @@ class DenseNet(Model):
     def __init__(
         self,
         num_layers: Optional[int],
-        dataset: BasicDataset,
+        input_shape: List[int],
+        num_classes: int = 0,
         num_init_features: int = 64,
         growth_rate: int = 64,
         bn_size: int = 0,
@@ -239,7 +239,7 @@ class DenseNet(Model):
         dilated: bool = False,
         flex_block_config: List[int] = None,
     ) -> None:
-        super(DenseNet, self).__init__(dataset)
+        super(DenseNet, self).__init__(input_shape, num_classes)
         self._model = basedensenet_constructor(
             self.densenet_spec,
             _DenseNet,
@@ -250,9 +250,9 @@ class DenseNet(Model):
             dropout,
             dilated,
             flex_block_config,
-            self._dataset.num_classes,
-            self._dataset.name,
-            self._dataset.shape[1],
+            self._num_classes,
+            self._input_shape[-2:],
+            self._input_shape[1],
         )
         logging.info(f"building DenseNet with {str(num_layers)} layers...")
 

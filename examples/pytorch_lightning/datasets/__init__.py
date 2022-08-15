@@ -9,7 +9,6 @@ from .base import BasicDataset
 from .cifar import CIFAR10, CIFAR100
 from .imagenet import ImageNet
 from .mnist import MNIST
-from ..util import build_lookup_dictionary
 
 __all__ = [
     "BasicDataset",
@@ -22,15 +21,12 @@ __all__ = [
 ]
 
 
-datasets_by_name = build_lookup_dictionary(__name__, __all__, BasicDataset)
-
-
 def dataset_from_name(name: str) -> Type[BasicDataset]:
     """returns the dataset to which the name belongs to (name has to be the value of the datasets
     name-attribute)
 
     Args:
-        name: name of the dataset
+        name (str): name of the dataset
 
     Raises:
         ValueError: raised if no dataset under that name was found
@@ -38,9 +34,10 @@ def dataset_from_name(name: str) -> Type[BasicDataset]:
     Returns:
         dataset: the dataset
     """
-    if name not in datasets_by_name:
-        raise ValueError(f"{name} dataset not found!")
-    return datasets_by_name[name]
+    for dataset_class in [CIFAR10, CIFAR100, ImageNet, MNIST]:
+        if dataset_class.name == name:
+            return dataset_class
+    raise Exception(f"unknown dataset: {name}")
 
 
 def dataset_names() -> List[str]:
@@ -49,4 +46,4 @@ def dataset_names() -> List[str]:
     Returns:
         List: the dataset names
     """
-    return list(datasets_by_name.keys())
+    return [dataset_class.name for dataset_class in [CIFAR10, CIFAR100, ImageNet, MNIST]]
