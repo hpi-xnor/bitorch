@@ -5,6 +5,7 @@ from typing import Tuple, List, Type, Any, Optional, Sequence
 
 from pytorch_lightning import Trainer
 
+import bitorch
 from bitorch.models import model_from_name, model_names, Model
 from bitorch.models.base import NoArgparseArgsMixin
 from ..datasets import dataset_names
