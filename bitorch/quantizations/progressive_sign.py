@@ -19,7 +19,7 @@ class ProgressiveSignConfig(Config):
     progressive_sign_scale = 0.0
 
     # alpha of default progressive sign transform function, should be between 2 and 10
-    progressive_sign_alpha = 2
+    progressive_sign_alpha = 4
 
     # beta of default progressive sign transform function, should be between 2 and 10
     progressive_sign_beta = 10
