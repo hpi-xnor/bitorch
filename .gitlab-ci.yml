@@ -4,7 +4,8 @@ before_script:
   - python --version
   - pip install -e ".[dev]"
 
-.scheduled-only:
+# jobs extending .scheduled_only only run in scheduled pipelines not on every commit
+.scheduled_only:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
@@ -21,26 +22,19 @@ before_script:
     - black . --check --verbose --diff --color
 
 codestyle:
-  extends: .codestyle
+  extends:
+    - .codestyle
 
 codestyle:3.10:
   extends:
     - .codestyle
-    - .scheduled-only
+    - .scheduled_only
   image: python:3.10
 
 # Running tests
 
-.test:
-  stage: test
+test_and_coverage:
   script:
-    - pytest --version
-    - python -m pytest .
-
-test-and-coverage:
-  extends: .test
-  script:
-    - pytest --version
     - coverage run -m pytest
     - coverage report
     - coverage xml
@@ -53,29 +47,28 @@ test-and-coverage:
 
 test:3.10:
   extends:
-    - .test
-    - .scheduled-only
+    - .scheduled_only
   image: python:3.10
-
-test:torch-compatibility:
-  extends:
-    - .test
   script:
-    - pip install torch~=1.12.0 torchvision~=0.13.0
-    - pytest --version
+    - python -m pytest .
+
+test:torch_backwards_compatibility:
+  script:
+    - pip install torch==1.9.0 torchvision==0.10.0
     - python -m pytest .
 
 # Documentation
 
-test-build-doc:
+test_build_doc:
   stage: test
   script:
     - apt-get update && apt-get install -y pandoc
     - sphinx-build -b html docs/source/ docs/build/ -a
 
-test-doc-completeness:
-  extends: .scheduled-only
+test_doc_completeness:
+  extends: .scheduled_only
   stage: test
+  allow_failure: true
   script:
     - flake8 --version
     # explicitly select Docstring errors and ignore to overwrite config in setup.cfg
