@@ -1,7 +1,7 @@
 # Pytorch Lightning Example Script
 
-To give an example on how to use bitorch for your own projects `image_classification.py` trains one of the
-models implemented in `bitorch` on an image classification dataset.
+To give an example on how to use bitorch for your own recommendation projects `train_dlrm.py` trains a quantized version of Facebooks [DLRM](https://github.com/facebookresearch/dlrm) implemented in `bitorch` on an ad recommendation dataset.
+Right now only the [Criteo Ad Challenge](https://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) dataset is supported.
 
 First the requirements for this example need to be installed
 (unless the optional dependencies of BITorch were already installed):
@@ -11,12 +11,14 @@ pip install -r requirements.txt
 
 Below you can find an example call of the script:
 ```bash
-python3 image_classification.py --optimizer adam --lr 0.001 --lr-scheduler cosine --max_epochs 2 --dataset imagenet --model resnet18v1 --batch-size 128 --accelerator gpu --num-workers 16 --gpus 3
+python examples/dlrm/train_dlrm.py  --dataset criteo --input-quantization sign --weight-quantization approxsign --download --ignore-dataset-size 0.0 --batch-size 8192 --lr-scheduler cosine --optimizer adam --wandb --batch-size-test 10000 --num-workers 0 --dataset-dir /datasets --gpus 1 --max_epochs 10
 ```
+
+If the dataset is not present in the given directory, it will be downloaded to the specified directory and preprocessed. Preprocessing usually takes about 30 min, depending on your hardware setup.
 
 ## Arguments
 
-To find an exhaustive overview over the parameters to configure the `image_classification.py` script, call `python image_classification.py --help`.
+To find an exhaustive overview over the parameters to configure the `train_dlrm.py` script, call `python train_dlrm.py --help`.
 The list below gives a brief overview over some selected arguments.
 
 ### general training args
@@ -40,16 +42,10 @@ The list below gives a brief overview over some selected arguments.
 - `--checkpoint-dir` path to where checkpoints shall be stored
 - `--checkpoint-load` path to checkpoint to load from
 
-### model args
-
-- `--model` specify name of model you want to train. Choose from `lenet,resnet,resnet152v1,resnet152v2,resnet18v1,resnet18v2,resnet34v1,resnet34v2,resnet50v1,resnet50v2,resnete,resnete18` or `resnete34`
-
-Each model can have specific arguments. Check them by calling `python image_classification.py --help`.
-
 ### dataset args
 
-- `--datset` name of dataset to train on. Chose from `mnist, cifar10, cifar100` and `imagenet`
-- `--download` toggles if dataset if not present at `--dataset-dir` should be downloaded. Only available for `mnist` and `cifar10`.
+- `--datset` name of dataset to train on. Chose from `criteo`
+- `--download` toggles if dataset if not present at `--dataset-dir` should be downloaded.
 - `--dataset-dir` path to dataset.
 - `--num-worker` sets number of workers for dataloading
 
