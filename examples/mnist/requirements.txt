@@ -1,2 +1,2 @@
 bitorch
-bitorch_inference_engine
+bitorch_engine

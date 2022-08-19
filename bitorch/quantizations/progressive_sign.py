@@ -1,15 +1,31 @@
 """Progressive Sign Function"""
 import typing
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 import torch
 import torch.nn.functional as F
 
+from bitorch.config import Config
 from .base import Quantization, STE
-from .config import config
 from .sign import SignFunction
 
 EPSILON = 1e-7
+
+
+class ProgressiveSignConfig(Config):
+    name = "progressive_sign_config"
+
+    # scaling of progressive sign function, should be zero at the start of the training, and (close to) one at the end
+    progressive_sign_scale = 0.0
+
+    # alpha of default progressive sign transform function, should be between 2 and 10
+    progressive_sign_alpha = 4
+
+    # beta of default progressive sign transform function, should be between 2 and 10
+    progressive_sign_beta = 10
+
+
+config = ProgressiveSignConfig()
 
 
 class ProgressiveSignFunctionTrain(STE):
@@ -53,12 +69,16 @@ class ProgressiveSign(Quantization):
 
     scale: float
     global_scaling: bool
+    alpha: Union[int, float]
+    beta: Union[int, float]
 
     def __init__(
         self,
         use_global_scaling: bool = True,
         initial_scale: Optional[float] = None,
         custom_transform: Optional[Callable[[float], float]] = None,
+        alpha: Union[int, float] = None,
+        beta: Union[int, float] = None,
     ) -> None:
         """
         Initialize the progressive sign module (can be used for progressive weight binarization).
@@ -70,6 +90,8 @@ class ProgressiveSign(Quantization):
             use_global_scaling: whether to use the global scaling variable stored in the config
             initial_scale: if not using global scaling you can set an initial scale
             custom_transform: to use a custom transform function from scale to temperature, add it here
+            alpha: parameters of default transform function
+            beta: parameters of default transform function
         """
         super().__init__()
         if initial_scale is not None and use_global_scaling:
@@ -80,22 +102,42 @@ class ProgressiveSign(Quantization):
         self.global_scaling = use_global_scaling
         self.scale = initial_scale or config.progressive_sign_scale
         self.custom_transform = custom_transform
+        self.alpha = alpha or config.progressive_sign_alpha
+        self.beta = beta or config.progressive_sign_beta
 
     @property
     def current_scale(self) -> float:
+        """Return the current scale of this Progressive Sign layer."""
         if self.global_scaling:
             return config.progressive_sign_scale
         return self.scale
 
     @staticmethod
-    def default_transform(x: float) -> float:
-        return 1 - (5 ** (-3 * x))
+    def default_transform(scale: float, alpha: Union[int, float] = None, beta: Union[int, float] = None) -> float:
+        """Transform the given scale into the temperature of the progressive sign function with the default function.
 
-    def transform(self, x: float) -> float:
-        """Transform x for a steady temperature increase, higher at the beginning, and much less at the end."""
+        The formula is as follows: 1 - (alpha ** (-beta * scale))
+
+        Args:
+            scale: the current scale
+            alpha: base of default exponential function
+            beta: (negative) factor of scale exponent
+        """
+        if alpha is None:
+            alpha = config.progressive_sign_alpha
+        if beta is None:
+            beta = config.progressive_sign_beta
+        return 1 - (alpha ** (-beta * scale))
+
+    def transform(self, scale: float) -> float:
+        """Transform the given scale into a steady temperature increase, higher at the start, and much less at the end.
+
+        Args:
+            scale: the current scale
+        """
         if self.custom_transform is not None:
-            return self.custom_transform(x)
-        return self.default_transform(x)
+            return self.custom_transform(scale)
+        return self.default_transform(scale, self.alpha, self.beta)
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the sign function.

@@ -15,11 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - support for integration of bitorch's inference engine for the following layers
   - QLinear
   - QConv
-- New quantization function: [Progressive Sign](bitorch/quantizations/progressive_sign.py)
-- New features in PyTorch Lightning example:
-  - Training with Knowledge Distillation
-  - Improved Logging
-  - Callback to update Progressive Sign modules
+- new quantization function: [Progressive Sign](bitorch/quantizations/progressive_sign.py)
+- new features in PyTorch Lightning example:
+  - training with Knowledge Distillation
+  - improved logging
+  - callback to update Progressive Sign module
+- option to integrate custom models, datasets, quantization functions
 
 ### Changed
 

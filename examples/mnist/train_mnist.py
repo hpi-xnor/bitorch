@@ -17,10 +17,10 @@ import bitorch.layers as qnn
 from bitorch import RuntimeMode
 from datasets import MNIST
 from bitorch.layers import convert
-import bitorch_inference_engine
+import bitorch_engine
 
 
-bitorch_inference_engine.initialize()
+bitorch_engine.initialize()
 
 
 class QuantizedMLP(nn.Module):

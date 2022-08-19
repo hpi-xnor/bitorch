@@ -132,7 +132,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         limit_val_batches=0.01 if args.dev_run else None,
     )
     if args.dev_run:
-        logger.info("This run only uses 1 % of training and validation data (--dev-run)!")
+        logger.info("this run only uses 1 % of training and validation data (--dev-run)!")
     logger.info(f"model: {args.model}")
     logger.info(f"optimizer: {args.optimizer}")
     logger.info(f"lr: {args.lr}")

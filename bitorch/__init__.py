@@ -57,7 +57,7 @@ def config_from_name(name: str) -> Config:
 
 
 def config_names() -> List:
-    """getter for list of config names for argparse
+    """Get the list of config names for argparse.
 
     Returns:
         List: the config names
@@ -66,7 +66,7 @@ def config_names() -> List:
 
 
 def add_config_args(parser: ArgumentParser) -> None:
-    """adds all config arguments
+    """Adds all arguments from all registered configs.
 
     Args:
         parser (ArgumentParser): parser to add the arguments to
@@ -76,10 +76,19 @@ def add_config_args(parser: ArgumentParser) -> None:
 
 
 def apply_args_to_configuration(args: Namespace) -> None:
-    """applys the cli configurations to the config objects.
+    """Applies the cli configurations to the config objects.
 
     Args:
         args (Namespace): the cli configurations
     """
     for config_ in configs_by_name.values():
         config_.apply_args_to_configuration(args)
+
+
+def register_custom_config(custom_config: Config) -> None:
+    """Register a custom (external) config in bitorch.
+
+    Args:
+        custom_config: the custom config which should be added to bitorch
+    """
+    configs_by_name[custom_config.name] = custom_config
