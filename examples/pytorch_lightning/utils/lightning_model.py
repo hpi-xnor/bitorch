@@ -1,3 +1,4 @@
+# type: ignore
 import logging
 from argparse import Namespace
 from typing import Union, Any
@@ -106,8 +107,10 @@ class ModelWrapper(LightningModule):
     def on_validation_epoch_end(self) -> None:
         if self.quantization_scheduler is not None:
             self.quantization_scheduler.step()
-            self.log("quantization_scheduler/mix_factor",
-                     self.quantization_scheduler.scheduled_quantizer_instances[0].mix_factor)
+            self.log(
+                "quantization_scheduler/mix_factor",
+                self.quantization_scheduler.scheduled_quantizer_instances[0].mix_factor,
+            )
         return super().on_epoch_end()
 
     def configure_optimizers(self) -> Union[dict, torch.optim.Optimizer]:  # type: ignore

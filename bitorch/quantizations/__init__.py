@@ -31,6 +31,7 @@ __all__ = [
     "Sign",
     "SteHeaviside",
     "SwishSign",
+    "Quantization_Scheduler",
 ]
 
 

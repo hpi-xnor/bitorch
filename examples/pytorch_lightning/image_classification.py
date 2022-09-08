@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader
 
 import bitorch
 from bitorch import apply_args_to_configuration, RuntimeMode
-from bitorch.quantizations import Quantization_Scheduler, Sign, Identity, quantization_from_name
+from bitorch.quantizations import Quantization_Scheduler, quantization_from_name
 from datasets import dataset_from_name
 from bitorch.models import model_from_name
 from bitorch.quantizations import Quantization
@@ -102,13 +102,18 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model_kwargs = vars(model_args)
     logger.debug(f"got model args as dict: {model_kwargs}")
 
-    model = model_from_name(args.model)(**model_kwargs, input_shape=dataset.shape,
-                                        num_classes=dataset.num_classes)  # type: ignore
+    model = model_from_name(args.model)(
+        **model_kwargs, input_shape=dataset.shape, num_classes=dataset.num_classes
+    )  # type: ignore
     model.initialize()
 
     if args.quantization_scheduling:
-        quantization_scheduler = Quantization_Scheduler(model, quantizations=[quantization_from_name(
-            name)() for name in args.scheduled_quantizations], scheduling_procedure=args.quantization_scheduling_procedure, steps=args.max_epochs)
+        quantization_scheduler = Quantization_Scheduler(
+            model,
+            quantizations=[quantization_from_name(name)() for name in args.scheduled_quantizations],
+            scheduling_procedure=args.quantization_scheduling_procedure,
+            steps=args.max_epochs,
+        )
     else:
         quantization_scheduler = None
 

@@ -1,3 +1,4 @@
+# type: ignore
 import pytorch_lightning as pl
 
 from bitorch.quantizations import ProgressiveSign
