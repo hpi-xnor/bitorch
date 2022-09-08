@@ -150,12 +150,12 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
     )
     optimizer.add_argument(
         "--scheduled-quantizations",
-        nargs="*", default=None,
+        nargs="*", default=["identity", "sign"],
         help="name of quantizations to schedule",
     )
     optimizer.add_argument(
         "--quantization-scheduling-procedure",
-        type=str, default=None, choices=list(Quantization_Scheduler.procedure_classes.keys()),
+        type=str, default="mix_linear", choices=list(Quantization_Scheduler.procedure_classes.keys()),
         help="procedure to use for scheduling",
     )
     optimizer.add_argument(

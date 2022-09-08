@@ -103,7 +103,7 @@ class ModelWrapper(LightningModule):
 
         return loss
 
-    def on_epoch_end(self) -> None:
+    def on_validation_epoch_end(self) -> None:
         if self.quantization_scheduler is not None:
             self.quantization_scheduler.step()
             self.log("quantization_scheduler/mix_factor",

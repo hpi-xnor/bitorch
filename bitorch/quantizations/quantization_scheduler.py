@@ -9,21 +9,20 @@ from .config import config
 
 class MixLinearScheduling(Quantization):
     name = "__mixlinarscheduling__"
+    bit_width = 32
 
     def __init__(self, quantizations, steps):
         super().__init__()
         self.quantizations = [deepcopy(quantization) for quantization in quantizations]
+        self.bit_width = self.quantizations[-1].bit_width
         self.mix_factor = 0.0
         self.step_count = 0
         self.steps = steps
 
     def step(self):
-        print("before:", self.step_count, self.steps)
         self.step_count += 1
         self.mix_factor = self.step_count / self.steps
-        print("after:", self.step_count, self.steps)
-
-        assert self.mix_factor <= 1
+        self.mix_factor = min(self.mix_factor, 1.0)
 
     def quantize(self, x: torch.Tensor):
         if len(self.quantizations) == 1:
@@ -57,22 +56,21 @@ class Quantization_Scheduler(Module):
         self.scheduled_quantizer = self.get_scheduled_quantizer(scheduling_procedure)
 
         self.scheduled_quantizer_instances = []
-        self.replace_quantizations(model, exclude_layers, "")
-        print("got ", len(self.scheduled_quantizer_instances), "quantization schedulers")
+        self.replace_quantizations(model, exclude_layers)
 
     def get_scheduled_quantizer(self, procedure):
         return self.procedure_classes[procedure]
 
-    def replace_quantizations(self, model, exclude_layers, module_name):
+    def replace_quantizations(self, model, exclude_layers):
         for name in dir(model):
             module = getattr(model, name)
             if issubclass(type(module), Quantization):
-                print("replaced", module_name, " -> ", name)
                 self.scheduled_quantizer_instances.append(self.scheduled_quantizer(self.quantizations, self.steps))
                 setattr(model, name, self.scheduled_quantizer_instances[-1])
 
-        for name, children in model.named_children():
-            self.replace_quantizations(children, exclude_layers, name)
+        for child in model.children():
+            if type(child) not in exclude_layers:
+                self.replace_quantizations(child, exclude_layers)
 
     def step(self):
         for scheduled_quantizer in self.scheduled_quantizer_instances:
