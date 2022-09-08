@@ -25,6 +25,7 @@ from torch.utils.data import DataLoader
 
 import bitorch
 from bitorch import apply_args_to_configuration, RuntimeMode
+from bitorch.quantizations import Quantization_Scheduler, Sign, Identity, quantization_from_name
 from datasets import dataset_from_name
 from bitorch.models import model_from_name
 from bitorch.quantizations import Quantization
@@ -101,8 +102,15 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model_kwargs = vars(model_args)
     logger.debug(f"got model args as dict: {model_kwargs}")
 
-    model = model_from_name(args.model)(**model_kwargs, input_shape=dataset.shape, num_classes=dataset.num_classes)  # type: ignore
+    model = model_from_name(args.model)(**model_kwargs, input_shape=dataset.shape,
+                                        num_classes=dataset.num_classes)  # type: ignore
     model.initialize()
+
+    if args.quantization_scheduling:
+        quantization_scheduler = Quantization_Scheduler(model, quantizations=[quantization_from_name(
+            name)() for name in args.scheduled_quantizations], scheduling_procedure=args.quantization_scheduling_procedure, steps=args.max_epochs)
+    else:
+        quantization_scheduler = None
 
     wrapper_class: Type[ModelWrapper] = ModelWrapper
     if args.teacher:
@@ -117,7 +125,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
         model_wrapped = wrapper_class.load_from_checkpoint(args.checkpoint_load)
     else:
-        model_wrapped = wrapper_class(model, dataset.num_classes, args)
+        model_wrapped = wrapper_class(model, dataset.num_classes, quantization_scheduler, args)
 
     trainer = Trainer(
         strategy=args.strategy,

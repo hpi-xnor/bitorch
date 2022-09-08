@@ -8,8 +8,9 @@ from pytorch_lightning import Trainer
 import bitorch
 from bitorch.models import model_from_name, model_names, Model
 from bitorch.models.base import NoArgparseArgsMixin
-from ..datasets import dataset_names
-from ..utils.teachers import available_teachers
+from bitorch.quantizations.quantization_scheduler import Quantization_Scheduler
+from datasets import dataset_names
+from utils.teachers import available_teachers
 
 
 class _HeadArgumentParser(ArgumentParser):
@@ -141,6 +142,21 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
         type=str,
         choices=["cosine", "step", "exponential"],
         help="name of the lr scheduler to use. default to none",
+    )
+    optimizer.add_argument(
+        "--quantization-scheduling",
+        action="store_true", default=False,
+        help="toggles weather to use quantization scheduling",
+    )
+    optimizer.add_argument(
+        "--scheduled-quantizations",
+        nargs="*", default=None,
+        help="name of quantizations to schedule",
+    )
+    optimizer.add_argument(
+        "--quantization-scheduling-procedure",
+        type=str, default=None, choices=list(Quantization_Scheduler.procedure_classes.keys()),
+        help="procedure to use for scheduling",
     )
     optimizer.add_argument(
         "--lr",

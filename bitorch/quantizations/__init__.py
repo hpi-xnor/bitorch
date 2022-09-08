@@ -15,6 +15,7 @@ from .sign import Sign
 from .ste_heaviside import SteHeaviside
 from .swish_sign import SwishSign
 from .progressive_sign import ProgressiveSign
+from .quantization_scheduler import Quantization_Scheduler
 from ..util import build_lookup_dictionary
 
 __all__ = [
