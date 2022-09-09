@@ -1,3 +1,9 @@
+"""
+Implementation of a quantization scheduler which replaces quantization functions inside a given model during
+training. This module also contains various scheduling procedure implementations which can be extended in future
+versions
+"""
+
 from torch.nn import Module
 import torch
 from typing import List, Type
@@ -6,12 +12,31 @@ from copy import deepcopy
 
 
 class ScheduledQuantizer(Quantization):
-    """Base class for scheduled quantizers to inherit from"""
+    """Base class for scheduled quantizers to inherit from. You can also use this quantization method
+    to indicate to the quantization scheduler that only this quantization should be scheduled.
 
-    name = "__scheduledquantizer__"
+    e.g.
+    ```
+    model = Sequential(
+        QConv2d(3, 64, input_quantization="scheduled_quantizer", weight_quantization="sign"),
+        ReLU(),
+        flatten(),
+        QLinear(1000, 10, input_quantization="sign", weight_quantization="sign"),
+        Softmax(),
+    )
+    # this replaces all quantizations in the model with scheduled quantizers and schedules them during training
+    scheduler = Quantization_Scheduler(model, [Identity(), InputDorefa()], replace_all_quantizations=True)
+
+    # this only replaces the one instance of the ScheduledQuantizer and leaves the rest unchanged
+    scheduler = Quantization_Scheduler(model, [Identity(), InputDorefa()], replace_all_quantizations=False)
+    ```
+
+    """
+
+    name = "scheduled_quantizer"
     bit_width = 32
 
-    def __init__(self, quantizations: List[Quantization], steps: int) -> None:
+    def __init__(self, quantizations: List[Quantization] = None, steps: int = None) -> None:
         """Initias scheduled optimizer and sets bitwidth to width of last quantization to be scheduled.
 
         Args:
@@ -19,8 +44,11 @@ class ScheduledQuantizer(Quantization):
             steps (int): number of steps. at the end of each step, the step() method has to be called once.
         """
         super().__init__()
-        self.quantizations = [deepcopy(quantization) for quantization in quantizations]
-        self.bit_width = self.quantizations[-1].bit_width
+        if quantizations is None:
+            self.quantizations = None
+        else:
+            self.quantizations = [deepcopy(quantization) for quantization in quantizations]
+            self.bit_width = self.quantizations[-1].bit_width if hasattr(self.quantizations[-1], "bit_width") else 32
         self.step_count = 0
         self.factor = 0.0
         self.steps = steps
@@ -85,6 +113,7 @@ class Quantization_Scheduler(Module):
         steps: int,
         quantizations: List[Quantization],
         scheduling_procedure: str,
+        schedule_all_quantizations: bool = False,
         exclude_layers: List[Type] = [],
     ) -> None:
         """Initiates the quantization scheduler and replaces the activation function inside the model with scheduled
@@ -97,6 +126,9 @@ class Quantization_Scheduler(Module):
             quantizations (List[Quantization]): Quantization functions to be scheduled
             scheduling_procedure (str): procedure to be used for scheduling. See available subclasses of
                 ScheduledQuantizer
+            schedule_all_quantizations (bool): toggles weather all quantizations in the model shall be replaced with
+                quantized schedulers or weather only the quantized scheduler layers already present shall be used for
+                scheduling. Defaults to False.
             exclude_layers (List[Type], optional): list of layers types to exclude from replacement with scheduled
                 quantizers. Defaults to [].
         """
@@ -112,12 +144,20 @@ class Quantization_Scheduler(Module):
         self.scheduled_quantizer = self.get_scheduled_quantizer(scheduling_procedure)
 
         self.scheduled_quantizer_instances: List[ScheduledQuantizer] = []
-        self.replace_quantizations(model, exclude_layers)
+        self.replace_quantizations(model, exclude_layers, schedule_all_quantizations)
 
     def get_scheduled_quantizer(self, procedure: str) -> Type:
+        """gets the scheduling class associated with the given scheduling procedure
+
+        Args:
+            procedure (str): name of the scheduling procedure to be used
+
+        Returns:
+            Type: a subclass of ScheduledQuantizer
+        """
         return self.procedure_classes[procedure]
 
-    def replace_quantizations(self, model: Module, exclude_layers: List[Type]) -> None:
+    def replace_quantizations(self, model: Module, exclude_layers: List[Type], replace_all_quantizations: bool) -> None:
         """replaces all quantization functions present in the model with a scheduled quantizer.
         iterates recursevely to the model layers.
 
@@ -125,16 +165,21 @@ class Quantization_Scheduler(Module):
             model (Module): model have the quantization functions replaced
             exclude_layers (List[Type]): list of layers to exclude from replacement, e.g. if QConv2d is specified,
                 the quantization functions from all QConv2d layers (input and weight) are not replaced
+            replace_all_quantizations (bool): toggles weather to replace all quantizations or just the instances
+                of ScheduledQuantizer
         """
         for name in dir(model):
             module = getattr(model, name)
-            if issubclass(type(module), Quantization):
+            if replace_all_quantizations and issubclass(type(module), Quantization):
+                self.scheduled_quantizer_instances.append(self.scheduled_quantizer(self.quantizations, self.steps))
+                setattr(model, name, self.scheduled_quantizer_instances[-1])
+            elif not replace_all_quantizations and issubclass(type(module), ScheduledQuantizer):
                 self.scheduled_quantizer_instances.append(self.scheduled_quantizer(self.quantizations, self.steps))
                 setattr(model, name, self.scheduled_quantizer_instances[-1])
 
         for child in model.children():
             if type(child) not in exclude_layers:
-                self.replace_quantizations(child, exclude_layers)
+                self.replace_quantizations(child, exclude_layers, replace_all_quantizations)
 
     def step(self) -> None:
         """updates all instances of scheduled quantizers in the model"""

@@ -112,6 +112,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             model,
             quantizations=[quantization_from_name(name)() for name in args.scheduled_quantizations],
             scheduling_procedure=args.quantization_scheduling_procedure,
+            schedule_all_quantizations=args.schedule_all_quantizations,
             steps=args.max_epochs,
         )
     else:

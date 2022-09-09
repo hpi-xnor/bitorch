@@ -18,7 +18,7 @@ def test_scheduler():
     par2 = list(model_unscheduled.parameters())[0]
     par3 = list(model_dorefa.parameters())[0]
     assert torch.equal(par1, par2)
-    assert torch.equal(par1, par3)
+    assert torch.equal(par2, par3)
 
     scheduler = Quantization_Scheduler(model, 2, [Sign(), WeightDoReFa(), Sign()], scheduling_procedure="mix_linear")
     assert scheduler.scheduled_quantizer is MixLinearScheduling

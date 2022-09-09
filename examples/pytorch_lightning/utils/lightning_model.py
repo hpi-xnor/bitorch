@@ -108,8 +108,8 @@ class ModelWrapper(LightningModule):
         if self.quantization_scheduler is not None:
             self.quantization_scheduler.step()
             self.log(
-                "quantization_scheduler/mix_factor",
-                self.quantization_scheduler.scheduled_quantizer_instances[0].mix_factor,
+                "quantization_scheduler/factor",
+                self.quantization_scheduler.scheduled_quantizer_instances[0].factor,
             )
         return super().on_epoch_end()
 

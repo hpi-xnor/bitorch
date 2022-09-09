@@ -150,6 +150,13 @@ def add_optimizer_args(parser: ArgumentParser) -> None:
         help="toggles weather to use quantization scheduling",
     )
     optimizer.add_argument(
+        "--schedule-all-quantizations",
+        action="store_true",
+        default=False,
+        help="toggles weather to replace all quantizations inside the model with scheduled quantizers or "
+        "to just use the instances of ScheduledQuantizer which are already present in the model.",
+    )
+    optimizer.add_argument(
         "--scheduled-quantizations",
         nargs="*",
         default=["identity", "sign"],
