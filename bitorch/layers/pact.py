@@ -14,7 +14,7 @@ class PactActFn(Function):
         ctx.save_for_backward(input_tensor, alpha)
         # y_1 = 0.5 * ( torch.abs(x).detach() - torch.abs(x - alpha).detach() + alpha.item() )
         clamped = torch.clamp(input_tensor, min=0, max=alpha.item())
-        scale = (2 ** bits - 1) / alpha
+        scale = (2**bits - 1) / alpha
         quantized = torch.round(clamped * scale) / scale
         return quantized
 

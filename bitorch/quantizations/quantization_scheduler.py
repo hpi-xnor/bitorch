@@ -36,7 +36,7 @@ class ScheduledQuantizer(Quantization):
     name = "scheduled_quantizer"
     bit_width = 32
 
-    def __init__(self, quantizations: List[Quantization] = None, steps: int = None) -> None:
+    def __init__(self, quantizations: List[Quantization] = [], steps: int = 0) -> None:
         """Initias scheduled optimizer and sets bitwidth to width of last quantization to be scheduled.
 
         Args:
@@ -44,10 +44,8 @@ class ScheduledQuantizer(Quantization):
             steps (int): number of steps. at the end of each step, the step() method has to be called once.
         """
         super().__init__()
-        if quantizations is None:
-            self.quantizations = None
-        else:
-            self.quantizations = [deepcopy(quantization) for quantization in quantizations]
+        self.quantizations = [deepcopy(quantization) for quantization in quantizations]
+        if len(quantizations) > 0:
             self.bit_width = self.quantizations[-1].bit_width if hasattr(self.quantizations[-1], "bit_width") else 32
         self.step_count = 0
         self.factor = 0.0
