@@ -36,7 +36,7 @@ __all__ = [
 ]
 
 
-quantizations_by_name: Dict[str, Type[Quantization]] = build_lookup_dictionary(__name__, __all__, Quantization)
+quantizations_by_name: Dict[str, Type[Quantization]] = build_lookup_dictionary(__name__, __all__[:-2], Quantization)
 
 
 def quantization_from_name(name: str) -> Type[Quantization]:

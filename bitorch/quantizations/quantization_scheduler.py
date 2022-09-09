@@ -57,6 +57,17 @@ class ScheduledQuantizer(Quantization):
         self.factor = self.step_count / self.steps
         self.factor = min(self.factor, 1.0)
 
+    def quantize(self, x: torch.Tensor) -> torch.Tensor:
+        """dummy quantization function for compability reasons.
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: unchanged input tensor
+        """
+        return x
+
 
 class MixLinearScheduling(ScheduledQuantizer):
     name = "__mixlinarscheduling__"
