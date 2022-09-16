@@ -17,11 +17,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - QConv
 - a quantized DLRM version, derived from [this](https://github.com/facebookresearch/dlrm) implementation
 - example code for training the quantized DLRM model
-- New quantization function: [Progressive Sign](bitorch/quantizations/progressive_sign.py)
-- New features in PyTorch Lightning example:
-  - Training with Knowledge Distillation
-  - Improved Logging
-  - Callback to update Progressive Sign modules
+- new quantization function: [Progressive Sign](bitorch/quantizations/progressive_sign.py)
+- new features in PyTorch Lightning example:
+  - training with Knowledge Distillation
+  - improved logging
+  - callback to update Progressive Sign module
+- option to integrate custom models, datasets, quantization functions
 
 ### Changed
 

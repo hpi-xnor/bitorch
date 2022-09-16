@@ -12,7 +12,7 @@ class LayerConfig(Config):
     name = "layer_config"
 
     def get_quantization_function(self, quantization: Union[str, Quantization]) -> Quantization:
-        """Returns the quantization module specified in quantization_name.
+        """Returns the quantization module specified by the given name or object.
 
         Args:
             quantization: quantization module or name of quantization function.

@@ -28,17 +28,17 @@ TEST_INPUT_DATA = [
         [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
     ),
     (
-        ProgressiveSign(use_global_scaling=False, initial_scale=0.2),
+        ProgressiveSign(use_global_scaling=False, initial_scale=0.05),
         1,
         [-1.5, -1.0, -0.3, -0.1, 0.0, 0.1, 0.3, 1.0, 1.5],
-        [-1.0, -1.0, -0.788, -0.2627, 0.0, 0.2627, 0.788, 1.0, 1.0],
+        [-1.0, -1.0, -0.6, -0.2, 0.0, 0.2, 0.6, 1.0, 1.0],
         [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
     ),
     (
         ProgressiveSign(use_global_scaling=False, initial_scale=0.5),
         1,
         [-1.5, -1.0, -0.3, -0.1, -0.05, 0.0, 0.05, 0.1, 0.3, 1.0, 1.5],
-        [-1.0, -1.0, -1.0, -1.0, -0.559, 0.0, 0.559, 1.0, 1.0, 1.0, 1.0],
+        [-1.0, -1.0, -1.0, -1.0, -1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
     ),
     (
@@ -117,6 +117,7 @@ def test_quantizations(
     assert torch.allclose(y, x_exp, atol=0.001)
     assert quantization.bit_width == bits
     with pytest.deprecated_call():
+        # noinspection PyDeprecation
         assert quantization.bitwidth == bits
 
     y.backward(x)

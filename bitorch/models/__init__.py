@@ -48,6 +48,9 @@ from ..util import build_lookup_dictionary
 
 __all__ = [
     "Model",
+    "model_from_name",
+    "model_names",
+    "register_custom_model",
     "LeNet",
     "Resnet",
     "Resnet152V1",
@@ -83,8 +86,8 @@ models_by_name = build_lookup_dictionary(__name__, __all__, Model, key_fn=lambda
 
 
 def model_from_name(name: str) -> Type[Model]:
-    """returns the model to which the name belongs to (name has to be the value of the models
-    name-attribute)
+    """
+    Return a model by the given name.
 
     Args:
         name (str): name of the model
@@ -100,10 +103,21 @@ def model_from_name(name: str) -> Type[Model]:
     return models_by_name[name.lower()]
 
 
-def model_names() -> List:
-    """getter for list of model names for argparse
+def model_names() -> List[str]:
+    """
+    Get the list of model names.
 
     Returns:
         List: the model names
     """
     return list(models_by_name.keys())
+
+
+def register_custom_model(custom_model: Type[Model]) -> None:
+    """
+    Register a custom (external) model in bitorch.
+
+    Args:
+        custom_model: the custom model which should be added to bitorch
+    """
+    models_by_name[custom_model.name] = custom_model

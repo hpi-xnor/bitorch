@@ -5,11 +5,11 @@ from typing import Tuple, List, Type, Any, Optional, Sequence
 
 from pytorch_lightning import Trainer
 
-from bitorch import add_config_args
-from ..datasets import dataset_names  # type: ignore
+import bitorch
 from bitorch.models import model_from_name, model_names, Model
 from bitorch.models.base import NoArgparseArgsMixin
-from examples.pytorch_lightning.utils.teachers import available_teachers
+from ..datasets import dataset_names
+from ..utils.teachers import available_teachers
 
 
 class _HeadArgumentParser(ArgumentParser):
@@ -303,7 +303,7 @@ def add_regular_args(parser: ArgumentParser) -> None:
     add_checkpoint_args(parser)
     add_training_args(parser)
 
-    add_config_args(parser)
+    bitorch.add_config_args(parser)
 
     parser.add_argument(
         "--model",
