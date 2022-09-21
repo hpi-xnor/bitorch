@@ -8,8 +8,8 @@ from pytorch_lightning import Trainer
 import bitorch
 from bitorch.models import model_from_name, model_names, Model
 from bitorch.models.base import NoArgparseArgsMixin
-from ..datasets import dataset_names
-from ..utils.teachers import available_teachers
+from datasets import dataset_names
+from .teachers import available_teachers
 
 
 class _HeadArgumentParser(ArgumentParser):
