@@ -18,7 +18,8 @@ print("version:", version)
 def _get_requirements(*file_path: Union[Path, str]):
     requirements_list = []
     for fp in file_path:
-        requirements_list.extend(list(requirement.strip() for requirement in (root_path / fp).open().readlines()))
+        with (root_path / fp).open() as requirements_file:
+            requirements_list.extend(list(requirement.strip() for requirement in requirements_file.readlines()))
     # exclude bitorch from examples
     if "bitorch" in requirements_list:
         requirements_list.remove("bitorch")
@@ -47,7 +48,7 @@ setuptools.setup(
     extras_require={
         "dev": _get_requirements("requirements-dev.txt"),
         # "opt": _get_requirements(*_get_files_recursively("requirements*.txt", root="examples")),
-        "opt": _get_requirements("examples/pytorch_lightning/requirements.txt"),
+        "opt": _get_requirements("examples/image_classification/requirements.txt", "examples/mnist/requirements.txt"),
     },
     classifiers=[
         "Development Status :: 3 - Alpha",

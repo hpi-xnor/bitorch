@@ -8,7 +8,7 @@ from torch.nn import functional as F
 import bitorch
 import bitorch.runtime_mode
 from bitorch import RuntimeMode
-from examples.pytorch_lightning.datasets import MNIST
+from examples.image_classification.datasets import MNIST
 from bitorch.layers import QConv2d, QLinear
 from bitorch.layers.extensions.layer_implementation import CustomImplementationMixin
 from bitorch.layers.extensions import LayerRecipe
