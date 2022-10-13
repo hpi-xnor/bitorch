@@ -43,6 +43,11 @@ from .resnet_e import (
     ResnetE18,
     ResnetE34,
 )
+from .quicknet import (
+    QuickNet,
+    QuickNetSmall,
+    QuickNetLarge,
+)
 from .dlrm import DLRM
 from ..util import build_lookup_dictionary
 
@@ -79,6 +84,9 @@ __all__ = [
     "MeliusNetB",
     "MeliusNetC",
     "MeliusNetFlex",
+    "QuickNet",
+    "QuickNetSmall",
+    "QuickNetLarge",
 ]
 
 
