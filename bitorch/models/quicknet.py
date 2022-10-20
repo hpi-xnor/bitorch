@@ -6,7 +6,7 @@ from torch import nn
 from torch.nn import Module
 
 from .base import Model, NoArgparseArgsMixin
-from bitorch.layers import QConv2d, QLinear, PadModule
+from bitorch.layers import QConv2d, QLinear, PadModule, QConv2d_NoAct
 from bitorch.models.common_layers import get_initial_layers
 
 
@@ -31,7 +31,6 @@ class ResidualBlock(Module):
                 pad_value=1,
                 padding="same",
                 bias=False,
-                gradient_cancellation_threshold=1.25,
             ),
             nn.ReLU(),
             nn.BatchNorm2d(self.out_channels, momentum=0.9),
@@ -55,7 +54,7 @@ def build_transition_block(in_channels: int, out_channels: int, strides: int) ->
             stride=strides,
             bias=False,
         ).requires_grad_(False),
-        QConv2d(in_channels, out_channels, kernel_size=1, bias=False),
+        nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False),
         nn.ReLU(),
         nn.BatchNorm2d(out_channels, momentum=0.9),
     )
@@ -83,21 +82,48 @@ class QuickNet(Model):
         self._model = self._build_model()
         logging.info("building Quicknet")
 
+        self._model.Stem.apply(self._initialize_stem)  # type: ignore
+        self._model.Body.apply(self._initialize_body_top)  # type: ignore
+        self._model.Top.apply(self._initialize_body_top)  # type: ignore
+
+    def _initialize_stem(self, layer: Module) -> None:
+        if type(layer) == nn.Conv2d:
+            if layer.groups == 1:
+                nn.init.kaiming_normal_(layer.weight)  # he normal
+            else:
+                nn.init.xavier_uniform_(layer.weight)  # glorot uniform
+
+    def _initialize_body_top(self, layer: Module) -> None:
+        if isinstance(layer, (QConv2d_NoAct, nn.Linear)):
+            if isinstance(layer, nn.Linear) or layer.groups == 1:
+                nn.init.xavier_normal_(layer.weight)  # glorot normal
+            else:
+                pass  # TODO  add blurpool initialization
+
     def _build_model(self) -> nn.Sequential:
         model = nn.Sequential()
         model.add_module(
-            "Stem Module",
+            "Stem",
             nn.Sequential(*get_initial_layers("quicknet_stem", self.image_channels, self.section_filters[0])),
         )
+        body = nn.Sequential()
         for block_num, (layers, filters) in enumerate(zip(self.section_blocks, self.section_filters)):
+            residual_blocks: List[Module] = []
             for layer in range(layers):
-                model.append(ResidualBlock(filters, filters))
+                residual_blocks.append(ResidualBlock(filters, filters))
+            body.add_module(
+                "ResidualBlocks_%d" % (block_num + 1),
+                nn.Sequential(*residual_blocks),
+            )
             if block_num != len(self.section_blocks) - 1:
-                model.add_module(
+                body.add_module(
                     "Transition_%d" % (block_num + 1),
                     build_transition_block(filters, self.section_filters[block_num + 1], 2),
                 )
-
+        model.add_module(
+            "Body",
+            body,
+        )
         model.add_module(
             "Top",
             nn.Sequential(
