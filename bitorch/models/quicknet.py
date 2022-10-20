@@ -87,7 +87,7 @@ class QuickNet(Model):
         self._model.Top.apply(self._initialize_body_top)  # type: ignore
 
     def _initialize_stem(self, layer: Module) -> None:
-        if type(layer) == nn.Conv2d:
+        if isinstance(layer, nn.Conv2d):
             if layer.groups == 1:
                 nn.init.kaiming_normal_(layer.weight)  # he normal
             else:
@@ -159,3 +159,13 @@ class QuickNetLarge(NoArgparseArgsMixin, QuickNet):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(QuickNetLarge, self).__init__(section_blocks=self.section_blocks, *args, **kwargs)
+
+
+def clip_weights(layer: Module, clip_value: float = 1.25) -> None:
+    """
+    clips weights in quantized convolution layer in Residual Blocks.
+    """
+    if isinstance(layer, ResidualBlock):
+        weights = layer.body._modules["0"].layer_implementation.weight.data  # type: ignore
+        weights = weights.clamp(-clip_value, clip_value)  # type: ignore
+        layer.body._modules["0"].layer_implementation.weight.data = weights  # type: ignore
