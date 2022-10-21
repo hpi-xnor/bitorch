@@ -1,6 +1,6 @@
 black
 build
-flake8
+flake8==3.8.2
 flake8-docstrings
 mypy~=0.920
 myst-nb
