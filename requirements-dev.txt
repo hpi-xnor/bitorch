@@ -1,6 +1,7 @@
 black
 build
-flake8==3.8.2
+importlib-metadata==4.13.0
+flake8
 flake8-docstrings
 mypy~=0.920
 myst-nb
