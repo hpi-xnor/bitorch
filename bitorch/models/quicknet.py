@@ -4,9 +4,10 @@ from typing import Any, List
 import torch
 from torch import nn
 from torch.nn import Module
+import numpy as np
 
 from .base import Model, NoArgparseArgsMixin
-from bitorch.layers import QConv2d, QLinear, PadModule, QConv2d_NoAct
+from bitorch.layers import QConv2d, QLinear, PadModule
 from bitorch.models.common_layers import get_initial_layers
 
 
@@ -86,6 +87,29 @@ class QuickNet(Model):
         self._model.Body.apply(self._initialize_body_top)  # type: ignore
         self._model.Top.apply(self._initialize_body_top)  # type: ignore
 
+    def _blurpool_init(self, weight: torch.Tensor) -> None:
+        """Initialize anti-alias low_pass filter.
+        See the `"Making Convolutional Networks Shift-Invariant Again" <https://arxiv.org/abs/1904.11486>`_ paper.
+        """
+
+        filters, kernel_size = weight.data.shape[0], weight.data.shape[2]
+
+        if kernel_size == 2:
+            new_weights = np.array([1, 1])
+        elif kernel_size == 3:
+            new_weights = np.array([1, 2, 1])
+        elif kernel_size == 5:
+            new_weights = np.array([1, 4, 6, 4, 1])
+        else:
+            raise ValueError("filter size should be in 2, 3, 5")
+
+        new_weights = np.outer(new_weights, new_weights)
+        new_weights = new_weights / np.sum(new_weights)
+        new_weights = np.expand_dims(new_weights, axis=-1)
+        new_weights = np.repeat(new_weights, filters, axis=-1)
+        new_weights = np.reshape(new_weights, weight.shape)
+        weight.data = torch.from_numpy(new_weights)
+
     def _initialize_stem(self, layer: Module) -> None:
         if isinstance(layer, nn.Conv2d):
             if layer.groups == 1:
@@ -94,11 +118,11 @@ class QuickNet(Model):
                 nn.init.xavier_uniform_(layer.weight)  # glorot uniform
 
     def _initialize_body_top(self, layer: Module) -> None:
-        if isinstance(layer, (QConv2d_NoAct, nn.Linear)):
+        if isinstance(layer, (nn.Conv2d, nn.Linear)):
             if isinstance(layer, nn.Linear) or layer.groups == 1:
                 nn.init.xavier_normal_(layer.weight)  # glorot normal
             else:
-                pass  # TODO  add blurpool initialization
+                self._blurpool_init(layer.weight)
 
     def _build_model(self) -> nn.Sequential:
         model = nn.Sequential()
@@ -163,7 +187,8 @@ class QuickNetLarge(NoArgparseArgsMixin, QuickNet):
 
 def clip_weights(layer: Module, clip_value: float = 1.25) -> None:
     """
-    clips weights in quantized convolution layer in Residual Blocks.
+    Clips weights in quantized convolution layer in Residual Blocks.
+    Can be used in training loop.
     """
     if isinstance(layer, ResidualBlock):
         weights = layer.body._modules["0"].layer_implementation.weight.data  # type: ignore
