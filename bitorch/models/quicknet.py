@@ -95,20 +95,18 @@ class QuickNet(Model):
         filters, kernel_size = weight.data.shape[0], weight.data.shape[2]
 
         if kernel_size == 2:
-            new_weights = np.array([1, 1])
+            base = np.array([1.0, 1.0])
         elif kernel_size == 3:
-            new_weights = np.array([1, 2, 1])
+            base = np.array([1.0, 2.0, 1.0])
         elif kernel_size == 5:
-            new_weights = np.array([1, 4, 6, 4, 1])
+            base = np.array([1.0, 4.0, 6.0, 4.0, 1.0])
         else:
             raise ValueError("filter size should be in 2, 3, 5")
 
-        new_weights = np.outer(new_weights, new_weights)
-        new_weights = new_weights / np.sum(new_weights)
-        new_weights = np.expand_dims(new_weights, axis=-1)
-        new_weights = np.repeat(new_weights, filters, axis=-1)
-        new_weights = np.reshape(new_weights, weight.shape)
-        weight.data = torch.from_numpy(new_weights)
+        new_weights = torch.Tensor(base[:, None] * base[None, :])
+        new_weights = new_weights / torch.sum(new_weights)
+        new_weights = new_weights[None, None, :, :].repeat((filters, 1, 1, 1))
+        weight.data = new_weights
 
     def _initialize_stem(self, layer: Module) -> None:
         if isinstance(layer, nn.Conv2d):
