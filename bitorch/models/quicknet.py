@@ -7,7 +7,7 @@ from torch.nn import Module
 import numpy as np
 
 from .base import Model, NoArgparseArgsMixin
-from bitorch.layers import QConv2d, QLinear, PadModule
+from bitorch.layers import QConv2d, PadModule
 from bitorch.models.common_layers import get_initial_layers
 
 
@@ -152,11 +152,20 @@ class QuickNet(Model):
                 nn.ReLU(),
                 nn.AdaptiveAvgPool2d(1),
                 nn.Flatten(),
-                QLinear(self.section_filters[-1], self.num_classes),
-                nn.Softmax(),
+                nn.Linear(self.section_filters[-1], self.num_classes),
             ),
         )
         return model
+
+    def _clip_weights(self, layer: Module, clip_value: float = 1.25) -> None:
+        """
+        Clips weights in quantized convolution layer in Residual Blocks.
+        Can be used in training loop.
+        """
+        if isinstance(layer, ResidualBlock):
+            weights = layer.body._modules["0"].layer_implementation.weight.data  # type: ignore
+            weights = weights.clamp(-clip_value, clip_value)  # type: ignore
+            layer.body._modules["0"].layer_implementation.weight.data = weights  # type: ignore
 
 
 class QuickNetSmall(NoArgparseArgsMixin, QuickNet):
@@ -181,14 +190,3 @@ class QuickNetLarge(NoArgparseArgsMixin, QuickNet):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(QuickNetLarge, self).__init__(section_blocks=self.section_blocks, *args, **kwargs)
-
-
-def clip_weights(layer: Module, clip_value: float = 1.25) -> None:
-    """
-    Clips weights in quantized convolution layer in Residual Blocks.
-    Can be used in training loop.
-    """
-    if isinstance(layer, ResidualBlock):
-        weights = layer.body._modules["0"].layer_implementation.weight.data  # type: ignore
-        weights = weights.clamp(-clip_value, clip_value)  # type: ignore
-        layer.body._modules["0"].layer_implementation.weight.data = weights  # type: ignore
