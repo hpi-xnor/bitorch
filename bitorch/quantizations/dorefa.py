@@ -8,6 +8,45 @@ from .base import Quantization
 from .config import config
 
 
+class WeightDoReFaFunction(Function):
+    @staticmethod
+    @typing.no_type_check
+    def forward(
+            ctx: torch.autograd.function.BackwardCFunction,
+            input_tensor: torch.Tensor,
+            maximum_bit_value: int) -> torch.Tensor:
+        """quantizes input tensor and forwards it.
+
+        Args:
+            ctx (Any): autograd context
+            input_tensor (torch.Tensor): input tensor
+            bits (int): number of bits to round the input tensor to
+
+        Returns:
+            torch.Tensor: the quantized input tensor
+        """
+        ctx.save_for_backward(input_tensor)
+
+        squashed_values = torch.tanh(input_tensor)
+        max_val = torch.max(torch.abs(squashed_values)).detach()
+        adjusted_values = squashed_values / (2.0 * max_val) + 0.5
+        return 2.0 * (torch.round(adjusted_values * maximum_bit_value) / maximum_bit_value) - 1.0
+
+    @staticmethod
+    @typing.no_type_check
+    def backward(ctx: Any, output_gradient: torch.Tensor) -> torch.Tensor:
+        """just passes the unchanged output gradient as input gradient.
+
+        Args:
+            ctx (Any): autograd context
+            output_gradient (torch.Tensor): output gradient
+
+        Returns:
+            torch.Tensor: the unchanged output gradient
+        """
+        return output_gradient, None, None
+
+
 class WeightDoReFa(Quantization):
     """Module for applying the dorefa function on weights.
 
@@ -37,10 +76,8 @@ class WeightDoReFa(Quantization):
         Returns:
             torch.Tensor: DoReFaed tensor x
         """
-        squashed_values = torch.tanh(x)
-        max_val = torch.max(torch.abs(squashed_values)).detach()
-        adjusted_values = squashed_values / (2.0 * max_val) + 0.5
-        return 2.0 * (torch.round(adjusted_values * self._max_value) / self._max_value) - 1.0
+
+        return WeightDoReFaFunction.apply(x, self._max_value)
 
 
 class InputDoReFaFunction(Function):

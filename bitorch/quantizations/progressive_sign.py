@@ -4,9 +4,10 @@ from typing import Any, Callable, Optional, Union
 
 import torch
 import torch.nn.functional as F
+from torch.autograd.function import Function
 
 from bitorch.config import Config
-from .base import Quantization, STE
+from .base import Quantization
 from .sign import SignFunction
 
 EPSILON = 1e-7
@@ -28,7 +29,7 @@ class ProgressiveSignConfig(Config):
 config = ProgressiveSignConfig()
 
 
-class ProgressiveSignFunctionTrain(STE):
+class ProgressiveSignFunctionTrain(Function):
     @staticmethod
     @typing.no_type_check
     def forward(
@@ -46,6 +47,7 @@ class ProgressiveSignFunctionTrain(STE):
         Returns:
             torch.Tensor: the sign tensor
         """
+        ctx.save_for_backward(input_tensor)
         # avoid division by zero with EPSILON
         return F.hardtanh(input_tensor / max(1.0 - temperature, EPSILON))
 
