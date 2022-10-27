@@ -1,3 +1,4 @@
+# type: ignore
 import logging
 import time
 from typing import Optional, Any, Dict, List, Union
