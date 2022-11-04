@@ -12,9 +12,8 @@ class WeightDoReFaFunction(Function):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,
-            input_tensor: torch.Tensor,
-            maximum_bit_value: int) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction, input_tensor: torch.Tensor, maximum_bit_value: int
+    ) -> torch.Tensor:
         """quantizes input tensor and forwards it.
 
         Args:
@@ -76,7 +75,6 @@ class WeightDoReFa(Quantization):
         Returns:
             torch.Tensor: DoReFaed tensor x
         """
-
         return WeightDoReFaFunction.apply(x, self._max_value)
 
 
