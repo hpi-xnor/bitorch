@@ -29,9 +29,9 @@ from bitorch.quantizations import Quantization_Scheduler, quantization_from_name
 from datasets import dataset_from_name
 from bitorch.models import model_from_name
 from bitorch.quantizations import Quantization
-from examples.pytorch_lightning.utils.callbacks import ProgressiveSignScalerCallback
-from examples.pytorch_lightning.utils.log import CommandLineLogger
-from examples.pytorch_lightning.utils.wandb_logger import CustomWandbLogger
+from examples.image_classification.utils.callbacks import ProgressiveSignScalerCallback
+from examples.image_classification.utils.log import CommandLineLogger
+from examples.image_classification.utils.wandb_logger import CustomWandbLogger
 from utils.arg_parser import create_argparser
 from utils.lightning_model import ModelWrapper, DistillationModelWrapper
 from utils.utils import configure_logging

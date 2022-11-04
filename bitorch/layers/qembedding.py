@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Any, Union, Optional
 from torch import Tensor
 from torch.nn import EmbeddingBag, Embedding
 from torch.nn.functional import embedding_bag, embedding
@@ -15,11 +15,11 @@ class QEmbeddingBag(EmbeddingBag):
 
     def __init__(
         self,
-        *args: int,
+        *args: Any,
         embedding_dim: int,
         weight_quantization: Union[Quantization, str] = None,
         output_quantization: Union[Quantization, str] = None,
-        **kwargs: int,
+        **kwargs: Any,
     ) -> None:
         super(QEmbeddingBag, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)  # type: ignore
         """load quantization functions"""
@@ -86,11 +86,11 @@ class QEmbedding(Embedding):
 
     def __init__(
         self,
-        *args: int,
+        *args: Any,
         embedding_dim: int,
         weight_quantization: Union[Quantization, str] = None,
         output_quantization: Union[Quantization, str] = None,
-        **kwargs: int,
+        **kwargs: Any,
     ) -> None:
         super(QEmbedding, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)  # type: ignore
         """load quantization functions"""
