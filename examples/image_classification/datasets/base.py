@@ -7,7 +7,7 @@ import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
 
-from datasets.dummy_dataset import DummyDataset
+from .dummy_dataset import DummyDataset
 
 
 class BasicDataset(Dataset):
