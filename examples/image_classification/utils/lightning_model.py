@@ -1,3 +1,4 @@
+# type: ignore
 import logging
 from argparse import Namespace
 from typing import Union, Any
@@ -18,6 +19,7 @@ class ModelWrapper(LightningModule):
         self,
         model: Module,
         num_classes: int,
+        quantization_scheduler: Module,
         script_args: Namespace,
         add_f1_prec_recall: bool = False,
     ) -> None:
@@ -32,6 +34,7 @@ class ModelWrapper(LightningModule):
         self.accuracy_top1 = Accuracy(num_classes=num_classes)
         self.accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
         self.add_f1_prec_recall = add_f1_prec_recall
+        self.quantization_scheduler = quantization_scheduler
         if add_f1_prec_recall:
             self.f1 = F1Score(num_classes=num_classes)
             self.prec = Precision(num_classes=num_classes)
@@ -100,6 +103,15 @@ class ModelWrapper(LightningModule):
         self.log_dict(metrics_dict, prog_bar=True, on_step=False, on_epoch=True)
 
         return loss
+
+    def on_validation_epoch_end(self) -> None:
+        if self.quantization_scheduler is not None:
+            self.quantization_scheduler.step()
+            self.log(
+                "quantization_scheduler/factor",
+                self.quantization_scheduler.scheduled_quantizer_instances[0].factor,
+            )
+        return super().on_epoch_end()
 
     def configure_optimizers(self) -> Union[dict, torch.optim.Optimizer]:  # type: ignore
         logging.info(f"Using {self.hparams.optimizer} optimizer and {self.hparams.lr_scheduler} lr scheduler...")

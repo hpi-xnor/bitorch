@@ -23,11 +23,12 @@ from bitorch.layers.register import (
 from bitorch.models import Model
 
 TEST_MODE = RuntimeMode.INFERENCE_AUTO
+MNIST = [(1, 1, 28, 28), 10, "MNIST"]
 
 
 class _TestModel(Model):
     def __init__(self):
-        super().__init__(input_shape=MNIST.shape, num_classes=MNIST.num_classes)
+        super().__init__(input_shape=MNIST[0], num_classes=MNIST[1])
         self.q_conv2d = QConv2d(1, 32, 3, 1, 1)
         self.q_linear = QLinear(784, 64)
         self._model = nn.Sequential(

@@ -1,5 +1,6 @@
 black
 build
+importlib-metadata==4.13.0
 flake8
 flake8-docstrings
 importlib_metadata<5

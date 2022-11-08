@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - improved logging
   - callback to update Progressive Sign module
 - option to integrate custom models, datasets, quantization functions
+- a quantization scheduler which lets you change quantization methods during training
 
 ### Changed
 
