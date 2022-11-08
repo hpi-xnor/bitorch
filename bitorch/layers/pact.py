@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 from torch.autograd import Function
 from torch.nn import Module
 import torch
@@ -42,7 +42,7 @@ class Pact(Module):
     Choi, Jungwook, et al. "Pact: Parameterized clipping activation for quantized neural networks." (2018)
     """
 
-    def __init__(self, bits: int = None) -> None:
+    def __init__(self, bits: Optional[int] = None) -> None:
         super().__init__()
         self.alpha = torch.nn.parameter.Parameter(torch.tensor(10.0))
         self.bits = bits or config.pact_bits

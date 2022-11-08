@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, Type, Union, Tuple, TYPE_CHECKING
+from typing import Optional, Any, Type, Union, Tuple, TYPE_CHECKING
 
 import torch
 
@@ -100,7 +100,7 @@ class LayerImplementation(ABC):
     def can_create_clone_from(self, recipe: LayerRecipe) -> Tuple[bool, str]:
         return self.class_.can_clone(recipe)
 
-    def get_replacement(self, recipe: LayerRecipe, device: torch.device = None) -> Any:
+    def get_replacement(self, recipe: LayerRecipe, device: Optional[torch.device] = None) -> Any:
         return self.class_.create_clone_from(recipe, device)
 
     def is_default(self) -> bool:

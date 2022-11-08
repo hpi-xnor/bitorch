@@ -19,7 +19,7 @@ class BasicDataset(Dataset):
     num_train_samples = 0
     num_val_samples = 0
 
-    def __init__(self, train: bool, root_directory: str = None, download: bool = False) -> None:
+    def __init__(self, train: bool, root_directory: Optional[str] = None, download: bool = False) -> None:
         """initializes the dataset.
 
         Args:

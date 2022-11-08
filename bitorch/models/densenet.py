@@ -53,7 +53,7 @@ class BaseNetDense(Module):
         reduction: List[float],
         bn_size: int,
         downsample: str,
-        image_resolution: List[int] = None,
+        image_resolution: Optional[List[int]] = None,
         dropout: float = 0,
         classes: int = 1000,
         image_channels: int = 3,
@@ -154,7 +154,7 @@ def basedensenet_constructor(
     dilated: bool,
     flex_block_config: Optional[List[int]],
     classes: int = 1000,
-    image_resolution: List[int] = None,
+    image_resolution: Optional[List[int]] = None,
     image_channels: int = 3,
 ) -> Module:
     """Creates a densenet of the given model type with given layer numbers.
@@ -237,7 +237,7 @@ class DenseNet(Model):
         bn_size: int = 0,
         dropout: float = 0,
         dilated: bool = False,
-        flex_block_config: List[int] = None,
+        flex_block_config: Optional[List[int]] = None,
     ) -> None:
         super(DenseNet, self).__init__(input_shape, num_classes)
         self._model = basedensenet_constructor(

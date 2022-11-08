@@ -32,7 +32,7 @@ class LayerRegistry:
             return None
         return next(filter(lambda x: x.layer == layer, self._instance_recipes))
 
-    def get_replacement(self, mode: RuntimeMode, recipe: LayerRecipe, device: torch.device = None) -> Any:
+    def get_replacement(self, mode: RuntimeMode, recipe: LayerRecipe, device: Optional[torch.device] = None) -> Any:
         layer = self.get_layer(mode, recipe)
         return layer.get_replacement(recipe, device)
 
@@ -110,7 +110,7 @@ class LayerRegistry:
         self,
         new_mode: RuntimeMode,
         only: Optional[Iterable[Any]] = None,
-        device: torch.device = None,
+        device: Optional[torch.device] = None,
         verbose: bool = False,
     ) -> None:
         for recipe in list(self._instance_recipes):

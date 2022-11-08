@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from typing import List, Any
+from typing import Optional, List, Any
 
 import torch
 from torch import nn
@@ -82,7 +82,7 @@ class Model(nn.Module):
             elif isinstance(module, nn.Linear):
                 nn.init.xavier_normal_(module.weight)
 
-    def convert(self, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> "Model":
+    def convert(self, new_mode: RuntimeMode, device: Optional[torch.device] = None, verbose: bool = False) -> "Model":
         return convert(self, new_mode, device, verbose)
 
 

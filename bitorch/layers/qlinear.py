@@ -1,6 +1,6 @@
 """Module containing the quantized linear layer"""
 
-from typing import Any, Type, Union, Dict
+from typing import Optional, Any, Type, Union, Dict
 
 import torch
 from torch.nn import Linear
@@ -18,9 +18,9 @@ class QLinearBase(Linear):
     def __init__(
         self,
         *args: int,
-        input_quantization: Union[str, Quantization] = None,
+        input_quantization: Optional[Union[str, Quantization]] = None,
         gradient_cancellation_threshold: Union[float, None] = None,
-        weight_quantization: Union[str, Quantization] = None,
+        weight_quantization: Optional[Union[str, Quantization]] = None,
         **kwargs: bool,
     ) -> None:
         """Applies the given quantization functions on weights and inputs before applying the linear operation.

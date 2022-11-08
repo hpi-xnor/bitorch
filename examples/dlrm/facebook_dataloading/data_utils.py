@@ -44,7 +44,7 @@ import sys
 import logging
 from os import path
 from multiprocessing import Process, Manager
-from typing import Any, Union
+from typing import Optional, Any, Union
 # import io
 # from io import StringIO
 # import collections as coll
@@ -425,8 +425,8 @@ def getCriteoAdData(
             split: Any,
             num_data_in_split: Any,
             dataset_multiprocessing: Any,
-            convertDictsDay: Any = None,
-            resultDay: Any = None
+            convertDictsDay: Optional[Any] = None,
+            resultDay: Optional[Any] = None
     ) -> Union[None, int]:
         if dataset_multiprocessing:
             convertDicts_day = [{} for _ in range(26)]

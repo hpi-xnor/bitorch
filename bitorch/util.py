@@ -1,15 +1,15 @@
 # import sys
 import typing
 import importlib
-from typing import Callable, List, Any, Dict
+from typing import Optional, Callable, List, Any, Dict
 
 
 @typing.no_type_check
 def build_lookup_dictionary(
     current_module_name: str,
     class_strings: List[str],
-    filter_by_superclass: Any = None,
-    filter_fn: Callable[[Any], bool] = None,
+    filter_by_superclass: Optional[Any] = None,
+    filter_fn: Optional[Callable[[Any], bool]] = None,
     key_fn: Callable[[Any], str] = lambda x: x.name,
 ) -> Dict[str, Any]:
     """Builds a lookup dictionary based on a list of strings of class names.

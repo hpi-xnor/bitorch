@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Optional, Any
 import torch
 from .config import config
 
@@ -49,8 +49,8 @@ class _PrintDebug(_Debug):
 class _GraphicalDebug(_Debug):
     def __init__(
         self,
-        figure: object = None,
-        images: list = None,
+        figure: Optional[object] = None,
+        images: Optional[list] = None,
         debug_interval: int = 100,
         num_outputs: int = 10,
     ) -> None:
@@ -69,7 +69,7 @@ class _GraphicalDebug(_Debug):
         self.set_figure(figure)
         self.set_images(images)
 
-    def set_figure(self, figure: object = None) -> None:
+    def set_figure(self, figure: Optional[object] = None) -> None:
         """setter for figure object
 
         Args:
@@ -77,7 +77,7 @@ class _GraphicalDebug(_Debug):
         """
         self._figure = figure
 
-    def set_images(self, images: list = None) -> None:
+    def set_images(self, images: Optional[list] = None) -> None:
         """setter for images list
 
         Args:
