@@ -3,7 +3,7 @@ Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs fr
 <https://arxiv.org/abs/1906.08637>`_ paper.
 """
 from .base import Model, NoArgparseArgsMixin
-from typing import List, Any
+from typing import Optional, List, Any
 import torch
 import argparse
 from torch import nn
@@ -172,7 +172,7 @@ class _ResnetE(SpecificResnetE):
         layers: list,
         channels: list,
         classes: int,
-        image_resolution: List[int] = None,
+        image_resolution: Optional[List[int]] = None,
         image_channels: int = 3,
     ) -> None:
         """Creates ResNetE model.

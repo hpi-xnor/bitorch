@@ -1,6 +1,6 @@
 """Module containing the quantized 1d convolution layer"""
 
-from typing import Any, Type, Union
+from typing import Optional, Any, Type, Union
 
 from torch import Tensor
 from torch.nn import Conv1d, init
@@ -24,8 +24,8 @@ class QConv1d_NoAct(Conv1d):  # noqa: N801
     def __init__(
         self,
         *args: Any,
-        weight_quantization: Union[str, Quantization] = None,
-        pad_value: float = None,
+        weight_quantization: Optional[Union[str, Quantization]] = None,
+        pad_value: Optional[float] = None,
         bias: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -82,8 +82,8 @@ class QConv1dBase(QConvArgsProviderMixin, QConv1d_NoAct):  # type: ignore
     def __init__(
         self,  # type: ignore
         *args: Any,
-        input_quantization: Union[str, Quantization] = None,
-        weight_quantization: Union[str, Quantization] = None,
+        input_quantization: Optional[Union[str, Quantization]] = None,
+        weight_quantization: Optional[Union[str, Quantization]] = None,
         gradient_cancellation_threshold: Union[float, None] = None,
         **kwargs: Any,
     ) -> None:

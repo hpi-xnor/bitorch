@@ -56,7 +56,7 @@ class QActivation(nn.Module):
 
     def __init__(
         self,
-        activation: Union[str, Quantization] = None,
+        activation: Optional[Union[str, Quantization]] = None,
         gradient_cancellation_threshold: Optional[float] = 0.0,
     ) -> None:
         """initialization function for fetching suitable activation function.

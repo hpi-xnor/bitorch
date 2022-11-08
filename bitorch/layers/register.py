@@ -27,7 +27,10 @@ def all_layer_registries() -> List[LayerRegistry]:
 
 
 def convert_layers_to(
-    new_mode: RuntimeMode, only: Optional[Iterable[Any]] = None, device: torch.device = None, verbose: bool = False
+    new_mode: RuntimeMode,
+    only: Optional[Iterable[Any]] = None,
+    device: Optional[torch.device] = None,
+    verbose: bool = False,
 ) -> None:
     """
     Convert all wrapped layers (or a given subset of them) to a new mode.
