@@ -83,7 +83,7 @@ class MeliusNet(Model):
         bn_size: int = 0,
         dropout: float = 0,
         dilated: bool = False,
-        flex_block_config: List[int] = None,
+        flex_block_config: Optional[List[int]] = None,
     ) -> None:
         super(MeliusNet, self).__init__(input_shape, num_classes)
         self._model = basedensenet_constructor(

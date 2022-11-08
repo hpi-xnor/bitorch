@@ -79,8 +79,8 @@ class ProgressiveSign(Quantization):
         use_global_scaling: bool = True,
         initial_scale: Optional[float] = None,
         custom_transform: Optional[Callable[[float], float]] = None,
-        alpha: Union[int, float] = None,
-        beta: Union[int, float] = None,
+        alpha: Optional[Union[int, float]] = None,
+        beta: Optional[Union[int, float]] = None,
     ) -> None:
         """
         Initialize the progressive sign module (can be used for progressive weight binarization).
@@ -115,7 +115,9 @@ class ProgressiveSign(Quantization):
         return self.scale
 
     @staticmethod
-    def default_transform(scale: float, alpha: Union[int, float] = None, beta: Union[int, float] = None) -> float:
+    def default_transform(
+        scale: float, alpha: Optional[Union[int, float]] = None, beta: Optional[Union[int, float]] = None
+    ) -> float:
         """Transform the given scale into the temperature of the progressive sign function with the default function.
 
         The formula is as follows: 1 - (alpha ** (-beta * scale))

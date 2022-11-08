@@ -3,7 +3,7 @@ This submodule contains adapted pytorch layers that use quantization functions o
 and activations before forwarding them. These layers use the quantization functions specified in the
 quantization submodule.
 """
-from typing import TypeVar
+from typing import Optional, TypeVar
 
 import torch
 from torch import nn
@@ -49,7 +49,7 @@ __all__ = [
 T = TypeVar("T", bound=nn.Module)
 
 
-def convert(module: T, new_mode: RuntimeMode, device: torch.device = None, verbose: bool = False) -> T:
+def convert(module: T, new_mode: RuntimeMode, device: Optional[torch.device] = None, verbose: bool = False) -> T:
     """
     Convert the given module to a new bitorch RuntimeMode. Needs to have custom implementations installed.
 

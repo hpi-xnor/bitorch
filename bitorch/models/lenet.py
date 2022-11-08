@@ -1,5 +1,5 @@
 import argparse
-from typing import List
+from typing import Optional, List
 from bitorch.layers.debug_layers import ShapePrintDebug
 from bitorch.layers import QLinear, QConv2d, QActivation
 from torch import nn
@@ -18,8 +18,8 @@ class LeNet(Model):
         self,
         weight_quant: str,
         input_quant: str,
-        weight_quant_2: str = None,
-        input_quant_2: str = None,
+        weight_quant_2: Optional[str] = None,
+        input_quant_2: Optional[str] = None,
     ) -> nn.Sequential:
         weight_quant_2 = weight_quant_2 or weight_quant
         input_quant_2 = input_quant_2 or input_quant

@@ -1,5 +1,5 @@
 from .base import Model, NoArgparseArgsMixin
-from typing import List, Any
+from typing import Optional, List, Any
 from bitorch.layers import QConv2d_NoAct
 import torch
 import argparse
@@ -417,7 +417,7 @@ class ResNetV1(SpecificResnet):
         layers: list,
         channels: list,
         classes: int,
-        image_resolution: List[int] = None,
+        image_resolution: Optional[List[int]] = None,
         image_channels: int = 3,
     ) -> None:
         """Creates ResNetV1 model.
@@ -467,7 +467,7 @@ class ResNetV2(SpecificResnet):
         layers: list,
         channels: list,
         classes: int = 1000,
-        image_resolution: List[int] = None,
+        image_resolution: Optional[List[int]] = None,
         image_channels: int = 3,
     ) -> None:
         """Creates ResNetV2 model.

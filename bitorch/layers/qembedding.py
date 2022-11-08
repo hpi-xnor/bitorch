@@ -17,8 +17,8 @@ class QEmbeddingBag(EmbeddingBag):
         self,
         *args: Any,
         embedding_dim: int,
-        weight_quantization: Union[Quantization, str] = None,
-        output_quantization: Union[Quantization, str] = None,
+        weight_quantization: Optional[Union[Quantization, str]] = None,
+        output_quantization: Optional[Union[Quantization, str]] = None,
         **kwargs: Any,
     ) -> None:
         super(QEmbeddingBag, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)  # type: ignore
@@ -88,8 +88,8 @@ class QEmbedding(Embedding):
         self,
         *args: Any,
         embedding_dim: int,
-        weight_quantization: Union[Quantization, str] = None,
-        output_quantization: Union[Quantization, str] = None,
+        weight_quantization: Optional[Union[Quantization, str]] = None,
+        output_quantization: Optional[Union[Quantization, str]] = None,
         **kwargs: Any,
     ) -> None:
         super(QEmbedding, self).__init__(*args, embedding_dim=embedding_dim, **kwargs)  # type: ignore
