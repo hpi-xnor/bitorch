@@ -22,7 +22,6 @@ def get_initial_layers(
                 input_channels,
                 stem_channels,
                 kernel_size=3,
-                # padding="same",
                 stride=2,
                 bias=False,
             )
@@ -36,7 +35,6 @@ def get_initial_layers(
                 stem_channels,
                 kernel_size=3,
                 groups=stem_channels,
-                # padding="same",
                 stride=2,
                 bias=False,
             )

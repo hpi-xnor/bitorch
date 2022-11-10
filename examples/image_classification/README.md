@@ -42,7 +42,7 @@ The list below gives a brief overview over some selected arguments.
 
 ### model args
 
-- `--model` specify name of model you want to train. Choose from `Lenet,esnet,resnet152v1,resnet152v2,resnet18v1,resnet18v2,resnet34v1,resnet34v2,resnet50v1,resnet50v2,resnete,resnete18` or `resnete34`
+- `--model` specify name of model you want to train. Choose from `Lenet,Resnet,Resnet152V1,Resnet152V2,Resnet18V1,Resnet18V2,Resnet34V1,Resnet34V2,Resnet50V1,Resnet50V2,ResnetE,ResnetE18,ResnetE34,Quicknet,QuicknetSmall` or `QuickNetLarge`
 
 Each model can have specific arguments. Check them by calling `python image_classification.py --help`.
 
