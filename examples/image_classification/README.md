@@ -42,14 +42,14 @@ The list below gives a brief overview over some selected arguments.
 
 ### model args
 
-- `--model` specify name of model you want to train. Choose from `lenet,resnet,resnet152v1,resnet152v2,resnet18v1,resnet18v2,resnet34v1,resnet34v2,resnet50v1,resnet50v2,resnete,resnete18` or `resnete34`
+- `--model` specify name of model you want to train. Choose from `Lenet,esnet,resnet152v1,resnet152v2,resnet18v1,resnet18v2,resnet34v1,resnet34v2,resnet50v1,resnet50v2,resnete,resnete18` or `resnete34`
 
 Each model can have specific arguments. Check them by calling `python image_classification.py --help`.
 
 ### dataset args
 
 - `--datset` name of dataset to train on. Chose from `mnist, cifar10, cifar100` and `imagenet`
-- `--download` toggles if dataset if not present at `--dataset-dir` should be downloaded. Only available for `mnist` and `cifar10`.
+- `--download` toggles if dataset is not present at `--dataset-dir` should be downloaded. Only available for `mnist` and `cifar10`.
 - `--dataset-dir` path to dataset.
 - `--num-worker` sets number of workers for dataloading
 

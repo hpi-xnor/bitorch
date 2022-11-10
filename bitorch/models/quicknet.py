@@ -64,11 +64,15 @@ class QuickNet(Model):
     def __init__(
         self,
         input_shape: List[int],
-        section_filters: List[int] = [64, 128, 256, 512],
-        section_blocks: List[int] = [4, 4, 4, 4],
+        section_filters: List[int] = None,
+        section_blocks: List[int] = None,
         num_classes: int = 0,
     ) -> None:
         super(QuickNet, self).__init__(input_shape, num_classes)
+        if section_filters is None:
+            section_filters = [64, 128, 256, 512]
+        if section_blocks is None:
+            section_blocks = [4, 4, 4, 4]
         self.image_channels = self._input_shape[1]
         self.num_classes = num_classes
         self.section_filters = section_filters
@@ -76,9 +80,9 @@ class QuickNet(Model):
         self._model = self._build_model()
         logging.info("building Quicknet")
 
-        self._model.Stem.apply(self._initialize_stem)  # type: ignore
-        self._model.Body.apply(self._initialize_body_top)  # type: ignore
-        self._model.Top.apply(self._initialize_body_top)  # type: ignore
+        self._model.stem.apply(self._initialize_stem)  # type: ignore
+        self._model.body.apply(self._initialize_body_top)  # type: ignore
+        self._model.top.apply(self._initialize_body_top)  # type: ignore
 
     def _blurpool_init(self, weight: torch.Tensor) -> None:
         """Initialize anti-alias low_pass filter.
@@ -104,21 +108,21 @@ class QuickNet(Model):
     def _initialize_stem(self, layer: Module) -> None:
         if isinstance(layer, nn.Conv2d):
             if layer.groups == 1:
-                nn.init.kaiming_normal_(layer.weight)  # he normal
+                nn.init.kaiming_normal_(layer.weight)
             else:
-                nn.init.xavier_uniform_(layer.weight)  # glorot uniform
+                nn.init.xavier_uniform_(layer.weight)
 
     def _initialize_body_top(self, layer: Module) -> None:
         if isinstance(layer, (nn.Conv2d, nn.Linear)):
             if isinstance(layer, nn.Linear) or layer.groups == 1:
-                nn.init.xavier_normal_(layer.weight)  # glorot normal
+                nn.init.xavier_normal_(layer.weight)
             else:
                 self._blurpool_init(layer.weight)
 
     def _build_model(self) -> nn.Sequential:
         model = nn.Sequential()
         model.add_module(
-            "Stem",
+            "stem",
             nn.Sequential(*get_initial_layers("quicknet_stem", self.image_channels, self.section_filters[0])),
         )
         body = nn.Sequential()
@@ -135,11 +139,11 @@ class QuickNet(Model):
                     "Transition_%d" % (block_num + 1), TransitionBlock(filters, self.section_filters[block_num + 1], 2)
                 )
         model.add_module(
-            "Body",
+            "body",
             body,
         )
         model.add_module(
-            "Top",
+            "top",
             nn.Sequential(
                 nn.ReLU(),
                 nn.AdaptiveAvgPool2d(1),
