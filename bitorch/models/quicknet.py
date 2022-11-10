@@ -11,54 +11,47 @@ from bitorch.layers import QConv2d, PadModule
 from bitorch.models.common_layers import get_initial_layers
 
 
-class ResidualBlock(Module):
-    def __init__(self, in_channels: int, out_channels: int):
+class ResidualBlock(nn.Sequential):
+    def __init__(self, in_channels: int, out_channels: int) -> None:
         super().__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.body = self._build_body()
-
-    def _build_body(self) -> nn.Sequential:
-        """builds body of residual blocks, i.e. a binary convolutions with a batchnorm.
-
-        Returns:
-            nn.Sequential: the basic building block body model
-        """
-        return nn.Sequential(
+        self.add_module(
+            "qconv",
             QConv2d(
-                self.in_channels,
-                self.out_channels,
+                in_channels,
+                out_channels,
                 kernel_size=3,
                 pad_value=1,
                 padding="same",
                 bias=False,
             ),
-            nn.ReLU(),
-            nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
+        self.add_module("relu", nn.ReLU())
+        self.add_module("bnorm", nn.BatchNorm2d(out_channels, momentum=0.9))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.body(x) + x
+        return super().forward(x) + x
 
 
-def build_transition_block(in_channels: int, out_channels: int, strides: int) -> nn.Sequential:
-    return nn.Sequential(
-        nn.ReLU(),
-        nn.MaxPool2d(strides, stride=1),
-        PadModule(1, 1, 1, 1),
-        nn.Conv2d(
-            in_channels,
-            in_channels,
-            kernel_size=3,
-            groups=in_channels,
-            # padding="same",
-            stride=strides,
-            bias=False,
-        ).requires_grad_(False),
-        nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False),
-        nn.ReLU(),
-        nn.BatchNorm2d(out_channels, momentum=0.9),
-    )
+class TransitionBlock(nn.Sequential):
+    def __init__(self, in_channels: int, out_channels: int, strides: int) -> None:
+        super().__init__()
+        self.add_module("relu", nn.ReLU())
+        self.add_module("pool", nn.MaxPool2d(strides, stride=1))
+        self.add_module("pad", PadModule(1, 1, 1, 1))
+        self.add_module(
+            "depth_conv",
+            nn.Conv2d(
+                in_channels,
+                in_channels,
+                kernel_size=3,
+                groups=in_channels,
+                stride=strides,
+                bias=False,
+            ).requires_grad_(False),
+        )
+        self.add_module("conv", nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False))
+        self.add_module("relu2", nn.ReLU())
+        self.add_module("norm", nn.BatchNorm2d(out_channels, momentum=0.9))
 
 
 class QuickNet(Model):
@@ -139,8 +132,7 @@ class QuickNet(Model):
             )
             if block_num != len(self.section_blocks) - 1:
                 body.add_module(
-                    "Transition_%d" % (block_num + 1),
-                    build_transition_block(filters, self.section_filters[block_num + 1], 2),
+                    "Transition_%d" % (block_num + 1), TransitionBlock(filters, self.section_filters[block_num + 1], 2)
                 )
         model.add_module(
             "Body",
@@ -163,9 +155,9 @@ class QuickNet(Model):
         Can be used in training loop.
         """
         if isinstance(layer, ResidualBlock):
-            weights = layer.body._modules["0"].layer_implementation.weight.data  # type: ignore
+            weights = layer.qconv.weight.data  # type: ignore
             weights = weights.clamp(-clip_value, clip_value)  # type: ignore
-            layer.body._modules["0"].layer_implementation.weight.data = weights  # type: ignore
+            layer.qconv.weight.data = weights  # type: ignore
 
 
 class QuickNetSmall(NoArgparseArgsMixin, QuickNet):
