@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 import torch
 from torch import nn
@@ -64,8 +64,8 @@ class QuickNet(Model):
     def __init__(
         self,
         input_shape: List[int],
-        section_filters: List[int] = None,
-        section_blocks: List[int] = None,
+        section_filters: Optional[List[int]] = None,
+        section_blocks: Optional[List[int]] = None,
         num_classes: int = 0,
     ) -> None:
         super(QuickNet, self).__init__(input_shape, num_classes)
@@ -88,7 +88,6 @@ class QuickNet(Model):
         """Initialize anti-alias low_pass filter.
         See the `"Making Convolutional Networks Shift-Invariant Again" <https://arxiv.org/abs/1904.11486>`_ paper.
         """
-
         filters, kernel_size = weight.data.shape[0], weight.data.shape[2]
 
         if kernel_size == 2:

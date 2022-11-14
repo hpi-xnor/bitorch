@@ -3,9 +3,7 @@ import torch.nn.functional as F
 
 
 class PadModule(nn.Module):
-    """
-    Module for padding tensors.
-    """
+    """Module for padding tensors."""
 
     def __init__(
         self,
