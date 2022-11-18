@@ -152,15 +152,15 @@ class QuickNet(Model):
         )
         return model
 
-    def _clip_weights(self, layer: Module, clip_value: float = 1.25) -> None:
-        """
-        Clips weights in quantized convolution layer in Residual Blocks.
-        Can be used in training loop.
-        """
+    def clip_weights(self, layer: Module, clip_value: float = 1.25) -> None:
+        """Clips weights in quantized convolution layer in Residual Blocks"""
         if isinstance(layer, ResidualBlock):
             weights = layer.qconv.weight.data  # type: ignore
             weights = weights.clamp(-clip_value, clip_value)  # type: ignore
             layer.qconv.weight.data = weights  # type: ignore
+
+    def on_train_batch_end(self, layer: Module) -> None:
+        self.clip_weights(layer)
 
 
 class QuickNetSmall(NoArgparseArgsMixin, QuickNet):

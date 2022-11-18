@@ -85,6 +85,16 @@ class Model(nn.Module):
     def convert(self, new_mode: RuntimeMode, device: Optional[torch.device] = None, verbose: bool = False) -> "Model":
         return convert(self, new_mode, device, verbose)
 
+    def on_train_batch_end(self, layer: nn.Module) -> None:
+        """Is used with the pytorch lighting on_train_batch_end callback
+
+        Implement it to e.g. clip weights after optimization. Is recursively applied to every submodule.
+
+        Args:
+            layer (nn.Module): current layer
+        """
+        pass
+
 
 class NoArgparseArgsMixin:
     """
