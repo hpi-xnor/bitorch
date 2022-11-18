@@ -70,7 +70,7 @@ class CriteoDataset(Dataset):
             days = 24
             out_file = "terabyte_processed"
         else:
-            raise(ValueError("Data set option is not supported"))
+            raise (ValueError("Data set option is not supported"))
         self.max_ind_range = max_ind_range
         self.memory_map = memory_map
 
