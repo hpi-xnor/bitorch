@@ -17,7 +17,7 @@ class Model(nn.Module):
     """Base class for Bitorch models"""
 
     name = ""
-    pretrained_model_url = None
+    hub_version_table_url = ""
 
     def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()
