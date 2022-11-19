@@ -101,11 +101,14 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model_kwargs = vars(model_args)
     logger.debug(f"got model args as dict: {model_kwargs}")
+    model_kwargs["input_shape"] = dataset.shape
+    model_kwargs["num_classes"] = dataset.num_classes
 
-    model = model_from_name(args.model)(
-        **model_kwargs, input_shape=dataset.shape, num_classes=dataset.num_classes
-    )  # type: ignore
+    model = model_from_name(args.model)(**model_kwargs)  # type: ignore
     model.initialize()
+    model_kwargs["model_name"] = args.model
+    
+    wandb.config.update({"model_config": model_kwargs})
 
     if args.quantization_scheduling:
         quantization_scheduler = Quantization_Scheduler(

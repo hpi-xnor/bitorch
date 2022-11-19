@@ -85,17 +85,18 @@ def test_recipe():
 
 
 def test_default_impl():
+    print("bitorch test mode:", bitorch.mode)
     layer = Example("Hello World", val=21)
     assert layer.val == 21
     assert layer.class_name() == "BaseClass"
     assert isinstance(layer, Example.class_)
     assert isinstance(layer, LayerContainer)
-
+    print(layer)
     # TODO: pickling is currently only possible in RAW mode
-    # content = pickle.dumps(layer)
-    #
-    # layer_loaded = pickle.loads(content)
-    # assert layer_loaded.val == 21
+    content = pickle.dumps(layer)
+    
+    layer_loaded = pickle.loads(content)
+    assert layer_loaded.val == 21
 
 
 def test_train_impl():

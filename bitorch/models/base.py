@@ -92,7 +92,7 @@ class Model(nn.Module):
         # TODO: encode current runtime / layer implementation in name for better reference / correct loading of model
         return f"{self.name}_checkpoint.pth"
 
-    def from_pretrained(self, source: Optional[str] = None, verbose: bool = False) -> nn.Module:
+    def from_pretrained(self, *args, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, verbose: bool = False, **kwargs) -> nn.Module:
         if source is not None:
             return self._load_from_source(source, verbose)
         elif self.pretrained_model_url is not None:
