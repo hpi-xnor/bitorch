@@ -23,7 +23,7 @@ def add_missing_columns(*key_lists, init_values=None, table):
                         if not isinstance(init_values, list) 
                         else (
                             init_values[list_idx] 
-                                if isinstance(init_values[list_idx], list)
+                                if not isinstance(init_values[list_idx], list)
                                 else init_values[list_idx][key_idx]
                         )
                 )
@@ -53,7 +53,7 @@ def extract_model_parameters(run):
 
         parser, model_parser = create_argparser(metadata["args"])
 
-        args_, unparsed_model_args = parser.parse_known_args()
+        args_, unparsed_model_args = parser.parse_known_args(metadata["args"])
         model_args_ = model_parser.parse_args(unparsed_model_args)
 
         dataset = dataset_from_name(args_.dataset)
@@ -149,8 +149,8 @@ def main(args):
         model_kwargs = extract_model_parameters(run)
 
         model_name = model_kwargs["model_name"]
-        version_table = download_version_table(model_name)
-        version_table = update_table(version_table, model_kwargs, run, compare_metrics)
+        version_table = download_version_table(model_name, api)
+        version_table = update_table(version_table, model_kwargs, run, compare_metrics, api)
 
         write_table(version_table, model_name, api)
 

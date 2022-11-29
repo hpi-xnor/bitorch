@@ -17,7 +17,7 @@ class Model(nn.Module):
     """Base class for Bitorch models"""
 
     name = ""
-    hub_version_table_url = ""
+    version_table_path = "hpi-deep-learning/model-registry/model-version-tables"
 
     def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()
