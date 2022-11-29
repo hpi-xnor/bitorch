@@ -108,7 +108,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model.initialize()
     model_kwargs["model_name"] = args.model
     
-    wandb.config.update({"model_config": model_kwargs})
+    if args.wandb_log:
+        # wandb.init()
+        wandb.config.update({"model_config": model_kwargs})
 
     if args.quantization_scheduling:
         quantization_scheduler = Quantization_Scheduler(
