@@ -18,6 +18,7 @@ class Model(nn.Module):
 
     name = ""
     version_table_path = "hpi-deep-learning/model-registry/model-version-tables"
+    model_registry_base_path = "hpi-deep-learning/model-registry"
 
     def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()

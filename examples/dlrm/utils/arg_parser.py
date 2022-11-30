@@ -278,7 +278,7 @@ def add_regular_args(parser: ArgumentParser) -> None:
     )
 
 
-def create_argparser() -> Tuple[ArgumentParser, ArgumentParser]:
+def create_argparser(arguments=None) -> Tuple[ArgumentParser, ArgumentParser]:
     """creates a main argument parser for general options and a model parser for model specific options
 
     Returns:
