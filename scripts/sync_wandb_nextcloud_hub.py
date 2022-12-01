@@ -1,3 +1,6 @@
+import sys
+from tqdm import tqdm
+import numpy as np
 import warnings
 import pandas
 import os
@@ -141,12 +144,22 @@ def compare(configA, configB, compare_metrics):
         # this should be correct...
         return (configA[metric_name] < configB[metric_name]) == (mode == "max")
 
+def convert_dtypes(data):
+    for column in data.columns:
+        if data[column].dtype.kind not in 'biufc':
+            data[column] = data[column].astype(str)
+    return data
+
 def add_model_to_version_table(model_kwargs, version_table, run, api):
         model_kwargs["model_registry_version"] = upload_model_to_registry(run, model_kwargs["model_name"], api)
-        return pandas.concat([version_table, pandas.DataFrame([model_kwargs])])
+        df_to_add = pandas.DataFrame([model_kwargs])
+        # df_to_add = pandas.DataFrame([model_kwargs], dtype="string").apply(pandas.to_numeric, errors="ignore")
+        return pandas.concat([version_table, df_to_add], ignore_index=True)
     
 
 def update_table(version_table, model_kwargs, run, compare_metrics, api):
+    model_comparison_keys = list(model_kwargs.keys())
+    model_kwargs = convert_dtypes(model_kwargs)
     version_table = add_missing_columns(
         model_kwargs.keys(), dict(run.summary).keys(), [metric_name for metric_name, _ in compare_metrics], ["time uploaded", "model_registry_version"],
         init_values=[None, None, [-INFINITY if mode == "min" else +INFINITY for mode in [mode for _, mode in compare_metrics]], ["", "latest"]],
@@ -155,26 +168,28 @@ def update_table(version_table, model_kwargs, run, compare_metrics, api):
     
     print("comparing ", model_kwargs)
     # this removes a deprecation warning
+    # model_kwargs_series = pandas.Series(model_kwargs, dtype="string").apply(pandas.to_numeric, errors="ignore")
     model_kwargs_series = pandas.Series(model_kwargs)
-    model_kwargs.update(dict(run.summary))
+    existing_row = version_table[(version_table[model_comparison_keys] == model_kwargs_series).all(1)]
     # model_kwargs_series, version_table = model_kwargs_series.align(version_table, axis=0, copy=False)
     
-    existing_row = version_table[(version_table == model_kwargs_series).all(1)]
+
+    model_kwargs.update(dict(run.summary))
     model_kwargs["time uploaded"] = str(datetime.datetime.now())
 
     if existing_row.empty:
         logging.info("adding new model configuration to version table...")
         version_table = add_model_to_version_table(model_kwargs, version_table, run, api)
     else:
-        existing_model_kwargs = existing_row.to_dict()
-        existing_row_idx = (version_table == model_kwargs_series).all(1)
+        existing_row_idx = np.where((version_table[model_comparison_keys] == model_kwargs_series).all(1))[0][0]
+        existing_model_kwargs = version_table.iloc[existing_row_idx].to_dict()
         
         # this prevents reuploading the same model
         compare_metrics.append(["time uploaded", "min"])
         new_model_better = compare(existing_model_kwargs, model_kwargs, compare_metrics)
         if new_model_better:
             logging.info("overwriting preexisting model configuration in version table with better version...")
-            version_table = version_table.drop(existing_row_idx)
+            version_table = version_table.drop(existing_row_idx).reset_index(drop=True)
             version_table = add_model_to_version_table(model_kwargs, version_table, run, api)
         else:
             logging.info("better/older model with same config already exists in version table, skipping...")
@@ -227,10 +242,7 @@ def main(args):
         compare_metrics.append([metric_name, mode])
     
     version_table = download_version_table(api)
-    for idx, run in enumerate(runs):
-    # for run in runs:
-        if idx < 2:
-            continue
+    for run in tqdm(runs):
         # try:
         if len(run.logged_artifacts()) == 0:
             logging.info(f"run {run.name} has no logged artifacts, skipping...")
@@ -238,10 +250,24 @@ def main(args):
         model_kwargs = extract_model_parameters(run)
         model_name = model_kwargs["model_name"]
         version_table = update_table(version_table, model_kwargs, run, compare_metrics, api)
+        # except Exception as e:
+        #     logging.info(f"run {run.name} cannot be synced with registry due to error: {e}. skipping...")
 
     write_table(version_table, model_name, api)
-        # except Exception as e:
-        #     logging.error(f"could not sync run {run.name}:{e}. Skipping...")
+    logging.info(f"Successfully synced {len(runs)} runs!")
+
+def delete_model_version_table_in_registry():
+    logging.warn("DELETING MODEL VERSION TABLE IN REGISTRY...")
+    input("PRESS ENTER IF YOU ARE SURE YOU WANT TO CONTINUE:")
+    entity, project, _ = Model.version_table_path.split("/")
+    with wandb.init(entity=entity, project=project) as run:
+        table_art = wandb.Artifact("model-tables", type="tables")
+        with Path("versions.csv").open("w") as v:
+            v.write("")
+        table_art.add_file("versions.csv")
+        run.log_artifact(table_art)
+        run.link_artifact(table_art, Model.version_table_path)
+    logging.warn("MODEL VERSION TABLE DELETED!")
 
 
 if __name__ == "__main__":
@@ -251,5 +277,11 @@ if __name__ == "__main__":
                         help="the list of runs to sync. If omitted, all runs are synced.")
     parser.add_argument("--entity", "-e", default=None, type=str)
     parser.add_argument("--project", "-p", default=None, type=str)
+    parser.add_argument("--delete-version-table", default=False, action="store_true",
+                        help="deletes the remote version table on the model registry. Use with caution!")
     args = parser.parse_args()
+    
+    if args.delete_version_table:
+        delete_model_version_table_in_registry()
+        sys.exit(0)
     main(args)
