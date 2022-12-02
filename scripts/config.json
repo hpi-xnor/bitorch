@@ -1,6 +1,9 @@
 {
     "entity": "hpi-deep-learning",
     "project": "bitorch",
-    "compare_metrics": ["metrics/best-test-top1-accuracy/max"],
+    "compare_metrics": [
+        "metrics/best-test-top1-accuracy/max",
+        "balanced accuracy/max"
+    ],
     "runs": null
 }

@@ -111,7 +111,7 @@ class ModelWrapper(LightningModule):
                 "quantization_scheduler/factor",
                 self.quantization_scheduler.scheduled_quantizer_instances[0].factor,
             )
-        return super().on_epoch_end()
+        return super().on_validation_epoch_end()
 
     def configure_optimizers(self) -> Union[dict, torch.optim.Optimizer]:  # type: ignore
         logging.info(f"Using {self.hparams.optimizer} optimizer and {self.hparams.lr_scheduler} lr scheduler...")

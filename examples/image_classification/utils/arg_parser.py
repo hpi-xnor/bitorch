@@ -9,8 +9,8 @@ import bitorch
 from bitorch.models import model_from_name, model_names, Model
 from bitorch.models.base import NoArgparseArgsMixin
 from bitorch.quantizations.quantization_scheduler import Quantization_Scheduler
-from ..datasets import dataset_names
-from ..utils.teachers import available_teachers
+from datasets import dataset_names
+from utils.teachers import available_teachers
 
 
 class _HeadArgumentParser(ArgumentParser):
@@ -124,9 +124,14 @@ def add_checkpoint_args(parser: ArgumentParser) -> None:
         help="path to checkpoint file to load state from. if omitted, a new model will be trained.",
     )
     checkpoint.add_argument(
+        "--resume_training",
+        action="store_true",
+        help="resume training from given checkpoint",
+    )
+    checkpoint.add_argument(
         "--pretrained",
         action="store_true",
-        help="uses the given checkpoint as a pretrained model (only for initialization)",
+        help="load the state dict either from model hub or from checkpoint_load",
     )
 
 

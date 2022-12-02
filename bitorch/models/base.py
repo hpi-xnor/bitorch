@@ -1,3 +1,4 @@
+import pandas
 import logging
 from argparse import ArgumentParser
 from typing import Optional, List, Any
@@ -11,6 +12,8 @@ from bitorch.layers.qconv1d import QConv1dBase, QConv1d_NoAct
 from bitorch.layers.qconv2d import QConv2dBase, QConv2d_NoAct
 from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
 from bitorch.util import is_url
+from bitorch.models.model_hub import load_from_hub
+import wandb
 
 
 class Model(nn.Module):
@@ -18,7 +21,7 @@ class Model(nn.Module):
 
     name = ""
     version_table_path = "hpi-deep-learning/model-registry/model-version-tables"
-    model_registry_base_path = "hpi-deep-learning/model-registry"
+    model_hub_base_path = "hpi-deep-learning/model-registry"
 
     def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()
@@ -93,24 +96,21 @@ class Model(nn.Module):
         # TODO: encode current runtime / layer implementation in name for better reference / correct loading of model
         return f"{self.name}_checkpoint.pth"
 
-    def from_pretrained(self, *args, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, verbose: bool = False, **kwargs) -> nn.Module:
+    @classmethod
+    def from_pretrained(cls, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, **kwargs) -> nn.Module:
+        model = cls(**kwargs)
         if source is not None:
-            return self._load_from_source(source, verbose)
-        elif self.pretrained_model_url is not None:
-            return self._load_from_url(self.pretrained_model_url)
-        raise ValueError(
-            f"Model {self.name} does not have a predefined download url, "
-            "you have to specify a source to load the model from the specified checkpoint!"
-        )
-
-    def _load_from_url(self, url: str, verbose: bool = False):
-        ...
-
-    def _load_from_source(self, source: str, verbose: bool = False):
-        ...
-
-    def _upload_model(self, source_path: str, destination_url: str):
-        ...
+            logging.info(f"Loading {cls.name} model state_dict from file {source}")
+            state_dict = torch.load(source)
+        else:
+            kwargs["model_name"] = cls.name.lower()
+            logging.info(f"Downloading {cls.name} model state_dict from hub...")
+            state_dict = load_from_hub(cls.version_table_path, cls.model_hub_base_path, **kwargs)
+            
+        model.load_state_dict(state_dict)
+        return model
+    
+    
 
     def store_checkpoint(self, destination: Optional[str] = None) -> None:
         checkpoint_name = self._generate_checkpoint_name()

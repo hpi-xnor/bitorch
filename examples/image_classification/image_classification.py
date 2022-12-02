@@ -101,15 +101,18 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model_kwargs = vars(model_args)
     logger.debug(f"got model args as dict: {model_kwargs}")
-    model_kwargs["input_shape"] = dataset.shape
-    model_kwargs["num_classes"] = dataset.num_classes
-
-    model = model_from_name(args.model)(**model_kwargs)  # type: ignore
-    model.initialize()
-    model_kwargs["model_name"] = args.model
     
+    model_kwargs["input_shape"] = tuple(dataset.shape)
+    model_kwargs["num_classes"] = dataset.num_classes
+    if args.pretrained:
+        model = model_from_name(args.model).from_pretrained(args.checkpoint_load, **model_kwargs)
+    else:
+        model = model_from_name(args.model)(**model_kwargs)  # type: ignore
+        model.initialize()
+    
+    # for model registry compliance
+    model_kwargs["model_name"] = args.model
     if args.wandb_log:
-        # wandb.init()
         wandb.config.update({"model_config": model_kwargs})
 
     if args.quantization_scheduling:
@@ -132,8 +135,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             )
         wrapper_class = DistillationModelWrapper
 
-    if args.checkpoint_load is not None and args.pretrained:
-        logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
+    if args.checkpoint_load is not None and args.resume_training:
+        logger.info(f"resuming training from pretrained model at checkpoint {args.checkpoint_load}")
         model_wrapped = wrapper_class.load_from_checkpoint(args.checkpoint_load)
     else:
         model_wrapped = wrapper_class(model, dataset.num_classes, quantization_scheduler, args)
@@ -202,7 +205,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         model_wrapped,
         train_dataloaders=train_loader,
         val_dataloaders=test_loader,
-        ckpt_path=args.checkpoint_load if not args.pretrained else None,
+        ckpt_path=args.checkpoint_load if args.resume_training else None,
     )
 
 

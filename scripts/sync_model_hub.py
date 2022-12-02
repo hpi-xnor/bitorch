@@ -1,3 +1,5 @@
+import numbers
+import csv
 import sys
 from tqdm import tqdm
 import numpy as np
@@ -10,52 +12,21 @@ import wandb
 import logging
 import argparse
 import datetime
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from bitorch.models import model_from_name
 from bitorch.models.base import Model
+from bitorch.models.model_hub import download_version_table, convert_dtypes
 
 from examples.image_classification.datasets import dataset_from_name
+from examples.image_classification.utils.utils import configure_logging
 # from examples.image_classification.utils.arg_parser import create_argparser
 from importlib import import_module
 
 warnings.filterwarnings("ignore")
 INFINITY = 1e4
 
-def configure_logging(logger: Any, log_file: Optional[str], log_level: str, output_stdout: bool) -> None:
-    """configures logging module.
-
-    Args:
-        logger: the logger to be configured
-        log_file (str): path to log file. if omitted, logging will be forced to stdout.
-        log_level (str): string name of log level (e.g. 'debug')
-        output_stdout (bool): toggles stdout output. will be activated automatically if no log file was given.
-            otherwise if activated, logging will be outputed both to stdout and log file.
-    """
-    log_level_name = log_level.upper()
-    log_level = getattr(logging, log_level_name)
-    logger.setLevel(log_level)
-
-    logging_format = logging.Formatter(
-        "%(asctime)s - %(levelname)s [%(filename)s : %(funcName)s() : l. %(lineno)s]: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-    if log_file is not None:
-        log_file_path = Path(log_file)
-        log_file_path.parent.mkdir(parents=True, exist_ok=True)
-        file_handler = logging.FileHandler(log_file_path)
-        file_handler.setFormatter(logging_format)
-        logger.addHandler(file_handler)
-    else:
-        output_stdout = True
-
-    if output_stdout:
-        stream = logging.StreamHandler()
-        stream.setFormatter(logging_format)
-        logger.addHandler(stream)
-
-def add_missing_columns(*key_lists, init_values=None, table):
+def add_missing_columns(*key_lists: list, init_values: Any = None, table: pandas.DataFrame) -> pandas.DataFrame:
     for list_idx, key_list in enumerate(key_lists):
         for key_idx, key in enumerate(key_list):
             if key not in table.columns:
@@ -71,7 +42,7 @@ def add_missing_columns(*key_lists, init_values=None, table):
                 table[key] = value
     return table
 
-def extract_model_parameters(run):
+def extract_model_parameters(run: Any) -> dict:
     if "model_config" in run.config.keys():
         model_kwargs = run.config["model_config"]
     else:
@@ -90,8 +61,12 @@ def extract_model_parameters(run):
             metadata = json.load(metadata_file)
         
         if "dlrm" in metadata["program"]:
+            if "examples/dlrm" not in sys.path:
+                sys.path.append("examples/dlrm")
             create_argparser = import_module("examples.dlrm.utils.arg_parser").create_argparser
         else:
+            if "examples/image_classification" not in sys.path:
+                sys.path.append("examples/image_classification")
             create_argparser = import_module("examples.image_classification.utils.arg_parser").create_argparser
             
         parser, model_parser = create_argparser(metadata["args"])
@@ -112,66 +87,45 @@ def extract_model_parameters(run):
         logging.debug(f"extracted model config: {model_kwargs}")
     return model_kwargs
 
-def extract_artifact_version(artifact, model_name):
+
+def extract_artifact_version(artifact: wandb.Artifact, model_name: str) -> Union[None, int]:
     for alias in artifact._attrs["aliases"]:
         if alias["artifactCollectionName"] == model_name and alias["alias"][0] == "v" and alias["alias"][1:].isnumeric():
             return int(alias["alias"][1:])
 
-
-def download_version_table(api):
-    model_table_path = Model.version_table_path
-    try:
-        # os.system(f"curl -T /tmp/version_table.csv {model_table_url}")
-        model_table = api.artifact(f"{model_table_path}:latest").get_path(f"versions.csv").download(root="/tmp")
-        version_table = pandas.read_csv(model_table)
-    except Exception as e:
-        logging.info(f"could not retrieve model version table from {model_table_path}: {e}!")
-        return pandas.DataFrame()
-
-    return version_table
-
-def upload_model_to_registry(run, model_name, api):
-    model_registry_path = f"{model_from_name(model_name).model_registry_base_path}/{model_name}"
+def upload_model_to_hub(run: Any, model_name: str, api: wandb.Api) -> Union[None, int]:
+    model_hub_path = f"{model_from_name(model_name).model_hub_base_path}/{model_name}"
     run_artifact = run.logged_artifacts()[0]
-    run_artifact.link(model_registry_path)
-    uploaded_artifact = api.artifact(f"{model_registry_path}:latest")
+    run_artifact.link(model_hub_path)
+    uploaded_artifact = api.artifact(f"{model_hub_path}:latest")
     return extract_artifact_version(uploaded_artifact, model_name)
 
-def compare(configA, configB, compare_metrics):
+def compare(configA: dict, configB: dict, compare_metrics: list) -> bool:
     for metric_name, mode in compare_metrics:
-        if configA[metric_name] == configB[metric_name]:
+        if metric_name not in configA or metric_name not in configB or configA[metric_name] == configB[metric_name]:
             continue
         # this should be correct...
         return (configA[metric_name] < configB[metric_name]) == (mode == "max")
-
-def convert_dtypes(data):
-    for column in data.columns:
-        if data[column].dtype.kind not in 'biufc':
-            data[column] = data[column].astype(str)
-    return data
+    return False
 
 def add_model_to_version_table(model_kwargs, version_table, run, api):
-        model_kwargs["model_registry_version"] = upload_model_to_registry(run, model_kwargs["model_name"], api)
-        df_to_add = pandas.DataFrame([model_kwargs])
-        # df_to_add = pandas.DataFrame([model_kwargs], dtype="string").apply(pandas.to_numeric, errors="ignore")
-        return pandas.concat([version_table, df_to_add], ignore_index=True)
+    model_kwargs["model_hub_version"] = upload_model_to_hub(run, model_kwargs["model_name"], api)
+    df_to_add = pandas.DataFrame([model_kwargs])
+    return pandas.concat([version_table, df_to_add], ignore_index=True)
     
 
 def update_table(version_table, model_kwargs, run, compare_metrics, api):
     model_comparison_keys = list(model_kwargs.keys())
     model_kwargs = convert_dtypes(model_kwargs)
     version_table = add_missing_columns(
-        model_kwargs.keys(), dict(run.summary).keys(), [metric_name for metric_name, _ in compare_metrics], ["time uploaded", "model_registry_version"],
+        model_kwargs.keys(), dict(run.summary).keys(), [metric_name for metric_name, _ in compare_metrics], ["time uploaded", "model_hub_version"],
         init_values=[None, None, [-INFINITY if mode == "min" else +INFINITY for mode in [mode for _, mode in compare_metrics]], ["", "latest"]],
         table=version_table
     )
     
-    print("comparing ", model_kwargs)
-    # this removes a deprecation warning
-    # model_kwargs_series = pandas.Series(model_kwargs, dtype="string").apply(pandas.to_numeric, errors="ignore")
+    logging.info(f"extracted model config: {model_kwargs}")
     model_kwargs_series = pandas.Series(model_kwargs)
     existing_row = version_table[(version_table[model_comparison_keys] == model_kwargs_series).all(1)]
-    # model_kwargs_series, version_table = model_kwargs_series.align(version_table, axis=0, copy=False)
     
 
     model_kwargs.update(dict(run.summary))
@@ -184,7 +138,7 @@ def update_table(version_table, model_kwargs, run, compare_metrics, api):
         existing_row_idx = np.where((version_table[model_comparison_keys] == model_kwargs_series).all(1))[0][0]
         existing_model_kwargs = version_table.iloc[existing_row_idx].to_dict()
         
-        # this prevents reuploading the same model
+        # this prevents reuploading the same model by favoring the older model if the other metrics are the same
         compare_metrics.append(["time uploaded", "min"])
         new_model_better = compare(existing_model_kwargs, model_kwargs, compare_metrics)
         if new_model_better:
@@ -197,7 +151,7 @@ def update_table(version_table, model_kwargs, run, compare_metrics, api):
 
 
 def write_table(version_table, model_name, api):
-    version_table.to_csv(f"/tmp/versions.csv")
+    version_table.to_csv(f"/tmp/versions.csv", quoting=csv.QUOTE_NONNUMERIC, index=False)
     entity, project, _ = model_from_name(model_name).version_table_path.split("/")
     with wandb.init(entity=entity, project=project) as run:
         version_table_artifact = wandb.Artifact("model-tables", type="tables")
@@ -241,23 +195,23 @@ def main(args):
             continue
         compare_metrics.append([metric_name, mode])
     
-    version_table = download_version_table(api)
+    version_table = download_version_table(Model.version_table_path, api, no_exception=True)
     for run in tqdm(runs):
-        # try:
-        if len(run.logged_artifacts()) == 0:
-            logging.info(f"run {run.name} has no logged artifacts, skipping...")
-            continue
-        model_kwargs = extract_model_parameters(run)
-        model_name = model_kwargs["model_name"]
-        version_table = update_table(version_table, model_kwargs, run, compare_metrics, api)
-        # except Exception as e:
-        #     logging.info(f"run {run.name} cannot be synced with registry due to error: {e}. skipping...")
+        try:
+            if len(run.logged_artifacts()) == 0:
+                logging.info(f"run {run.name} has no logged artifacts, skipping...")
+                continue
+            model_kwargs = extract_model_parameters(run)
+            model_name = model_kwargs["model_name"]
+            version_table = update_table(version_table, model_kwargs, run, compare_metrics, api)
+        except Exception as e:
+            logging.info(f"run {run.name} cannot be synced with hub due to error: {e}. skipping...")
 
     write_table(version_table, model_name, api)
     logging.info(f"Successfully synced {len(runs)} runs!")
 
-def delete_model_version_table_in_registry():
-    logging.warn("DELETING MODEL VERSION TABLE IN REGISTRY...")
+def delete_model_version_table_in_hub():
+    logging.warn("DELETING MODEL VERSION TABLE IN HUB...")
     input("PRESS ENTER IF YOU ARE SURE YOU WANT TO CONTINUE:")
     entity, project, _ = Model.version_table_path.split("/")
     with wandb.init(entity=entity, project=project) as run:
@@ -278,10 +232,10 @@ if __name__ == "__main__":
     parser.add_argument("--entity", "-e", default=None, type=str)
     parser.add_argument("--project", "-p", default=None, type=str)
     parser.add_argument("--delete-version-table", default=False, action="store_true",
-                        help="deletes the remote version table on the model registry. Use with caution!")
+                        help="deletes the remote version table on the model hub. Use with caution!")
     args = parser.parse_args()
     
     if args.delete_version_table:
-        delete_model_version_table_in_registry()
+        delete_model_version_table_in_hub()
         sys.exit(0)
     main(args)
