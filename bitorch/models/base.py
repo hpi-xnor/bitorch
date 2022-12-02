@@ -92,13 +92,11 @@ class Model(nn.Module):
     def convert(self, new_mode: RuntimeMode, device: Optional[torch.device] = None, verbose: bool = False) -> "Model":
         return convert(self, new_mode, device, verbose)
 
-    def _generate_checkpoint_name(self):
-        # TODO: encode current runtime / layer implementation in name for better reference / correct loading of model
-        return f"{self.name}_checkpoint.pth"
-
     @classmethod
-    def from_pretrained(cls, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, **kwargs) -> nn.Module:
-        model = cls(**kwargs)
+    def from_pretrained(
+        cls, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, **kwargs: str
+    ) -> nn.Module:
+        model = cls(**kwargs)  # type: ignore
         if source is not None:
             logging.info(f"Loading {cls.name} model state_dict from file {source}")
             state_dict = torch.load(source)
@@ -106,23 +104,9 @@ class Model(nn.Module):
             kwargs["model_name"] = cls.name.lower()
             logging.info(f"Downloading {cls.name} model state_dict from hub...")
             state_dict = load_from_hub(cls.version_table_path, cls.model_hub_base_path, **kwargs)
-            
+
         model.load_state_dict(state_dict)
         return model
-    
-    
-
-    def store_checkpoint(self, destination: Optional[str] = None) -> None:
-        checkpoint_name = self._generate_checkpoint_name()
-        if is_url(destination):
-            logging.info(f"uploading model to url: {destination}...")
-            tmp_path = f"/tmp/{checkpoint_name}"
-            torch.save(self, tmp_path)
-            self._upload_model(tmp_path, destination)
-        else:
-            logging.debug(f"saving model to {destination}...")
-            torch.save(self, destination)
-        logging.debug("done saving model!")
 
 
 class NoArgparseArgsMixin:

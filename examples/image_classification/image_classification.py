@@ -58,9 +58,9 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     loggers: List[LightningLoggerBase] = []
     if args.tensorboard_log:
-        loggers.append(TensorBoardLogger(str(output_dir), name="tensorboard"))
+        loggers.append(TensorBoardLogger(str(output_dir), name="tensorboard"))  # type: ignore
     if args.csv_log:
-        loggers.append(CSVLogger(str(output_dir), name="csv"))
+        loggers.append(CSVLogger(str(output_dir), name="csv"))  # type: ignore
     if args.wandb_log:
         loggers.append(
             CustomWandbLogger(
@@ -101,7 +101,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
 
     model_kwargs = vars(model_args)
     logger.debug(f"got model args as dict: {model_kwargs}")
-    
+
     model_kwargs["input_shape"] = tuple(dataset.shape)
     model_kwargs["num_classes"] = dataset.num_classes
     if args.pretrained:
@@ -109,7 +109,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     else:
         model = model_from_name(args.model)(**model_kwargs)  # type: ignore
         model.initialize()
-    
+
     # for model registry compliance
     model_kwargs["model_name"] = args.model
     if args.wandb_log:

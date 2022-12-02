@@ -151,7 +151,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     print("DATA SHAPE:", (type(data_point[0]), (type(data_point[1]), type(data_point[2]))))
     print("DATA SHAPE:", (data_point[0].shape, (data_point[1].shape, data_point[2].shape)))
     data_point = (data_point[0], (data_point[1], data_point[2]))
-    
+
     # for model registry compliance
     model_kwargs["embedding_layer_sizes"] = embedding_layer_sizes
     model_kwargs["input_shape"] = []
@@ -161,14 +161,13 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     else:
         model = DLRM(**model_kwargs)  # type: ignore
         model.initialize()
-    
+
     if args.checkpoint_load is not None and args.resume_training:
         logger.info(f"resuming training from pretrained model at checkpoint {args.checkpoint_load}")
         model_wrapped = ModelWrapper.load_from_checkpoint(args.checkpoint_load)
     else:
         model_wrapped = ModelWrapper(model, 1, args)
-        
-    
+
     # for model registry compliance
     model_kwargs["model_name"] = "dlrm"
     if args.wandb_log:

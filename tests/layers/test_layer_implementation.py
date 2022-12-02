@@ -94,7 +94,7 @@ def test_default_impl():
     print(layer)
     # TODO: pickling is currently only possible in RAW mode
     content = pickle.dumps(layer)
-    
+
     layer_loaded = pickle.loads(content)
     assert layer_loaded.val == 21
 
