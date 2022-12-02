@@ -121,7 +121,7 @@ def add_checkpoint_args(parser: ArgumentParser) -> None:
         "--checkpoint-load",
         type=str,
         default=None,
-        help="path to checkpoint file to load state from. if omitted, a new model will be trained.",
+        help="path to checkpoint file to load state from. if omitted and --pretrained is activated, the model weights will be downloaded from the model hub. If --pretrained is not set, a new model will be trained.",
     )
     checkpoint.add_argument(
         "--resume_training",

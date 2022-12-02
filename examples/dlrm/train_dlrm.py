@@ -156,18 +156,21 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     model_kwargs["embedding_layer_sizes"] = embedding_layer_sizes
     model_kwargs["input_shape"] = []
     model_kwargs["dense_feature_size"] = dense_feature_size
-
-    model = DLRM(**model_kwargs)  # type: ignore
-    model.initialize()
-    if args.checkpoint_load is not None and args.pretrained:
-        logger.info(f"starting training from pretrained model at checkpoint {args.checkpoint_load}")
+    if args.pretrained:
+        model = DLRM.from_pretrained(args.checkpoint_load, **model_kwargs)
+    else:
+        model = DLRM(**model_kwargs)  # type: ignore
+        model.initialize()
+    
+    if args.checkpoint_load is not None and args.resume_training:
+        logger.info(f"resuming training from pretrained model at checkpoint {args.checkpoint_load}")
         model_wrapped = ModelWrapper.load_from_checkpoint(args.checkpoint_load)
     else:
         model_wrapped = ModelWrapper(model, 1, args)
         
     
     # for model registry compliance
-    model_kwargs["model_name"] = args.model
+    model_kwargs["model_name"] = "dlrm"
     if args.wandb_log:
         wandb.config.update({"model_config": model_kwargs})
 
