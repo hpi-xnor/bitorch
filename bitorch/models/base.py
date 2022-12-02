@@ -1,4 +1,3 @@
-import pandas
 import logging
 from argparse import ArgumentParser
 from typing import Optional, List, Any
@@ -11,9 +10,7 @@ from bitorch.layers import convert
 from bitorch.layers.qconv1d import QConv1dBase, QConv1d_NoAct
 from bitorch.layers.qconv2d import QConv2dBase, QConv2d_NoAct
 from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
-from bitorch.util import is_url
 from bitorch.models.model_hub import load_from_hub
-import wandb
 
 
 class Model(nn.Module):
