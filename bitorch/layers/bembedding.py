@@ -199,18 +199,12 @@ class BEmbeddingBag(BEmbedding):
         Returns:
             Tensor: The aggregated embedding vectors.
         """
-        out = torch.zeros((batch_size, self.embedding_dim), device=self.weight.device)
-        for row, (start_index, end_index) in enumerate(zip(offsets.tolist(), offsets.tolist()[1:] + [None])):
-            use_indices = inverse_indices[start_index:end_index]
-            if self.mode == "sum":
-                out[row] = torch.sum(unqiue_embedding_vectors.index_select(0, use_indices), dim=0)
-            elif self.mode == "mean":
-                out[row] = torch.sum(unqiue_embedding_vectors.index_select(0, use_indices), dim=0).div_(
-                    len(use_indices)
-                )
-            elif self.mode == "prod":
-                out[row] = torch.prod(unqiue_embedding_vectors.index_select(0, use_indices), dim=0)
-        return out.reshape((batch_size, -1))
+        return torch.nn.functional.embedding_bag(
+            input=inverse_indices,
+            weight=unqiue_embedding_vectors,
+            offsets=offsets,
+            mode=self.mode
+        )
 
     def forward(self, indices: Tensor, offsets: Tensor) -> Tensor:  # type: ignore
         """Generates embeddings from given tokens and offsets.
