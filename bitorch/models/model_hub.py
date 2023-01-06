@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Any, Union
+from typing import Dict, Any, Union, Tuple
 import os
 import numbers
 import pandas
@@ -9,16 +9,18 @@ import torch
 import base64
 import hashlib
 
-def md5_hash_file(path: Path):
+
+def _md5_hash_file(path: Path) -> Any:
     hash_md5 = hashlib.md5()
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(64 * 1024), b""):
             hash_md5.update(chunk)
     return hash_md5
 
-def digest_file(path: Union[Path, str]):
-    path = Path(path)
-    return base64.b64encode(md5_hash_file(path).digest()).decode("ascii")
+
+def _digest_file(path: Union[Path, str]) -> str:
+    return base64.b64encode(_md5_hash_file(Path(path)).digest()).decode("ascii")
+
 
 def convert_dtypes(data: dict) -> dict:
     """converts types of the values of dict so that they can be easily compared accross
@@ -59,7 +61,7 @@ def get_matching_row(version_table: pandas.DataFrame, model_kwargs: dict) -> pan
     return existing_row
 
 
-def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict) -> str:
+def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict) -> Tuple[str, str]:
     """finds the matching row for model_kwargs in version table and path to model artifact for given configuration
 
     Args:
@@ -83,6 +85,7 @@ def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict) -> str:
     model_digest = matching_row["model_digest"][0]
     return model_url, model_digest
 
+
 def load_from_hub(
     model_version_table_path: str, download_path: str = "bitorch_models", **model_kwargs: str
 ) -> torch.Tensor:
@@ -103,7 +106,7 @@ def load_from_hub(
     model_checksum = model_path.split("/")[-1]
     model_local_path = Path(f"{download_path}/{model_checksum}")
 
-    if(not model_local_path.exists() or digest_file(str(model_local_path)) != model_digest):
+    if not model_local_path.exists() or _digest_file(str(model_local_path)) != model_digest:
         logging.info("downloading model...")
         os.system(f"wget {model_path} -O {str(model_local_path)} -q --show-progress")
         logging.info("Model downloaded!")
