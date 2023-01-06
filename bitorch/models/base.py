@@ -1,4 +1,3 @@
-import pandas
 import logging
 from argparse import ArgumentParser
 from typing import Optional, List, Any
