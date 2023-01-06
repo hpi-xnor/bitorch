@@ -11,17 +11,17 @@ from bitorch.layers import convert
 from bitorch.layers.qconv1d import QConv1dBase, QConv1d_NoAct
 from bitorch.layers.qconv2d import QConv2dBase, QConv2d_NoAct
 from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
-from bitorch.util import is_url
 from bitorch.models.model_hub import load_from_hub
-import wandb
 
 
 class Model(nn.Module):
     """Base class for Bitorch models"""
 
     name = ""
-    version_table_path = "hpi-deep-learning/model-registry/model-version-tables"
-    model_hub_base_path = "hpi-deep-learning/model-registry"
+    version_table_path = "snagnar/model-registry/model-version-tables"
+    model_hub_base_path = "snagnar/model-registry"
+    # version_table_path = "hpi-deep-learning/model-registry/model-version-tables"
+    # model_hub_base_path = "hpi-deep-learning/model-registry"
 
     def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()

@@ -88,7 +88,8 @@ def load_from_hub(
     model_path = get_model_path(version_table, model_kwargs, model_hub_base_path)
     logging.info("downloading model...")
     downloaded_model = api.artifact(model_path).get_path("model.ckpt").download(root=download_path)
-    artifact = torch.load(downloaded_model)
+    logging.info("Model downloaded!")
+    artifact = torch.load(downloaded_model, map_location="cpu")
 
     # true if artifact is a checkpoint from pytorch lightning
     if isinstance(artifact, dict):
