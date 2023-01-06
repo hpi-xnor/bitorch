@@ -8,7 +8,7 @@ import torch
 
 
 def convert_dtypes(data: dict) -> dict:
-    """converts types of the values of dict so that they can be easily compared accross 
+    """converts types of the values of dict so that they can be easily compared accross
     dataframes and csvs. converts all values that are not numerical to string.
 
     Args:
@@ -29,7 +29,7 @@ def get_matching_row(version_table: pandas.DataFrame, model_kwargs: dict) -> pan
     """searches the version table dataframe for a row that matches model kwargs
 
     Args:
-        version_table (pandas.DataFrame): the dataframe to search in 
+        version_table (pandas.DataFrame): the dataframe to search in
         model_kwargs (dict): the dict to search for. does not have to have key-value-pairs of each
         column of version_table, i.e. can be subset
 
@@ -127,7 +127,7 @@ def download_version_table(model_table_path: str, api: wandb.Api, no_exception: 
     """
     logging.info("downloading model version table from hub...")
     try:
-        model_table = api.artifact(f"{model_table_path}:latest").get_path(f"versions.csv").download(root="/tmp")
+        model_table = api.artifact(f"{model_table_path}:latest").get_path("versions.csv").download(root="/tmp")
         version_table = pandas.read_csv(model_table)
     except Exception as e:
         logging.info(f"could not retrieve model version table from {model_table_path}: {e}")

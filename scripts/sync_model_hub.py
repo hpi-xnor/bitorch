@@ -29,6 +29,15 @@ INFINITY = 1e4
 
 
 def add_missing_columns(*key_lists: list, init_values: Any = None, table: pandas.DataFrame) -> pandas.DataFrame:
+    """adds missing columns to the dataframe as specified by the key lists. default values can be passed with init values.
+
+    Args:
+        table (pandas.DataFrame): dataframe that receives the new columns
+        init_values (Any, optional): standard values the columns. Defaults to None.
+
+    Returns:
+        pandas.DataFrame: upated dataframe
+    """
     for list_idx, key_list in enumerate(key_lists):
         for key_idx, key in enumerate(key_list):
             if key not in table.columns:
@@ -105,10 +114,17 @@ def extract_artifact_version(artifact: wandb.Artifact, model_name: str) -> int:
 
 def upload_model_to_hub(run: Any, model_name: str, api: wandb.Api) -> int:
     model_hub_path = f"{model_from_name(model_name).model_hub_base_path}/{model_name}"
-    run_artifact = run.logged_artifacts()[0]
-    run_artifact.link(model_hub_path)
-    uploaded_artifact = api.artifact(f"{model_hub_path}:latest")
-    return extract_artifact_version(uploaded_artifact, model_name)
+    entity, project = model_from_name(model_name).model_hub_base_path.split("/")
+    with wandb.init(entity=entity, project=project, name=model_name) as model_registry_run:
+        run_artifact = run.logged_artifacts()[0]
+        run_artifact.get_path("model.ckpt").download("/tmp")
+        model_registry_artifact = wandb.Artifact(model_name, type="pretrained_model")
+        model_registry_artifact.add_file("/tmp/model.ckpt")
+        model_registry_run.log_artifact(model_registry_artifact)
+        # run_artifact.link(model_hub_path)
+        # uploaded_artifact = api.artifact(f"{model_hub_path}:latest")
+        model_registry_run.link_artifact(model_registry_artifact, model_hub_path)
+    return extract_artifact_version(model_registry_artifact, model_name)
 
 
 def compare(configA: dict, configB: dict, compare_metrics: list) -> bool:
@@ -233,7 +249,7 @@ def main(args: argparse.Namespace) -> None:
     )
     entity = config["entity"]
     project = config["project"]
-    logging.info("Syncing runs from:", f"{entity}/{project}")
+    logging.info(f"Syncing runs from: {entity}/{project}")
     runs = api.runs(
         path=f"{entity}/{project}",
         filters=filters,
