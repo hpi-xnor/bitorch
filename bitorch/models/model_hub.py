@@ -1,11 +1,24 @@
-from typing import Dict, Any
-import wandb
+from pathlib import Path
+from typing import Dict, Any, Union
+import os
 import numbers
 import pandas
 import logging
 import warnings
 import torch
+import base64
+import hashlib
 
+def md5_hash_file(path: Path):
+    hash_md5 = hashlib.md5()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(64 * 1024), b""):
+            hash_md5.update(chunk)
+    return hash_md5
+
+def digest_file(path: Union[Path, str]):
+    path = Path(path)
+    return base64.b64encode(md5_hash_file(path).digest()).decode("ascii")
 
 def convert_dtypes(data: dict) -> dict:
     """converts types of the values of dict so that they can be easily compared accross
@@ -46,7 +59,7 @@ def get_matching_row(version_table: pandas.DataFrame, model_kwargs: dict) -> pan
     return existing_row
 
 
-def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict, model_hub_base_path: str) -> str:
+def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict) -> str:
     """finds the matching row for model_kwargs in version table and path to model artifact for given configuration
 
     Args:
@@ -66,12 +79,12 @@ def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict, model_hu
             f"No matching model found in hub with configuration: {model_kwargs}! You can train"
             " it yourself or try to load it from a local checkpoint!"
         )
-    model_version = matching_row["model_hub_version"][0]
-    return f"{model_hub_base_path}/{model_kwargs['model_name']}:v{model_version}"
-
+    model_url = matching_row["model_hub_url"][0]
+    model_digest = matching_row["model_digest"][0]
+    return model_url, model_digest
 
 def load_from_hub(
-    model_version_table_path: str, model_hub_base_path: str, download_path: str = "/tmp", **model_kwargs: str
+    model_version_table_path: str, download_path: str = "bitorch_models", **model_kwargs: str
 ) -> torch.Tensor:
     """loads the model that matches the requested model configuration in model_kwargs from the model hub.
 
@@ -83,13 +96,20 @@ def load_from_hub(
     Returns:
         torch.Tensor: state dict of downloaded model file
     """
-    api = wandb.Api()
-    version_table = download_version_table(model_version_table_path, api)
-    model_path = get_model_path(version_table, model_kwargs, model_hub_base_path)
-    logging.info("downloading model...")
-    downloaded_model = api.artifact(model_path).get_path("model.ckpt").download(root=download_path)
-    logging.info("Model downloaded!")
-    artifact = torch.load(downloaded_model, map_location="cpu")
+    Path(download_path).mkdir(parents=True, exist_ok=True)
+
+    version_table = download_version_table(model_version_table_path)
+    model_path, model_digest = get_model_path(version_table, model_kwargs)
+    model_checksum = model_path.split("/")[-1]
+    model_local_path = Path(f"{download_path}/{model_checksum}")
+
+    if(not model_local_path.exists() or digest_file(str(model_local_path)) != model_digest):
+        logging.info("downloading model...")
+        os.system(f"wget {model_path} -O {str(model_local_path)} -q --show-progress")
+        logging.info("Model downloaded!")
+    else:
+        logging.info(f"Using already downloaded model at {model_local_path}")
+    artifact = torch.load(model_local_path, map_location="cpu")
 
     # true if artifact is a checkpoint from pytorch lightning
     if isinstance(artifact, dict):
@@ -112,7 +132,7 @@ def lightning_checkpoint_to_state_dict(artifact: Dict[Any, Any]) -> Dict[Any, An
     return extracted_state_dict
 
 
-def download_version_table(model_table_path: str, api: wandb.Api, no_exception: bool = False) -> pandas.DataFrame:
+def download_version_table(model_table_path: str, no_exception: bool = False) -> pandas.DataFrame:
     """downloads the newest version table from model hub.
 
     Args:
@@ -128,8 +148,8 @@ def download_version_table(model_table_path: str, api: wandb.Api, no_exception: 
     """
     logging.info("downloading model version table from hub...")
     try:
-        model_table = api.artifact(f"{model_table_path}:latest").get_path("versions.csv").download(root="/tmp")
-        version_table = pandas.read_csv(model_table)
+        os.system(f"wget {model_table_path} -O /tmp/bitorch_model_version_table.csv -q --show-progress")
+        version_table = pandas.read_csv("/tmp/bitorch_model_version_table.csv")
     except Exception as e:
         logging.info(f"could not retrieve model version table from {model_table_path}: {e}")
         if no_exception:

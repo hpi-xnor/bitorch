@@ -17,10 +17,8 @@ class Model(nn.Module):
     """Base class for Bitorch models"""
 
     name = ""
-    version_table_path = "snagnar/model-registry/model-version-tables"
-    model_hub_base_path = "snagnar/model-registry"
-    # version_table_path = "hpi-deep-learning/model-registry/model-version-tables"
-    # model_hub_base_path = "hpi-deep-learning/model-registry"
+    version_table_url = "https://api.wandb.ai/artifactsV2/default/hpi-deep-learning/QXJ0aWZhY3Q6MzE1MzQ1ODM1/a9bd2573417efc7fb8f562f06f3d322d"
+    model_hub_base_path = "hpi-deep-learning/model-registry"
 
     def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()
@@ -102,7 +100,7 @@ class Model(nn.Module):
         else:
             kwargs["model_name"] = cls.name.lower()
             logging.info(f"Downloading {cls.name} model state_dict from hub...")
-            state_dict = load_from_hub(cls.version_table_path, cls.model_hub_base_path, **kwargs)
+            state_dict = load_from_hub(cls.version_table_url, **kwargs)
 
         model.load_state_dict(state_dict)
         return model
