@@ -18,7 +18,6 @@ class Model(nn.Module):
 
     name = ""
     version_table_url = "https://api.wandb.ai/artifactsV2/default/hpi-deep-learning/QXJ0aWZhY3Q6MzE1MzQ1ODM1/a9bd2573417efc7fb8f562f06f3d322d"
-    model_hub_base_path = "hpi-deep-learning/model-registry"
 
     def __init__(self, input_shape: List[int], num_classes: int = 0) -> None:
         super(Model, self).__init__()

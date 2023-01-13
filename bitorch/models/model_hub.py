@@ -8,6 +8,7 @@ import warnings
 import torch
 import base64
 import hashlib
+from torchvision.datasets.utils import download_url
 
 
 def _md5_hash_file(path: Path) -> Any:
@@ -67,7 +68,6 @@ def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict) -> Tuple
     Args:
         version_table (pandas.DataFrame): version table with model configurations and corresponding model hub versions
         model_kwargs (dict): model configuration to search for
-        model_hub_base_path (str): base path that contains model hub version of models
 
     Raises:
         RuntimeError: thrown if no matching model can be found in version table
@@ -93,7 +93,6 @@ def load_from_hub(
 
     Args:
         model_version_table_path (str): path to model version table on model hub
-        model_hub_base_path (str): base path for model hub for downloading stored models
         download_path (str, optional): path to store the downloaded files. Defaults to "/tmp".
 
     Returns:
@@ -108,7 +107,7 @@ def load_from_hub(
 
     if not model_local_path.exists() or _digest_file(str(model_local_path)) != model_digest:
         logging.info("downloading model...")
-        os.system(f"wget {model_path} -O {str(model_local_path)} -q --show-progress")
+        download_url(model_path, model_local_path.parent, model_local_path.name, model_checksum)
         logging.info("Model downloaded!")
     else:
         logging.info(f"Using already downloaded model at {model_local_path}")
@@ -151,7 +150,7 @@ def download_version_table(model_table_path: str, no_exception: bool = False) ->
     """
     logging.info("downloading model version table from hub...")
     try:
-        os.system(f"wget {model_table_path} -O /tmp/bitorch_model_version_table.csv -q --show-progress")
+        download_url(model_table_path, "/tmp", "bitorch_model_version_table.csv")
         version_table = pandas.read_csv("/tmp/bitorch_model_version_table.csv")
     except Exception as e:
         logging.info(f"could not retrieve model version table from {model_table_path}: {e}")
