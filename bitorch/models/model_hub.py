@@ -129,6 +129,10 @@ def lightning_checkpoint_to_state_dict(artifact: Dict[Any, Any]) -> Dict[Any, An
         Dict[Any, Any]: state dict for model
     """
     state_dict = artifact["state_dict"]
+
+    for key in state_dict.keys():
+        assert (key.startswith("model.")), f"Unexpected malformed static dict key {key}."
+
     # turns model._model.arg keys in state dict into _model.arg
     extracted_state_dict = {key[6:]: value for key, value in state_dict.items()}
     return extracted_state_dict
