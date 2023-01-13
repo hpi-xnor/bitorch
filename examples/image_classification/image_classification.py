@@ -18,9 +18,11 @@ from typing import List, Any, Type
 import fvbitcore.nn as fv_nn
 import torch
 import wandb
+import pytorch_lightning as pl
 from pytorch_lightning import Trainer
-from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
+from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor, Callback
 from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch.utils.data import DataLoader
 
 import bitorch
@@ -37,6 +39,19 @@ from utils.lightning_model import ModelWrapper, DistillationModelWrapper
 from utils.utils import configure_logging
 
 logger = logging.getLogger()
+
+
+class ModelCallback(Callback):
+    def on_train_batch_end(
+        self,
+        trainer: Trainer,
+        pl_module: pl.LightningModule,
+        outputs: STEP_OUTPUT,
+        batch: Any,
+        batch_idx: int,
+        unused: int = 0,
+    ) -> None:
+        pl_module.model.apply(pl_module.model.on_train_batch_end)  # type: ignore
 
 
 def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
@@ -84,6 +99,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 filename="{epoch:03d}",
             )
         )
+
+    callbacks.append(ModelCallback())
 
     # providing our own progress bar disables the default progress bar (not needed to disable later on)
     cmd_logger = CommandLineLogger(args.log_interval)

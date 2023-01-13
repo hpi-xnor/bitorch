@@ -1,6 +1,8 @@
 from typing import List, Optional, Union
 from torch import nn
 
+from bitorch.layers.pad import PadModule
+
 
 def get_initial_layers(
     variant: Optional[Union[List[int], str]], input_channels: int, output_channels: int
@@ -9,6 +11,44 @@ def get_initial_layers(
     layers: List[nn.Module] = []
     if variant == (224, 224) or variant == "imagenet":
         layers.append(nn.Conv2d(input_channels, output_channels, kernel_size=7, stride=2, padding=3, bias=False))
+
+    elif variant == "quicknet_stem":
+        assert output_channels % 4 == 0
+        stem_channels = output_channels // 4
+
+        layers.append(PadModule(0, 1, 0, 1))
+        layers.append(
+            nn.Conv2d(
+                input_channels,
+                stem_channels,
+                kernel_size=3,
+                stride=2,
+                bias=False,
+            )
+        )
+        layers.append(nn.BatchNorm2d(stem_channels, momentum=0.9))
+        layers.append(nn.ReLU())
+        layers.append(PadModule(0, 1, 0, 1))
+        layers.append(
+            nn.Conv2d(
+                stem_channels,
+                stem_channels,
+                kernel_size=3,
+                groups=stem_channels,
+                stride=2,
+                bias=False,
+            )
+        )
+        layers.append(nn.BatchNorm2d(stem_channels, momentum=0.9))
+        layers.append(
+            nn.Conv2d(
+                stem_channels,
+                output_channels,
+                kernel_size=1,
+                bias=False,
+            )
+        )
+        layers.append(nn.BatchNorm2d(output_channels, momentum=0.9))
     elif variant == "grouped_stem":
         stem_width = output_channels // 2
 

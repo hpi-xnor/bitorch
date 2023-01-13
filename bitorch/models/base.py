@@ -105,6 +105,16 @@ class Model(nn.Module):
         model.load_state_dict(state_dict)
         return model
 
+    def on_train_batch_end(self, layer: nn.Module) -> None:
+        """Is used with the pytorch lighting on_train_batch_end callback
+
+        Implement it to e.g. clip weights after optimization. Is recursively applied to every submodule.
+
+        Args:
+            layer (nn.Module): current layer
+        """
+        pass
+
 
 class NoArgparseArgsMixin:
     """

@@ -24,6 +24,9 @@ from bitorch.models import (
     MeliusNetA,
     MeliusNetB,
     MeliusNetC,
+    QuickNet,
+    QuickNetSmall,
+    QuickNetLarge,
 )
 import torch
 import numpy as np
@@ -70,6 +73,9 @@ TEST_INPUT_DATA = [
     [ResnetE34, {}, RGB_DATASETS],
     [LeNet, {"lenet_version": [0, 1, 2, 3, 4]}, [MNIST]],
     [DLRM, {}, [CRITEO]],
+    [QuickNet, {}, [IMAGENET]],
+    [QuickNetSmall, {}, [IMAGENET]],
+    [QuickNetLarge, {}, [IMAGENET]],
 ]
 
 
