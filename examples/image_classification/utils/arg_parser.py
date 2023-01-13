@@ -340,7 +340,7 @@ def add_regular_args(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--model",
         type=str.lower,
-        choices=model_names() + ["quicknet"],
+        choices=model_names(),
         required=True,
         help="name of the model to be trained",
     )
