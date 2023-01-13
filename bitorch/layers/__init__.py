@@ -19,6 +19,7 @@ from .qconv3d import QConv3d, QConv3dBase, QConv3d_NoAct
 from .qembedding import QEmbedding, QEmbeddingBag
 from .qlinear import QLinear, QLinearBase
 from .register import all_layer_registries
+from .pad import PadModule
 
 __all__ = [
     "InputGraphicalDebug",
@@ -43,6 +44,7 @@ __all__ = [
     "Pact",
     "CustomImplementationMixin",
     "convert",
+    "PadModule",
 ]
 
 
