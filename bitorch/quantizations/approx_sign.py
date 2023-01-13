@@ -12,8 +12,8 @@ class ApproxSignFunction(Function):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            input_tensor: torch.Tensor) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction, input_tensor: torch.Tensor  # type: ignore
+    ) -> torch.Tensor:
         """Binarize input tensor using the _sign function.
 
         Args:
@@ -25,14 +25,14 @@ class ApproxSignFunction(Function):
         ctx.save_for_backward(input_tensor)
 
         sign_tensor = torch.sign(input_tensor)
-        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1., device=sign_tensor.device), sign_tensor)
+        sign_tensor = torch.where(sign_tensor == 0, torch.tensor(1.0, device=sign_tensor.device), sign_tensor)
         return sign_tensor
 
     @staticmethod
     @typing.no_type_check
     def backward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            output_grad: torch.Tensor) -> torch.Tensor:
+        ctx: torch.autograd.function.BackwardCFunction, output_grad: torch.Tensor  # type: ignore
+    ) -> torch.Tensor:
         """Apply approx sign function. used e.g. for birealnet
 
         Args:
@@ -44,7 +44,7 @@ class ApproxSignFunction(Function):
         """
         input_tensor = ctx.saved_tensors[0]
         # produces zeros where preactivation inputs exceeded threshold, ones otherwise
-        inside_threshold = (torch.abs(input_tensor) <= 1)
+        inside_threshold = torch.abs(input_tensor) <= 1
         approx_sign = (2.0 - 2.0 * torch.abs(input_tensor)) * inside_threshold
         return approx_sign * output_grad
 
@@ -53,7 +53,7 @@ class ApproxSign(Quantization):
     """Module for applying the sign function with approx sign in backward pass"""
 
     name = "approxsign"
-    bitwidth = 1
+    bit_width = 1
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
         """Forwards the tensor through the approx sign function.

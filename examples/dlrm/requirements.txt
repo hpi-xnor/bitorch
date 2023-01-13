@@ -1,0 +1,6 @@
+bitorch
+fvbitcore
+pytorch_lightning
+sklearn
+torchmetrics
+wandb

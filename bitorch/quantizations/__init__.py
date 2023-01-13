@@ -5,7 +5,7 @@ build quantized models.
 If you want to implement a new function, use the :code:`Quantization` base class as superclass.
 """
 
-from typing import List, Type
+from typing import List, Type, Dict
 
 from .base import Quantization
 from .approx_sign import ApproxSign
@@ -14,15 +14,29 @@ from .identity import Identity
 from .sign import Sign
 from .ste_heaviside import SteHeaviside
 from .swish_sign import SwishSign
+from .progressive_sign import ProgressiveSign
+from .quantization_scheduler import Quantization_Scheduler, ScheduledQuantizer
 from ..util import build_lookup_dictionary
 
 __all__ = [
-    "Quantization", "ApproxSign", "InputDoReFa", "WeightDoReFa", "Identity", "Sign",
-    "SteHeaviside", "SwishSign",
+    "Quantization",
+    "quantization_from_name",
+    "quantization_names",
+    "register_custom_quantization",
+    "ApproxSign",
+    "InputDoReFa",
+    "WeightDoReFa",
+    "Identity",
+    "ProgressiveSign",
+    "Sign",
+    "SteHeaviside",
+    "SwishSign",
+    "Quantization_Scheduler",
+    "ScheduledQuantizer",
 ]
 
 
-quantizations_by_name = build_lookup_dictionary(__name__, __all__, Quantization)
+quantizations_by_name: Dict[str, Type[Quantization]] = build_lookup_dictionary(__name__, __all__, Quantization)
 
 
 def quantization_from_name(name: str) -> Type[Quantization]:
@@ -50,3 +64,13 @@ def quantization_names() -> List:
         List: the quantization names
     """
     return list(quantizations_by_name.keys())
+
+
+def register_custom_quantization(custom_quantization: Type[Quantization]) -> None:
+    """
+    Register a custom (external) quantization in bitorch.
+
+    Args:
+        custom_quantization: the custom config which should be added to bitorch
+    """
+    quantizations_by_name[custom_quantization.name] = custom_quantization

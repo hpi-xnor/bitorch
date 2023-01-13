@@ -1,25 +1,20 @@
 import pytest
-from bitorch.layers.qlinear import QLinear
-from bitorch.layers.qactivation import QActivation
-from bitorch.quantizations import Sign, quantization_from_name
 import torch
 from torch.nn import Parameter
 
+from bitorch.layers.qactivation import QActivation
+from bitorch.layers.qlinear import QLinear
+from bitorch.quantizations import Sign, quantization_from_name
 
-TEST_INPUT_DATA = [
-    [0., 0.],
-    [1., 0.],
-    [-1., 1.],
-    [0.3, -0.3],
-    [1e12, -1e12]
-]
+TEST_INPUT_DATA = [[0.0, 0.0], [1.0, 0.0], [-1.0, 1.0], [0.3, -0.3], [1e12, -1e12]]
 
 
 @pytest.mark.parametrize("input_values", TEST_INPUT_DATA)
 @pytest.mark.parametrize("quantization", ["sign", Sign()])
 def test_qlinear(input_values, quantization):
     layer = QLinear(2, 2, bias=False, weight_quantization=quantization, input_quantization=quantization)
-    assert isinstance(layer.weight_quantize, quantization_from_name("sign"))
+    assert isinstance(layer.weight_quantization, quantization_from_name("sign"))
+    assert isinstance(layer.input_quantization, quantization_from_name("sign"))
 
     test_weights = [[0.3, -1.4], [-0.3, 2.6]]
 

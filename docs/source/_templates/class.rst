@@ -14,7 +14,7 @@
    .. autosummary::
       :nosignatures:
    {% for item in methods %}
-    
+
       {%- if item.startswith('__init__') %}
         {%- if item not in inherited_members %}
         ~{{ name }}.{{ item }}

@@ -1,10 +1,12 @@
 """Quantization superclass implementation"""
 
-import torch
 import typing
+from typing import Any
+from warnings import warn
+
+import torch
 from torch import nn
 from torch.autograd.function import Function
-from typing import Any
 
 
 class STE(Function):
@@ -13,18 +15,10 @@ class STE(Function):
     @staticmethod
     @typing.no_type_check
     def forward(
-            ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
-            input_tensor: torch.Tensor) -> torch.Tensor:
-        """just fowards the unchanged input_tensor.
-
-        Args:
-            ctx (Any): autograd context
-            input_tensor (torch.Tensor): input tensor
-
-        Returns:
-            torch.Tensor: the unchanged input tensor
-        """
-        return input_tensor
+        ctx: torch.autograd.function.BackwardCFunction,  # type: ignore
+        input_tensor: torch.Tensor,
+    ) -> torch.Tensor:
+        raise NotImplementedError("Forwards pass of STE should be implemented by subclass.")
 
     @staticmethod
     @typing.no_type_check
@@ -44,12 +38,19 @@ class STE(Function):
 class Quantization(nn.Module):
     """superclass for quantization modules"""
 
-    name = "None"
-    bitwidth = -1
+    name: str = "None"
+    bit_width: int = -1
+
+    @property
+    def bitwidth(self) -> int:
+        warn("Attribute 'bitwidth' is deprecated, use 'bit_width' instead.", DeprecationWarning, stacklevel=2)
+        return self.bit_width
 
     def quantize(self, x: torch.Tensor) -> torch.Tensor:
-        """quantize the input tensor. It is recommended to use a torch.Function to also maniputlate backward behaiviour. See
-        the implementations of sign or dorefa quantization functions for more examples.
+        """Apply the quantization function to the input tensor.
+
+        It is recommended to use a torch.Function to also manipulate backwards behavior.
+        See the implementations of sign or dorefa quantization functions for more examples.
 
         Args:
             x (torch.Tensor): the input to be quantized

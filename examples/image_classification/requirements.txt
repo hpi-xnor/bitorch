@@ -1,0 +1,5 @@
+bitorch
+fvbitcore
+pytorch_lightning>=1.8.1
+sklearn
+wandb~=0.12.0

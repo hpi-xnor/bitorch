@@ -1,3 +1,7 @@
+"""
+BITorch is a library currently under development to simplify building quantized and binary neural networks with PyTorch.
+It contains implementation of the required layers, different quantization functions and examples.
+"""
 import os
 from argparse import ArgumentParser, Namespace
 from importlib import import_module
@@ -5,7 +9,10 @@ from pathlib import Path
 from typing import List
 
 from .config import Config
+from .runtime_mode import RuntimeMode, runtime_mode_type, change_mode, pause_wrapping  # noqa: F401
+from .layers import convert  # noqa: F401
 
+mode: RuntimeMode = RuntimeMode.DEFAULT
 
 configs_by_name = {}
 
@@ -50,7 +57,7 @@ def config_from_name(name: str) -> Config:
 
 
 def config_names() -> List:
-    """getter for list of config names for argparse
+    """Get the list of config names for argparse.
 
     Returns:
         List: the config names
@@ -59,20 +66,29 @@ def config_names() -> List:
 
 
 def add_config_args(parser: ArgumentParser) -> None:
-    """adds all config arguments
+    """Adds all arguments from all registered configs.
 
     Args:
         parser (ArgumentParser): parser to add the arguments to
     """
-    for config in configs_by_name.values():
-        config.add_config_arguments(parser)
+    for config_ in configs_by_name.values():
+        config_.add_config_arguments(parser)
 
 
 def apply_args_to_configuration(args: Namespace) -> None:
-    """applys the cli configurations to the config objects.
+    """Applies the cli configurations to the config objects.
 
     Args:
         args (Namespace): the cli configurations
     """
-    for config in configs_by_name.values():
-        config.apply_args_to_configuration(args)
+    for config_ in configs_by_name.values():
+        config_.apply_args_to_configuration(args)
+
+
+def register_custom_config(custom_config: Config) -> None:
+    """Register a custom (external) config in bitorch.
+
+    Args:
+        custom_config: the custom config which should be added to bitorch
+    """
+    configs_by_name[custom_config.name] = custom_config

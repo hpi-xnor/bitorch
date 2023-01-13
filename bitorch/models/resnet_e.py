@@ -2,9 +2,8 @@
 Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
 <https://arxiv.org/abs/1906.08637>`_ paper.
 """
-from bitorch.datasets.base import BasicDataset
-from .base import Model
-from typing import List, Any
+from .base import Model, NoArgparseArgsMixin
+from typing import Optional, List, Any
 import torch
 import argparse
 from torch import nn
@@ -13,7 +12,7 @@ import logging
 from bitorch.layers import QConv2d
 from bitorch.models.common_layers import get_initial_layers
 
-__all__ = ['ResnetE34', 'ResnetE18', 'ResnetE']
+__all__ = ["ResnetE34", "ResnetE18", "ResnetE"]
 
 
 class BasicBlock(nn.Module):
@@ -49,7 +48,14 @@ class BasicBlock(nn.Module):
         """
         return nn.Sequential(
             nn.AvgPool2d(kernel_size=2, stride=self.stride),
-            nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(
+                self.in_channels,
+                self.out_channels,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
             nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
 
@@ -61,8 +67,14 @@ class BasicBlock(nn.Module):
             nn.Sequential: the basic building block body model
         """
         return nn.Sequential(
-            QConv2d(self.in_channels, self.out_channels, kernel_size=3, stride=self.stride, padding=1, bias=False,
-                    input_quantization="sign", weight_quantization="sign"),
+            QConv2d(
+                self.in_channels,
+                self.out_channels,
+                kernel_size=3,
+                stride=self.stride,
+                padding=1,
+                bias=False,
+            ),
             nn.BatchNorm2d(self.out_channels, momentum=0.9),
         )
 
@@ -109,7 +121,6 @@ class SpecificResnetE(nn.Module):
         Returns:
             nn.Sequential: the model containing the building blocks
         """
-
         # this tricks adds shortcut connections between original resnet blocks
         # we multiple number of blocks by 2, but add only one layer instead of two in each block
         layers = layers * 2
@@ -157,12 +168,13 @@ class _ResnetE(SpecificResnetE):
     """
 
     def __init__(
-            self,
-            layers: list,
-            channels: list,
-            classes: int,
-            initial_layers: str = "imagenet",
-            image_channels: int = 3) -> None:
+        self,
+        layers: list,
+        channels: list,
+        classes: int,
+        image_resolution: Optional[List[int]] = None,
+        image_channels: int = 3,
+    ) -> None:
         """Creates ResNetE model.
 
         Args:
@@ -170,8 +182,8 @@ class _ResnetE(SpecificResnetE):
             channels (list): channel num used for input/output channel size of layers. there must always be one more
                 channels than there are layers.
             classes (int): number of output classes
-            initial_layers (str, optional): name of set for initial layers. refer to common_layers.py.
-                Defaults to "imagenet".
+            image_resolution (List[int], optional): resolution of input image. refer to common_layers.py.
+                Defaults to None.
             image_channels (int, optional): input channels of images. Defaults to 3.
 
         Raises:
@@ -180,11 +192,12 @@ class _ResnetE(SpecificResnetE):
         super(_ResnetE, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
-                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
+                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!"
+            )
 
         feature_layers: List[nn.Module] = []
         # feature_layers.append(nn.BatchNorm2d(image_channels, eps=2e-5, momentum=0.9))
-        feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
+        feature_layers.extend(get_initial_layers(image_resolution, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0], momentum=0.9))
 
         feature_layers.extend(self.make_feature_layers(layers, channels))
@@ -203,34 +216,23 @@ ResNet-e specifications
 
 class ResnetE(Model):
 
-    name = "resnete"
+    name = "ResnetE"
 
-    resnet_spec = {18: ([2, 2, 2, 2], [64, 64, 128, 256, 512]),
-                   34: ([3, 4, 6, 3], [64, 64, 128, 256, 512])}
+    resnet_spec = {
+        18: ([2, 2, 2, 2], [64, 64, 128, 256, 512]),
+        34: ([3, 4, 6, 3], [64, 64, 128, 256, 512]),
+    }
 
-    def __init__(
-            self,
-            resnete_num_layers: int,
-            dataset: BasicDataset) -> None:
-        super(ResnetE, self).__init__(dataset)
-        self._model = self.create(resnete_num_layers, self._dataset.num_classes,
-                                  self._dataset.name, self._dataset.shape[1])
+    def __init__(self, resnete_num_layers: int, input_shape: List[int], num_classes: int = 0) -> None:
+        super(ResnetE, self).__init__(input_shape, num_classes)
+        self._model = self.create(resnete_num_layers)
         logging.info(f"building ResnetE with {str(resnete_num_layers)} layers...")
 
-    @classmethod
-    def create(
-            cls,
-            num_layers: int,
-            classes: int = 1000,
-            initial_layers: str = "imagenet",
-            image_channels: int = 3) -> nn.Module:
+    def create(self, num_layers: int) -> nn.Module:
         """Creates a ResNetE complying to given layer number.
 
         Args:
             num_layers (int): number of layers to be build.
-            classes (int, optional): number of output classes. Defaults to 1000.
-            initial_layers (str, optional): name of set of initial layers to be used. Defaults to "imagenet".
-            image_channels (int, optional): number of channels of input images. Defaults to 3.
 
         Raises:
             ValueError: raised if no resnet specification for given num_layers is listed in the resnet_spec dict above
@@ -238,44 +240,43 @@ class ResnetE(Model):
         Returns:
             Module: resnetE model
         """
-        if num_layers not in cls.resnet_spec:
+        if num_layers not in self.resnet_spec:
             raise ValueError(f"No resnet spec for {num_layers} available!")
 
-        layers, channels = cls.resnet_spec[num_layers]
+        layers, channels = self.resnet_spec[num_layers]
+        image_channels = self._input_shape[1]
+        image_resolution = self._input_shape[-2:]
 
-        return _ResnetE(layers, channels, classes, initial_layers, image_channels)
+        return _ResnetE(layers, channels, self._num_classes, image_resolution, image_channels)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--resnetE-num-layers", type=int, choices=[18, 34], required=True,
-                            help="number of layers to be used inside resnetE")
+        parser.add_argument(
+            "--num-layers",
+            type=int,
+            choices=[18, 34],
+            required=True,
+            help="number of layers to be used inside resnetE",
+        )
 
 
-class ResnetE18(ResnetE):
+class ResnetE18(NoArgparseArgsMixin, ResnetE):
     """ResNetE-18 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "resnete18"
+    name = "ResnetE18"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE18, self).__init__(18, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class ResnetE34(ResnetE):
+class ResnetE34(NoArgparseArgsMixin, ResnetE):
     """ResNetE-34 model from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
     <https://arxiv.org/abs/1906.08637>`_ paper.
     """
 
-    name = "resnete34"
+    name = "ResnetE34"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(ResnetE34, self).__init__(34, *args, **kwargs)
-
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass

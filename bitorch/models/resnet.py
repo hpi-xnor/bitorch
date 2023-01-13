@@ -1,6 +1,5 @@
-from bitorch.datasets.base import BasicDataset
-from .base import Model
-from typing import List, Any
+from .base import Model, NoArgparseArgsMixin
+from typing import Optional, List, Any
 from bitorch.layers import QConv2d_NoAct
 import torch
 import argparse
@@ -44,7 +43,13 @@ class BasicBlockV1(Module):
             nn.Sequential: the downsampling model
         """
         return nn.Sequential(
-            QConv2d(self.in_channels, self.out_channels, kernel_size=1, stride=self.stride, padding=0),
+            QConv2d(
+                self.in_channels,
+                self.out_channels,
+                kernel_size=1,
+                stride=self.stride,
+                padding=0,
+            ),
             nn.BatchNorm2d(self.out_channels),
         )
 
@@ -56,7 +61,13 @@ class BasicBlockV1(Module):
             nn.Sequential: the basic building block body model
         """
         return nn.Sequential(
-            QConv2d(self.in_channels, self.out_channels, kernel_size=3, stride=self.stride, padding=1),
+            QConv2d(
+                self.in_channels,
+                self.out_channels,
+                kernel_size=3,
+                stride=self.stride,
+                padding=1,
+            ),
             nn.BatchNorm2d(self.out_channels),
             QConv2d(self.out_channels, self.out_channels, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(self.out_channels),
@@ -111,8 +122,14 @@ class BottleneckV1(Module):
             nn.Sequential: the downsampling model
         """
         return nn.Sequential(
-            QConv2d_NoAct(self.in_channels, self.out_channels, kernel_size=1,
-                          stride=self.stride, padding=0, bias=False),
+            QConv2d_NoAct(
+                self.in_channels,
+                self.out_channels,
+                kernel_size=1,
+                stride=self.stride,
+                padding=0,
+                bias=False,
+            ),
             nn.BatchNorm2d(self.out_channels),
         )
 
@@ -123,14 +140,25 @@ class BottleneckV1(Module):
             nn.Sequential: the bottleneck body model
         """
         return nn.Sequential(
-            QConv2d_NoAct(self.in_channels, self.out_channels // 4, kernel_size=1, stride=self.stride),
+            QConv2d_NoAct(
+                self.in_channels,
+                self.out_channels // 4,
+                kernel_size=1,
+                stride=self.stride,
+            ),
             nn.BatchNorm2d(self.out_channels // 4),
             nn.ReLU(),
-            QConv2d_NoAct(self.out_channels // 4, self.out_channels // 4, kernel_size=3, stride=1, padding=1),
+            QConv2d_NoAct(
+                self.out_channels // 4,
+                self.out_channels // 4,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
             nn.BatchNorm2d(self.out_channels // 4),
             nn.ReLU(),
             QConv2d_NoAct(self.out_channels // 4, self.out_channels, kernel_size=1, stride=1),
-            nn.BatchNorm2d(self.out_channels)
+            nn.BatchNorm2d(self.out_channels),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -182,7 +210,13 @@ class BasicBlockV2(Module):
         Returns:
             QConv2d: the downsampling convolution layer
         """
-        return QConv2d(self.in_channels, self.out_channels, kernel_size=1, stride=self.stride, padding=0)
+        return QConv2d(
+            self.in_channels,
+            self.out_channels,
+            kernel_size=1,
+            stride=self.stride,
+            padding=0,
+        )
 
     def _build_body(self) -> nn.Sequential:
         """builds body of building block. Check referenced paper for more details.
@@ -191,7 +225,13 @@ class BasicBlockV2(Module):
             nn.Sequential: the bottleneck body model
         """
         return nn.Sequential(
-            QConv2d(self.in_channels, self.out_channels, kernel_size=3, stride=self.stride, padding=1),
+            QConv2d(
+                self.in_channels,
+                self.out_channels,
+                kernel_size=3,
+                stride=self.stride,
+                padding=1,
+            ),
             nn.BatchNorm2d(self.out_channels),
             QConv2d(self.out_channels, self.out_channels, kernel_size=3, stride=1, padding=1),
         )
@@ -241,7 +281,13 @@ class BottleneckV2(Module):
         Returns:
             QConv2d: the downsampling convolution layer
         """
-        return QConv2d_NoAct(self.in_channels, self.out_channels, kernel_size=1, stride=self.stride, bias=False)
+        return QConv2d_NoAct(
+            self.in_channels,
+            self.out_channels,
+            kernel_size=1,
+            stride=self.stride,
+            bias=False,
+        )
 
     def _build_body(self) -> nn.Sequential:
         """builds body of building block. Check referenced paper for more details.
@@ -250,10 +296,21 @@ class BottleneckV2(Module):
             nn.Sequential: the bottleneck body model
         """
         return nn.Sequential(
-            QConv2d_NoAct(self.in_channels, self.out_channels // 4, kernel_size=1, stride=self.stride),
+            QConv2d_NoAct(
+                self.in_channels,
+                self.out_channels // 4,
+                kernel_size=1,
+                stride=self.stride,
+            ),
             nn.BatchNorm2d(self.out_channels // 4),
             nn.ReLU(),
-            QConv2d_NoAct(self.out_channels // 4, self.out_channels // 4, kernel_size=3, stride=1, padding=1),
+            QConv2d_NoAct(
+                self.out_channels // 4,
+                self.out_channels // 4,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
             nn.BatchNorm2d(self.out_channels // 4),
             nn.ReLU(),
             QConv2d_NoAct(self.out_channels // 4, self.out_channels, kernel_size=1, stride=1),
@@ -291,7 +348,14 @@ class SpecificResnet(Module):
         self.features = nn.Sequential()
         self.output_layer = nn.Linear(channels[-1], classes)
 
-    def make_layer(self, block: Module, layers: int, in_channels: int, out_channels: int, stride: int) -> nn.Sequential:
+    def make_layer(
+        self,
+        block: Module,
+        layers: int,
+        in_channels: int,
+        out_channels: int,
+        stride: int,
+    ) -> nn.Sequential:
         """builds a layer by stacking blocks in a sequential models.
 
         Args:
@@ -348,13 +412,14 @@ class ResNetV1(SpecificResnet):
     """
 
     def __init__(
-            self,
-            block: Module,
-            layers: list,
-            channels: list,
-            classes: int,
-            initial_layers: str = "imagenet",
-            image_channels: int = 3) -> None:
+        self,
+        block: Module,
+        layers: list,
+        channels: list,
+        classes: int,
+        image_resolution: Optional[List[int]] = None,
+        image_channels: int = 3,
+    ) -> None:
         """Creates ResNetV1 model.
 
         Args:
@@ -363,8 +428,8 @@ class ResNetV1(SpecificResnet):
             channels (list): channel num used for input/output channel size of layers. there must always be one more
                 channels than there are layers.
             classes (int): number of output classes
-            initial_layers (str, optional): name of set for initial layers. refer to common_layers.py.
-                Defaults to "imagenet".
+            image_resolution (List[int], optional): resolution of input image. refer to common_layers.py.
+                Defaults to None.
             image_channels (int, optional): input channels of images. Defaults to 3.
 
         Raises:
@@ -373,11 +438,12 @@ class ResNetV1(SpecificResnet):
         super(ResNetV1, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
-                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
+                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!"
+            )
 
         feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
-        feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
+        feature_layers.extend(get_initial_layers(image_resolution, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0]))
 
         feature_layers.extend(self.make_feature_layers(block, layers, channels))
@@ -396,13 +462,14 @@ class ResNetV2(SpecificResnet):
     """
 
     def __init__(
-            self,
-            block: Module,
-            layers: list,
-            channels: list,
-            classes: int = 1000,
-            initial_layers: str = "imagenet",
-            image_channels: int = 3) -> None:
+        self,
+        block: Module,
+        layers: list,
+        channels: list,
+        classes: int = 1000,
+        image_resolution: Optional[List[int]] = None,
+        image_channels: int = 3,
+    ) -> None:
         """Creates ResNetV2 model.
 
         Args:
@@ -411,8 +478,8 @@ class ResNetV2(SpecificResnet):
             channels (list): channel num used for input/output channel size of layers. there must always be one more
                 channels than there are layers.
             classes (int): number of output classes
-            initial_layers (str, optional): name of set for initial layers. refer to common_layers.py.
-                Defaults to "imagenet".
+            image_resolution (List[int], optional): resolution of input image. refer to common_layers.py.
+                Defaults to None.
             image_channels (int, optional): input channels of images. Defaults to 3.
 
         Raises:
@@ -421,11 +488,12 @@ class ResNetV2(SpecificResnet):
         super(ResNetV2, self).__init__(classes, channels)
         if len(channels) != (len(layers) + 1):
             raise ValueError(
-                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!")
+                f"the len of channels ({len(channels)}) must be exactly the len of layers ({len(layers)}) + 1!"
+            )
 
         feature_layers: List[nn.Module] = []
         feature_layers.append(nn.BatchNorm2d(image_channels))
-        feature_layers.extend(get_initial_layers(initial_layers, image_channels, channels[0]))
+        feature_layers.extend(get_initial_layers(image_resolution, image_channels, channels[0]))
 
         feature_layers.extend(self.make_feature_layers(block, layers, channels))
 
@@ -444,41 +512,38 @@ Resnet specifications
 
 class Resnet(Model):
 
-    name = "resnet"
+    name = "Resnet"
 
-    resnet_spec = {18: ('basic_block', [2, 2, 2, 2], [64, 64, 128, 256, 512]),
-                   34: ('basic_block', [3, 4, 6, 3], [64, 64, 128, 256, 512]),
-                   50: ('bottle_neck', [3, 4, 6, 3], [64, 256, 512, 1024, 2048]),
-                   101: ('bottle_neck', [3, 4, 23, 3], [64, 256, 512, 1024, 2048]),
-                   152: ('bottle_neck', [3, 8, 36, 3], [64, 256, 512, 1024, 2048])}
+    resnet_spec = {
+        18: ("basic_block", [2, 2, 2, 2], [64, 64, 128, 256, 512]),
+        34: ("basic_block", [3, 4, 6, 3], [64, 64, 128, 256, 512]),
+        50: ("bottle_neck", [3, 4, 6, 3], [64, 256, 512, 1024, 2048]),
+        101: ("bottle_neck", [3, 4, 23, 3], [64, 256, 512, 1024, 2048]),
+        152: ("bottle_neck", [3, 8, 36, 3], [64, 256, 512, 1024, 2048]),
+    }
     resnet_net_versions = [ResNetV1, ResNetV2]
-    resnet_block_versions = [{'basic_block': BasicBlockV1, 'bottle_neck': BottleneckV1},
-                             {'basic_block': BasicBlockV2, 'bottle_neck': BottleneckV2}]
+    resnet_block_versions = [
+        {"basic_block": BasicBlockV1, "bottle_neck": BottleneckV1},
+        {"basic_block": BasicBlockV2, "bottle_neck": BottleneckV2},
+    ]
 
     def __init__(
-            self,
-            resnet_version: int,
-            resnet_num_layers: int,
-            dataset: BasicDataset) -> None:
-        super(Resnet, self).__init__(dataset)
-        self._model = self.create_resnet(resnet_version, resnet_num_layers,
-                                         self._dataset.num_classes, self._dataset.name, self._dataset.shape[1])
+        self,
+        resnet_version: int,
+        resnet_num_layers: int,
+        input_shape: List[int],
+        num_classes: int = 0,
+    ) -> None:
+        super(Resnet, self).__init__(input_shape, num_classes)
+        self._model = self.create_resnet(resnet_version, resnet_num_layers)
         logging.info(f"building Resnetv{str(resnet_version)} with {str(resnet_num_layers)} layers...")
 
-    def create_resnet(self,
-                      version: int,
-                      num_layers: int,
-                      classes: int = 1000,
-                      initial_layers: str = "imagenet",
-                      image_channels: int = 3) -> Module:
+    def create_resnet(self, version: int, num_layers: int) -> Module:
         """Creates a resnet complying to given version and layer number.
 
         Args:
             version (int): version of resnet to be used. availavle versions are 1 or 2
             num_layers (int): number of layers to be build.
-            classes (int, optional): number of output classes. Defaults to 1000.
-            initial_layers (str, optional): name of set of initial layers to be used. Defaults to "imagenet".
-            image_channels (int, optional): number of channels of input images. Defaults to 3.
 
         Raises:
             ValueError: raised if no resnet specification for given num_layers is listed in the resnet_spec dict above
@@ -492,133 +557,114 @@ class Resnet(Model):
         if version not in [1, 2]:
             raise ValueError(f"invalid resnet version {version}, only 1 or 2 allowed")
 
+        image_channels = self._input_shape[1]
+        image_resolution = self._input_shape[-2:]
         block_type, layers, channels = self.resnet_spec[num_layers]
         resnet = self.resnet_net_versions[version - 1]
         block = self.resnet_block_versions[version - 1][block_type]
-        return resnet(block, layers, channels, classes, initial_layers, image_channels)
+        return resnet(block, layers, channels, self._num_classes, image_resolution, image_channels)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("--resnet-version", type=int, choices=[1, 2], required=True,
-                            help="version of resnet to be used")
-        parser.add_argument("--resnet-num-layers", type=int, choices=[18, 34, 50, 152], required=True,
-                            help="number of layers to be used inside resnet")
+        parser.add_argument(
+            "--version",
+            type=int,
+            choices=[1, 2],
+            required=True,
+            help="version of resnet to be used",
+        )
+        parser.add_argument(
+            "--num-layers",
+            type=int,
+            choices=[18, 34, 50, 152],
+            required=True,
+            help="number of layers to be used inside resnet",
+        )
 
 
-class Resnet18V1(Resnet):
+class Resnet18V1(NoArgparseArgsMixin, Resnet):
     """ResNet-18 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
 
-    name = "resnet18v1"
+    name = "Resnet18V1"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet18V1, self).__init__(1, 18, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class Resnet34V1(Resnet):
+class Resnet34V1(NoArgparseArgsMixin, Resnet):
     """ResNet-34 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
-    name = "resnet34v1"
+
+    name = "Resnet34V1"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet34V1, self).__init__(1, 34, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class Resnet50V1(Resnet):
+class Resnet50V1(NoArgparseArgsMixin, Resnet):
     """ResNet-50 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
 
-    name = "resnet50v1"
+    name = "Resnet50V1"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet50V1, self).__init__(1, 50, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class Resnet152V1(Resnet):
+class Resnet152V1(NoArgparseArgsMixin, Resnet):
     """ResNet-152 V1 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
 
-    name = "resnet152v1"
+    name = "Resnet152V1"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet152V1, self).__init__(1, 152, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class Resnet18V2(Resnet):
+class Resnet18V2(NoArgparseArgsMixin, Resnet):
     """ResNet-18 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
 
-    name = "resnet18v2"
+    name = "Resnet18V2"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet18V2, self).__init__(2, 18, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class Resnet34V2(Resnet):
+class Resnet34V2(NoArgparseArgsMixin, Resnet):
     """ResNet-34 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
 
-    name = "resnet34v2"
+    name = "Resnet34V2"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet34V2, self).__init__(2, 34, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class Resnet50V2(Resnet):
+class Resnet50V2(NoArgparseArgsMixin, Resnet):
     """ResNet-50 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
 
-    name = "resnet50v2"
+    name = "Resnet50V2"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet50V2, self).__init__(2, 50, *args, **kwargs)
 
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
 
-
-class Resnet152V2(Resnet):
+class Resnet152V2(NoArgparseArgsMixin, Resnet):
     """ResNet-152 V2 model from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     """
 
-    name = "resnet152v2"
+    name = "Resnet152V2"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super(Resnet152V2, self).__init__(2, 152, *args, **kwargs)
-
-    @staticmethod
-    def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
-        pass
