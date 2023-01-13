@@ -8,7 +8,7 @@ from bitorch.quantizations.progressive_sign import config as progressive_sign_co
 class ProgressiveSignScalerCallback(pl.callbacks.Callback):
     """Callback that updates the scale of progressive sign functions based on current epoch."""
 
-    def on_epoch_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+    def on_train_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         scale = trainer.current_epoch / trainer.max_epochs
         progressive_sign_config.progressive_sign_scale = scale
         for logger in trainer.loggers:

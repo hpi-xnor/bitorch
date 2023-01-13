@@ -8,7 +8,7 @@ from torch.nn import Module
 from torch.optim.optimizer import Optimizer
 
 
-def configure_logging(logger: Any, log_file: Union[None, str], log_level: str, output_stdout: bool) -> None:
+def configure_logging(logger: Any, log_file: Optional[str], log_level: str, output_stdout: bool) -> None:
     """configures logging module.
 
     Args:
@@ -27,7 +27,7 @@ def configure_logging(logger: Any, log_file: Union[None, str], log_level: str, o
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    if log_file:
+    if log_file is not None:
         log_file_path = Path(log_file)
         log_file_path.parent.mkdir(parents=True, exist_ok=True)
         file_handler = logging.FileHandler(log_file_path)
