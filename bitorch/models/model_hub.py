@@ -80,8 +80,8 @@ def get_model_path(version_table: pandas.DataFrame, model_kwargs: dict) -> Tuple
             f"No matching model found in hub with configuration: {model_kwargs}! You can train"
             " it yourself or try to load it from a local checkpoint!"
         )
-    model_url = matching_row["model_hub_url"][0]
-    model_digest = matching_row["model_digest"][0]
+    model_url = matching_row["model_hub_url"].iloc[0]
+    model_digest = matching_row["model_digest"].iloc[0]
     return model_url, model_digest
 
 
@@ -127,7 +127,7 @@ def lightning_checkpoint_to_state_dict(artifact: Dict[Any, Any]) -> Dict[Any, An
     Returns:
         Dict[Any, Any]: state dict for model
     """
-    state_dict = artifact["state_dict"]
+    state_dict = {key: value for key, value in artifact["state_dict"].items() if "model" in key}
 
     for key in state_dict.keys():
         assert key.startswith("model."), f"Unexpected malformed static dict key {key}."

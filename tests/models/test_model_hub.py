@@ -5,6 +5,7 @@ import time
 
 TEST_DATA = [
     (ResnetE18, {"input_shape": (1, 3, 32, 32), "num_classes": 10}),
+    (ResnetE18, {"input_shape": (1, 3, 224, 224), "num_classes": 1000}),
 ]
 
 
