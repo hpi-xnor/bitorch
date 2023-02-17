@@ -21,7 +21,7 @@ import wandb
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor, Callback
-from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, Logger
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torch.utils.data import DataLoader
 
@@ -71,7 +71,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     output_dir = Path(args.result_directory)
     output_dir.mkdir(exist_ok=True)
 
-    loggers: List[LightningLoggerBase] = []
+    loggers: List[Logger] = []
     if args.tensorboard_log:
         loggers.append(TensorBoardLogger(str(output_dir), name="tensorboard"))  # type: ignore
     if args.csv_log:

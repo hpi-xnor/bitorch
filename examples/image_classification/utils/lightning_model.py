@@ -27,12 +27,13 @@ class ModelWrapper(LightningModule):
         self.save_hyperparameters(clean_hyperparameters(script_args))
         self.loss_function = CrossEntropyLoss()
         self.model = model
-        self.batch_accuracy_top1 = Accuracy(num_classes=num_classes)
-        self.batch_accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
-        self.train_accuracy_top1 = Accuracy(num_classes=num_classes)
-        self.train_accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
-        self.accuracy_top1 = Accuracy(num_classes=num_classes)
-        self.accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
+        task = "binary" if num_classes == 2 else "multiclass"
+        self.batch_accuracy_top1 = Accuracy(task=task, num_classes=num_classes)
+        self.batch_accuracy_top5 = Accuracy(task=task, top_k=5, num_classes=num_classes)
+        self.train_accuracy_top1 = Accuracy(task=task, num_classes=num_classes)
+        self.train_accuracy_top5 = Accuracy(task=task, top_k=5, num_classes=num_classes)
+        self.accuracy_top1 = Accuracy(task=task, num_classes=num_classes)
+        self.accuracy_top5 = Accuracy(task=task, top_k=5, num_classes=num_classes)
         self.add_f1_prec_recall = add_f1_prec_recall
         self.quantization_scheduler = quantization_scheduler
         if add_f1_prec_recall:
