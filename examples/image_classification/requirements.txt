@@ -1,5 +1,5 @@
 bitorch
 fvbitcore
-pytorch_lightning>=1.8.1
+pytorch_lightning>=1.9.2
 sklearn
 wandb~=0.12.0
