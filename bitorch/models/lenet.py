@@ -91,6 +91,11 @@ class LeNet(Model):
                 self.activation_function(),
                 nn.Linear(self.num_fc, self.num_output),
             )
+    
+
+    def _load_default_model(cls) -> None:
+        return cls.from_pretrained(input_shape=(1, 1, 28, 28), num_classes=10, model_name=cls.name)
+
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

@@ -10,7 +10,7 @@ from torch import nn
 import logging
 
 from bitorch.layers import QConv2d
-from bitorch.models.common_layers import get_initial_layers
+from bitorch.models.common_layers import get_initial_layers, IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
 
 __all__ = ["ResnetE34", "ResnetE18", "ResnetE"]
 
@@ -248,6 +248,9 @@ class ResnetE(Model):
         image_resolution = self._input_shape[-2:]
 
         return _ResnetE(layers, channels, self._num_classes, image_resolution, image_channels)
+
+    def _load_default_model(cls) -> None:
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

@@ -11,88 +11,7 @@ from bitorch.layers import convert
 from bitorch.layers.qconv1d import QConv1dBase, QConv1d_NoAct
 from bitorch.layers.qconv2d import QConv2dBase, QConv2d_NoAct
 from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
-from bitorch.models.model_hub import load_from_hub
-
-def pop_first_layers(model: nn.Module, num_layers: int = 1) -> nn.Module:
-    """pops the first num_layers layers from the model.
-
-    Args:
-        model (nn.Module): the model
-        num_layers (int): number of layers to pop
-
-    Returns:
-        nn.Module: the model without the first num_layers layers
-    """
-    if num_layers == 0:
-        return model
-    layer_list = list(model.children())
-    if len(layer_list) == 0:
-        return model
-    last_output_size = None
-    for _ in range(len(layer_list)):
-        removed_layer = layer_list.pop(0)
-        if hasattr(removed_layer, "in_features"):
-            i += 1
-            last_output_size = removed_layer.out_features
-            if i == num_layers:
-                break
-    return Sequential(*layer_list), last_output_size
-
-
-
-def pop_last_layers(model: nn.Module, num_layers: int = 1) -> nn.Module:
-    """pops the last num_layers layers which transform the input/output size from the model.
-
-    Args:
-        model (nn.Module): the model
-        num_layers (int): number of layers to pop
-
-    Returns:
-        nn.Module: the model without the last num_layers layers
-    """
-    if num_layers == 0:
-        return model
-    layer_list = list(model.children())
-    if len(layer_list) == 0:
-        return model
-    last_input_size = None
-    for _ in range(len(layer_list)):
-        removed_layer = layer_list.pop()
-        if hasattr(removed_layer, "out_features"):
-            last_input_size = removed_layer.in_features
-            i += 1
-            if i == num_layers:
-                break
-    return Sequential(*layer_list), last_input_size
-
-def get_output_size(model: nn.Module) -> int:
-    """returns the output size of the model for the given input shape.
-
-    Args:
-        model (nn.Module): the model
-
-    Returns:
-        int: the output size
-    """
-    for layer in reversed(list(model.children())):  # type: ignore
-        if hasattr(layer, "out_features"):
-            return layer.out_features, type(layer)
-    return -1
-
-def get_input_size(model: nn.Module) -> int:
-    """returns the input size of the model for the given input shape.
-
-    Args:
-        model (nn.Module): the model
-
-    Returns:
-        int: the input size
-    """
-    for layer in list(model.children()):  # type: ignore
-        if hasattr(layer, "in_features"):
-            return layer.in_features, type(layer)
-    return -1
-
+from bitorch.models.model_hub import load_from_hub, pop_first_layers, pop_last_layers, get_input_size, get_output_size
 
 class Model(nn.Module):
     """Base class for Bitorch models"""
@@ -190,22 +109,32 @@ class Model(nn.Module):
         raise NotImplementedError()
     
     @classmethod
-    def as_backbone(cls, input_size=None, output_size=None, prepend_layers: Sequential = None, append_layers: Sequential = None, sanity_check: bool = True, as_feature_extractor: bool = False) -> "Model":
+    def as_backbone(
+            cls,
+            input_size=None,
+            output_size=None,
+            prepend_layers: Sequential = None,
+            append_layers: Sequential = None,
+            sanity_check: bool = True,
+            as_feature_extractor: bool = False) -> "Model":
         if input_size is not None and prepend_layers is not None:
             raise ValueError("Cannot specify both input_size and prepend_layers")
         if output_size is not None and append_layers is not None:
             raise ValueError("Cannot specify both output_size and append_layers")
         model = cls._load_default_model()
         if input_size is not None:
-            model._model, model_output_size = pop_first_layers(model._model)
+            first_layer_name, model_output_size = pop_first_layers(model._model)
             if len(input_size) == 2:
-                model._model = nn.Sequential(nn.Linear(input_size[0], model_output_size), model._model)
+                model._model._modules[first_layer_name] = nn.Linear(input_size[0], model_output_size)
+                # model._model = nn.Sequential(nn.Linear(input_size[0], model_output_size), model._model)
             elif len(input_size) == 3:
-                model._model = nn.Sequential(nn.Conv2d(input_size[0], model_output_size, kernel_size=3), model._model)
+                model._model._modules[first_layer_name] = nn.Conv2d(input_size[0], model_output_size, kernel_size=3)
+                # model._model = nn.Sequential(nn.Conv2d(input_size[0], model_output_size, kernel_size=3), model._model)
             else:
                 raise NotImplementedError("Only 2D and 3D inputs are supported")
         elif prepend_layers is not None:
-            model._model, model_output_size = pop_first_layers(model._model)
+            assert isinstance(prepend_layers, nn.Sequential)
+            first_layer_name, model_output_size = pop_first_layers(model._model)
             prepend_output_size, prepend_output_type = get_output_size(prepend_layers)
             if prepend_output_size != model_output_size:
                 logging.info("Changing output size of prepend_layers to match model")
@@ -215,7 +144,7 @@ class Model(nn.Module):
                     prepend_layers.add_module(nn.Conv2d(prepend_output_size, model_output_size, kernel_size=3))
                 else:
                     raise NotImplementedError("Only 2D and 3D inputs are supported")
-            model._model = nn.Sequential(prepend_layers, model._model)
+            model._model._modules[first_layer_name] = prepend_layers
         
         if output_size is not None:
             model._model, model_input_size = pop_last_layers(model._model)

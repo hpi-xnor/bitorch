@@ -8,7 +8,7 @@ from torch.nn import Module, ChannelShuffle
 
 from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d
-from bitorch.models.common_layers import get_initial_layers
+from bitorch.models.common_layers import get_initial_layers, IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
 
 
 class DenseLayer(Module):
@@ -255,6 +255,9 @@ class DenseNet(Model):
             self._input_shape[1],
         )
         logging.info(f"building DenseNet with {str(num_layers)} layers...")
+
+    def _load_default_model(cls) -> None:
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

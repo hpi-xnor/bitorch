@@ -8,7 +8,7 @@ from torch import nn
 from torch.nn import Module
 
 from bitorch.layers import QConv2d
-from bitorch.models.common_layers import get_initial_layers
+from bitorch.models.common_layers import get_initial_layers, IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
 
 
 class BasicBlockV1(Module):
@@ -563,6 +563,9 @@ class Resnet(Model):
         resnet = self.resnet_net_versions[version - 1]
         block = self.resnet_block_versions[version - 1][block_type]
         return resnet(block, layers, channels, self._num_classes, image_resolution, image_channels)
+
+    def _load_default_model(cls) -> None:
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

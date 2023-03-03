@@ -7,7 +7,91 @@ import warnings
 import torch
 import base64
 import hashlib
+from torch.nn import Module, Sequential, Identity
 from torchvision.datasets.utils import download_url
+
+
+def pop_first_layers(model: Module, num_layers: int = 1) -> Module:
+    """pops the first num_layers layers from the model.
+
+    Args:
+        model (Module): the model
+        num_layers (int): number of layers to pop
+
+    Returns:
+        Module: the model without the first num_layers layers
+    """
+    if num_layers == 0:
+        return model
+    layer_list = list(model.named_children())
+    if len(layer_list) == 0:
+        return model
+    last_output_size = None
+    last_name = ""
+    for name, layer in range(len(layer_list)):
+        model._modules[name] = Identity
+        if hasattr(layer, "in_features"):
+            i += 1
+            last_name = name
+            last_output_size = layer.out_features
+            if i == num_layers:
+                break
+    return last_name, last_output_size
+
+
+
+def pop_last_layers(model: Module, num_layers: int = 1) -> Module:
+    """pops the last num_layers layers which transform the input/output size from the model.
+
+    Args:
+        model (Module): the model
+        num_layers (int): number of layers to pop
+
+    Returns:
+        Module: the model without the last num_layers layers
+    """
+    if num_layers == 0:
+        return model
+    layer_list = list(model.children())
+    if len(layer_list) == 0:
+        return model
+    last_input_size = None
+    for _ in range(len(layer_list)):
+        removed_layer = layer_list.pop()
+        if hasattr(removed_layer, "out_features"):
+            last_input_size = removed_layer.in_features
+            i += 1
+            if i == num_layers:
+                break
+    return Sequential(*layer_list), last_input_size
+
+def get_output_size(model: Module) -> int:
+    """returns the output size of the model for the given input shape.
+
+    Args:
+        model (Module): the model
+
+    Returns:
+        int: the output size
+    """
+    for layer in reversed(list(model.children())):  # type: ignore
+        if hasattr(layer, "out_features"):
+            return layer.out_features, type(layer)
+    return -1
+
+def get_input_size(model: Module) -> int:
+    """returns the input size of the model for the given input shape.
+
+    Args:
+        model (Module): the model
+
+    Returns:
+        int: the input size
+    """
+    for layer in list(model.children()):  # type: ignore
+        if hasattr(layer, "in_features"):
+            return layer.in_features, type(layer)
+    return -1
 
 
 def _md5_hash_file(path: Path) -> Any:

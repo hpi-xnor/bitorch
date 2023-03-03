@@ -3,6 +3,9 @@ from torch import nn
 
 from bitorch.layers.pad import PadModule
 
+IMAGENET_INPUT_SHAPE = (1, 3, 224, 224)
+IMAGENET_CLASSES = 1000
+
 
 def get_initial_layers(
     variant: Optional[Union[List[int], str]], input_channels: int, output_channels: int

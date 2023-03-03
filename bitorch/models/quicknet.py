@@ -8,7 +8,7 @@ import numpy as np
 
 from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d, PadModule
-from bitorch.models.common_layers import get_initial_layers
+from bitorch.models.common_layers import get_initial_layers, IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
 
 
 class ResidualBlock(nn.Sequential):
@@ -83,6 +83,9 @@ class QuickNet(Model):
         self._model.stem.apply(self._initialize_stem)  # type: ignore
         self._model.body.apply(self._initialize_body_top)  # type: ignore
         self._model.top.apply(self._initialize_body_top)  # type: ignore
+
+    def _load_default_model(cls) -> None:
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
 
     def _blurpool_init(self, weight: torch.Tensor) -> None:
         """Initialize anti-alias low_pass filter.
