@@ -511,7 +511,6 @@ Resnet specifications
 
 
 class Resnet(Model):
-
     name = "Resnet"
 
     resnet_spec = {
@@ -564,8 +563,9 @@ class Resnet(Model):
         block = self.resnet_block_versions[version - 1][block_type]
         return resnet(block, layers, channels, self._num_classes, image_resolution, image_channels)
 
+    @classmethod
     def _load_default_model(cls) -> None:
-        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

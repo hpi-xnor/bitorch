@@ -256,8 +256,9 @@ class DenseNet(Model):
         )
         logging.info(f"building DenseNet with {str(num_layers)} layers...")
 
+    @classmethod
     def _load_default_model(cls) -> None:
-        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

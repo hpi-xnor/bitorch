@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 from typing import Dict, Any, Union, Tuple
 import numbers
@@ -9,6 +10,36 @@ import base64
 import hashlib
 from torch.nn import Module, Sequential, Identity
 from torchvision.datasets.utils import download_url
+
+
+def get_children(model: torch.nn.Module, name=[]):
+    # get children form model!
+    children = list(model.named_children())
+    flatt_children = []
+    if children == []:
+        # if model has no children; model is last child! :O
+        return [[name, model]]
+    else:
+        # look for children from children... to the last child!
+        for child_name, child in children:
+            flatt_children.extend(get_children(child, name=name + [child_name]))
+    return flatt_children
+
+
+def set_layer_in_model(model: Module, layer_names: list = [], layer: Module = None):
+    """sets a layer in a model at the given layer_names.
+
+    Args:
+        model (Module): the model
+        layer_names (list): the layer names
+        layer (Module): the layer to set
+    """
+    if len(layer_names) == 0:
+        return
+    if len(layer_names) == 1:
+        model._modules[layer_names[0]] = layer
+        return
+    set_layer_in_model(model._modules[layer_names[0]], layer_names[1:], layer)
 
 
 def pop_first_layers(model: Module, num_layers: int = 1) -> Module:
@@ -23,21 +54,23 @@ def pop_first_layers(model: Module, num_layers: int = 1) -> Module:
     """
     if num_layers == 0:
         return model
-    layer_list = list(model.named_children())
+    layer_list = get_children(model)
     if len(layer_list) == 0:
         return model
     last_output_size = None
     last_name = ""
-    for name, layer in range(len(layer_list)):
-        model._modules[name] = Identity
-        if hasattr(layer, "in_features"):
+    last_layer = None
+    i = 0
+    for name, layer in layer_list:
+        set_layer_in_model(model, name, Identity())
+        if hasattr(layer, "out_features") or hasattr(layer, "out_channels"):
             i += 1
             last_name = name
-            last_output_size = layer.out_features
+            last_output_size = layer.out_features if hasattr(layer, "out_features") else layer.out_channels
+            last_layer = copy.deepcopy(layer)
             if i == num_layers:
                 break
-    return last_name, last_output_size
-
+    return last_name, last_output_size, last_layer
 
 
 def pop_last_layers(model: Module, num_layers: int = 1) -> Module:
@@ -52,18 +85,25 @@ def pop_last_layers(model: Module, num_layers: int = 1) -> Module:
     """
     if num_layers == 0:
         return model
-    layer_list = list(model.children())
+    layer_list = get_children(model)
+    layer_list.reverse()
     if len(layer_list) == 0:
         return model
     last_input_size = None
-    for _ in range(len(layer_list)):
-        removed_layer = layer_list.pop()
-        if hasattr(removed_layer, "out_features"):
-            last_input_size = removed_layer.in_features
+    last_layer_name = ""
+    last_layer = None
+    i = 0
+    for name, layer in layer_list:
+        set_layer_in_model(model, name, Identity())
+        if hasattr(layer, "in_features") or hasattr(layer, "in_channels"):
+            last_layer_name = name
+            last_input_size = layer.in_features if hasattr(layer, "in_features") else layer.in_channels
+            last_layer = copy.deepcopy(layer)
             i += 1
             if i == num_layers:
                 break
-    return Sequential(*layer_list), last_input_size
+    return last_layer_name, last_input_size, last_layer
+
 
 def get_output_size(model: Module) -> int:
     """returns the output size of the model for the given input shape.
@@ -74,10 +114,13 @@ def get_output_size(model: Module) -> int:
     Returns:
         int: the output size
     """
-    for layer in reversed(list(model.children())):  # type: ignore
+    for _, layer in reversed(get_children(model)):  # type: ignore
         if hasattr(layer, "out_features"):
             return layer.out_features, type(layer)
-    return -1
+        if hasattr(layer, "out_channels"):
+            return layer.out_channels, type(layer)
+    return -1, None
+
 
 def get_input_size(model: Module) -> int:
     """returns the input size of the model for the given input shape.
@@ -88,10 +131,12 @@ def get_input_size(model: Module) -> int:
     Returns:
         int: the input size
     """
-    for layer in list(model.children()):  # type: ignore
+    for _, layer in get_children(model):  # type: ignore
         if hasattr(layer, "in_features"):
             return layer.in_features, type(layer)
-    return -1
+        if hasattr(layer, "in_channels"):
+            return layer.in_channels, type(layer)
+    return -1, None
 
 
 def _md5_hash_file(path: Path) -> Any:

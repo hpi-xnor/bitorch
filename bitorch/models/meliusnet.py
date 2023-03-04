@@ -12,6 +12,7 @@ from bitorch.layers import QConv2d
 
 from bitorch.models.common_layers import IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
 
+
 # Blocks
 class ImprovementBlock(Module):
     """ImprovementBlock which improves the last n channels"""
@@ -103,8 +104,9 @@ class MeliusNet(Model):
         )
         logging.info(f"building MeliusNet with {str(num_layers)} layers...")
 
+    @classmethod
     def _load_default_model(cls) -> None:
-        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

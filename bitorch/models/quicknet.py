@@ -84,8 +84,9 @@ class QuickNet(Model):
         self._model.body.apply(self._initialize_body_top)  # type: ignore
         self._model.top.apply(self._initialize_body_top)  # type: ignore
 
+    @classmethod
     def _load_default_model(cls) -> None:
-        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES, model_name=cls.name)
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES)
 
     def _blurpool_init(self, weight: torch.Tensor) -> None:
         """Initialize anti-alias low_pass filter.
