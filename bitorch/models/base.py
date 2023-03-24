@@ -98,8 +98,8 @@ class Model(nn.Module):
 
     @classmethod
     def from_pretrained(
-        cls, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, **kwargs: str
-    ) -> nn.Module:
+        cls, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, **kwargs: Any
+    ) -> "Model":
         """Loads a pretrained model from a file or from the model hub.
 
         Args:
@@ -128,10 +128,10 @@ class Model(nn.Module):
     @classmethod
     def as_backbone(
         cls,
-        input_size: Tuple[int] = None,
-        output_size: Tuple[int] = None,
-        prepend_layers: Sequential = None,
-        append_layers: Sequential = None,
+        input_size: Optional[Tuple[int]] = None,
+        output_size: Optional[Tuple[int]] = None,
+        prepend_layers: Optional[nn.Module] = None,
+        append_layers: Optional[nn.Module] = None,
         sanity_check: bool = True,
         as_feature_extractor: bool = False,
     ) -> "Model":
@@ -177,16 +177,16 @@ class Model(nn.Module):
                 set_layer_in_model(
                     model._model,
                     first_layer_name,
-                    nn.Conv2d(
+                    nn.Conv2d(  # type: ignore
                         input_size[0],
                         model_output_size,
-                        kernel_size=removed_layer.kernel_size,
-                        stride=removed_layer.stride,
-                        padding=removed_layer.padding,
-                        dilation=removed_layer.dilation,
-                        groups=removed_layer.groups,
-                        bias=removed_layer.bias is not None,
-                        padding_mode=removed_layer.padding_mode,
+                        kernel_size=removed_layer.kernel_size,  # type: ignore
+                        stride=removed_layer.stride,  # type: ignore
+                        padding=removed_layer.padding,  # type: ignore
+                        dilation=removed_layer.dilation,  # type: ignore
+                        groups=removed_layer.groups,  # type: ignore
+                        bias=removed_layer.bias is not None,  # type: ignore
+                        padding_mode=removed_layer.padding_mode,  # type: ignore
                     ),
                 )
             else:
@@ -203,16 +203,16 @@ class Model(nn.Module):
                     prepend_layers.append(nn.Linear(prepend_output_size, model_input_size))
                 elif issubclass(prepend_output_type, nn.Conv2d):
                     prepend_layers.append(
-                        nn.Conv2d(
+                        nn.Conv2d(  # type: ignore
                             prepend_output_size,
                             model_input_size,
-                            kernel_size=removed_layer.kernel_size,
-                            stride=removed_layer.stride,
-                            padding=removed_layer.padding,
-                            dilation=removed_layer.dilation,
-                            groups=removed_layer.groups,
-                            bias=removed_layer.bias is not None,
-                            padding_mode=removed_layer.padding_mode,
+                            kernel_size=removed_layer.kernel_size,  # type: ignore
+                            stride=removed_layer.stride,  # type: ignore
+                            padding=removed_layer.padding,  # type: ignore
+                            dilation=removed_layer.dilation,  # type: ignore
+                            groups=removed_layer.groups,  # type: ignore
+                            bias=removed_layer.bias is not None,  # type: ignore
+                            padding_mode=removed_layer.padding_mode,  # type: ignore
                         )
                     )
                 else:
@@ -227,16 +227,16 @@ class Model(nn.Module):
                 set_layer_in_model(
                     model._model,
                     last_layer_name,
-                    nn.Conv2d(
+                    nn.Conv2d(  # type: ignore
                         model_output_size,
                         output_size[0],
-                        kernel_size=removed_layer.kernel_size,
-                        stride=removed_layer.stride,
-                        padding=removed_layer.padding,
-                        dilation=removed_layer.dilation,
-                        groups=removed_layer.groups,
-                        bias=removed_layer.bias is not None,
-                        padding_mode=removed_layer.padding_mode,
+                        kernel_size=removed_layer.kernel_size,  # type: ignore
+                        stride=removed_layer.stride,  # type: ignore
+                        padding=removed_layer.padding,  # type: ignore
+                        dilation=removed_layer.dilation,  # type: ignore
+                        groups=removed_layer.groups,  # type: ignore
+                        bias=removed_layer.bias is not None,  # type: ignore
+                        padding_mode=removed_layer.padding_mode,  # type: ignore
                     ),
                 )
             else:
@@ -252,16 +252,16 @@ class Model(nn.Module):
                     append_layers = Sequential(nn.Linear(model_output_size, append_input_size), append_layers)
                 elif issubclass(append_input_type, nn.Conv2d):
                     append_layers = Sequential(
-                        nn.Conv2d(
+                        nn.Conv2d(  # type: ignore
                             model_input_size,
                             append_input_size,
-                            kernel_size=removed_layer.kernel_size,
-                            stride=removed_layer.stride,
-                            padding=removed_layer.padding,
-                            dilation=removed_layer.dilation,
-                            groups=removed_layer.groups,
-                            bias=removed_layer.bias is not None,
-                            padding_mode=removed_layer.padding_mode,
+                            kernel_size=removed_layer.kernel_size,  # type: ignore
+                            stride=removed_layer.stride,  # type: ignore
+                            padding=removed_layer.padding,  # type: ignore
+                            dilation=removed_layer.dilation,  # type: ignore
+                            groups=removed_layer.groups,  # type: ignore
+                            bias=removed_layer.bias is not None,  # type: ignore
+                            padding_mode=removed_layer.padding_mode,  # type: ignore
                         ),
                         append_layers,
                     )

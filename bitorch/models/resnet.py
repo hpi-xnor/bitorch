@@ -564,7 +564,7 @@ class Resnet(Model):
         return resnet(block, layers, channels, self._num_classes, image_resolution, image_channels)
 
     @classmethod
-    def _load_default_model(cls) -> None:
+    def _load_default_model(cls) -> Model:
         return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES)
 
     @staticmethod

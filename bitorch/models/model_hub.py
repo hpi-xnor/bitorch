@@ -1,6 +1,6 @@
 import copy
 from pathlib import Path
-from typing import Dict, Any, Union, Tuple
+from typing import Dict, Any, Union, Tuple, Optional, Type, List
 import numbers
 import pandas
 import logging
@@ -12,7 +12,7 @@ from torch.nn import Module, Identity
 from torchvision.datasets.utils import download_url
 
 
-def get_children(model: torch.nn.Module, name=[]):
+def get_children(model: torch.nn.Module, name: list = []) -> list:
     """
     gets all children of a model recursively.
 
@@ -35,23 +35,28 @@ def get_children(model: torch.nn.Module, name=[]):
     return flatt_children
 
 
-def set_layer_in_model(model: Module, layer_names: list = [], layer: Module = None):
+def set_layer_in_model(model: Module, layer_names: list = [], layer: Optional[Module] = None) -> None:
     """sets a layer in a model at the given layer_names.
 
     Args:
         model (Module): the model
         layer_names (list): the layer names
         layer (Module): the layer to set
+
+    Raises:
+        ValueError: raised if layer_names is empty
     """
     if len(layer_names) == 0:
         return
     if len(layer_names) == 1:
         model._modules[layer_names[0]] = layer
         return
-    set_layer_in_model(model._modules[layer_names[0]], layer_names[1:], layer)
+    if len(layer_names) < 1:
+        raise ValueError("layer_names must be a list of at least one element!")
+    set_layer_in_model(model._modules[layer_names[0]], layer_names[1:], layer)  # type: ignore
 
 
-def pop_first_layers(model: Module, num_layers: int = 1) -> Module:
+def pop_first_layers(model: Module, num_layers: int = 1) -> Tuple[List[Any], int, torch.nn.Module]:
     """pops the first num_layers layers from the model.
 
     Args:
@@ -59,13 +64,11 @@ def pop_first_layers(model: Module, num_layers: int = 1) -> Module:
         num_layers (int): number of layers to pop
 
     Returns:
-        Module: the model without the first num_layers layers
+        str: name of the removed layer
+        int: output size of the removed layer
+        Module: the removed layer
     """
-    if num_layers == 0:
-        return model
     layer_list = get_children(model)
-    if len(layer_list) == 0:
-        return model
     last_output_size = None
     last_name = ""
     last_layer = None
@@ -79,10 +82,10 @@ def pop_first_layers(model: Module, num_layers: int = 1) -> Module:
             last_layer = copy.deepcopy(layer)
             if i == num_layers:
                 break
-    return last_name, last_output_size, last_layer
+    return last_name, last_output_size, last_layer  # type: ignore
 
 
-def pop_last_layers(model: Module, num_layers: int = 1) -> Module:
+def pop_last_layers(model: Module, num_layers: int = 1) -> Tuple[List[Any], int, torch.nn.Module]:
     """pops the last num_layers layers which transform the input/output size from the model.
 
     Args:
@@ -90,14 +93,12 @@ def pop_last_layers(model: Module, num_layers: int = 1) -> Module:
         num_layers (int): number of layers to pop
 
     Returns:
-        Module: the model without the last num_layers layers
+        str: name of the removed layer
+        int: input size of the removed layer
+        Module: the removed layer
     """
-    if num_layers == 0:
-        return model
     layer_list = get_children(model)
     layer_list.reverse()
-    if len(layer_list) == 0:
-        return model
     last_input_size = None
     last_layer_name = ""
     last_layer = None
@@ -111,10 +112,10 @@ def pop_last_layers(model: Module, num_layers: int = 1) -> Module:
             i += 1
             if i == num_layers:
                 break
-    return last_layer_name, last_input_size, last_layer
+    return last_layer_name, last_input_size, last_layer  # type: ignore
 
 
-def get_output_size(model: Module) -> int:
+def get_output_size(model: Module) -> Tuple[int, Optional[Type]]:
     """returns the output size of the model for the given input shape.
 
     Args:
@@ -133,7 +134,7 @@ def get_output_size(model: Module) -> int:
     return -1, None
 
 
-def get_input_size(model: Module) -> int:
+def get_input_size(model: Module) -> Tuple[int, Optional[Type]]:
     """returns the input size of the model for the given input shape.
 
     Args:

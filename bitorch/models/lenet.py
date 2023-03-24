@@ -93,7 +93,7 @@ class LeNet(Model):
             )
 
     @classmethod
-    def _load_default_model(cls) -> None:
+    def _load_default_model(cls) -> Model:
         return cls.from_pretrained(input_shape=(1, 1, 28, 28), num_classes=10)
 
     @staticmethod

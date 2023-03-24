@@ -85,7 +85,7 @@ class QuickNet(Model):
         self._model.top.apply(self._initialize_body_top)  # type: ignore
 
     @classmethod
-    def _load_default_model(cls) -> None:
+    def _load_default_model(cls) -> Model:
         return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES)
 
     def _blurpool_init(self, weight: torch.Tensor) -> None:
