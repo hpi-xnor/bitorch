@@ -1,6 +1,6 @@
 import logging
 from argparse import ArgumentParser
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Tuple
 
 import torch
 from torch import nn
@@ -100,6 +100,15 @@ class Model(nn.Module):
     def from_pretrained(
         cls, source: Optional[str] = None, mode: RuntimeMode = RuntimeMode.DEFAULT, **kwargs: str
     ) -> nn.Module:
+        """Loads a pretrained model from a file or from the model hub.
+
+        Args:
+            source (Optional[str], optional): source of the model. If omitted, the model will be loaded from model hub. Defaults to None.
+            mode (RuntimeMode, optional): Runtime mode to load the model in. Defaults to RuntimeMode.DEFAULT.
+
+        Returns:
+            nn.Module: the pretrained model
+        """
         model = cls(**kwargs)  # type: ignore
         if source is not None:
             logging.info(f"Loading {cls.name} model state_dict from file {source}")
@@ -119,13 +128,42 @@ class Model(nn.Module):
     @classmethod
     def as_backbone(
         cls,
-        input_size=None,
-        output_size=None,
+        input_size: Tuple[int] = None,
+        output_size: Tuple[int] = None,
         prepend_layers: Sequential = None,
         append_layers: Sequential = None,
         sanity_check: bool = True,
         as_feature_extractor: bool = False,
     ) -> "Model":
+        """
+        Creates a model that can be used as a backbone for other models.
+        This method takes care of making the input and output sizes compatible with the model.
+        You can change the input and output size of the model as well als add layers in front of and after the model.
+        If the layers in front of or after the model are not compatible with the model, this method will
+        add the necessary layers to make the model compatible.
+
+        If you just want the model as feature extractor, only the last layer will be removed.
+
+        After the modification a sanity check will be performed by default. This will create a random input tensor and forward it through the model.
+        This check can be turned off using the sanity_check parameter.
+
+        Args:
+            input_size (Tuple[int], optional): Shape of the input (without batch dimension). Defaults to None.
+            output_size (Tuple[int], optional): shape of the wanted output (without batch dimension). Defaults to None.
+            prepend_layers (Sequential, optional): layers to be added in front of the model. Defaults to None.
+            append_layers (Sequential, optional): layers to be added after the model. Defaults to None.
+            sanity_check (bool, optional): toggles testing of created model with an example input. Defaults to True.
+            as_feature_extractor (bool, optional): toggles, if the last layer of the model should be removed. Defaults to False.
+
+        Raises:
+            ValueError: thrown if both input_size and prepend_layers are specified
+            ValueError: thrown if both output_size and append_layers are specified
+            NotImplementedError: thrown if the connecting layers are something other than nn.Linear or nn.Conv2d
+            RuntimeError: thrown if the model is not compatible with the specified input_size
+
+        Returns:
+            Model: the created model
+        """
         if input_size is not None and prepend_layers is not None:
             raise ValueError("Cannot specify both input_size and prepend_layers")
         if output_size is not None and append_layers is not None:
@@ -154,20 +192,20 @@ class Model(nn.Module):
             else:
                 raise NotImplementedError("Only 2D and 3D inputs are supported")
         elif prepend_layers is not None:
-            assert isinstance(prepend_layers, nn.Sequential), "prepend_layers must be a nn.Sequential"
-            first_layer_name, model_output_size, removed_layer = pop_first_layers(model._model)
+            prepend_layers = Sequential(prepend_layers)
+            first_layer_name, model_input_size, removed_layer = pop_first_layers(model._model)
             prepend_output_size, prepend_output_type = get_output_size(prepend_layers)
-            if prepend_output_size != model_output_size:
+            if prepend_output_size != model_input_size:
                 logging.info("Changing output size of prepend_layers to match model")
                 if prepend_output_type is None:
-                    prepend_layers.add_module("conversion", removed_layer)
+                    prepend_layers.append(removed_layer)
                 elif issubclass(prepend_output_type, nn.Linear):
-                    prepend_layers.add_module("conversion", nn.Linear(prepend_output_size, model_output_size))
+                    prepend_layers.append(nn.Linear(prepend_output_size, model_input_size))
                 elif issubclass(prepend_output_type, nn.Conv2d):
-                    prepend_layers.add_module("converion",
+                    prepend_layers.append(
                         nn.Conv2d(
                             prepend_output_size,
-                            model_output_size,
+                            model_input_size,
                             kernel_size=removed_layer.kernel_size,
                             stride=removed_layer.stride,
                             padding=removed_layer.padding,
@@ -182,15 +220,15 @@ class Model(nn.Module):
             set_layer_in_model(model._model, first_layer_name, prepend_layers)
 
         if output_size is not None:
-            last_layer_name, model_input_size, removed_layer = pop_last_layers(model._model)
+            last_layer_name, model_output_size, removed_layer = pop_last_layers(model._model)
             if len(output_size) == 1:
-                set_layer_in_model(model._model, last_layer_name, nn.Linear(model_input_size, output_size[0]))
+                set_layer_in_model(model._model, last_layer_name, nn.Linear(model_output_size, output_size[0]))
             elif len(output_size) == 3:
                 set_layer_in_model(
                     model._model,
                     last_layer_name,
                     nn.Conv2d(
-                        model_input_size,
+                        model_output_size,
                         output_size[0],
                         kernel_size=removed_layer.kernel_size,
                         stride=removed_layer.stride,
@@ -204,14 +242,14 @@ class Model(nn.Module):
             else:
                 raise NotImplementedError("Only 2D and 3D inputs are supported")
         elif append_layers is not None:
-            last_layer_name, model_input_size, removed_layer = pop_last_layers(model._model)
+            last_layer_name, model_output_size, removed_layer = pop_last_layers(model._model)
             append_input_size, append_input_type = get_input_size(append_layers)
-            if append_input_size != model_input_size:
+            if append_input_size != model_output_size:
                 logging.info("changing input size of append_layers to match model")
                 if append_input_type is None:
-                    append_layers = Sequential(removed_layer, *append_layers)
+                    append_layers = Sequential(removed_layer, append_layers)
                 elif issubclass(append_input_type, nn.Linear):
-                    append_layers = Sequential(nn.Linear(model_input_size, append_input_size), *append_layers)
+                    append_layers = Sequential(nn.Linear(model_output_size, append_input_size), append_layers)
                 elif issubclass(append_input_type, nn.Conv2d):
                     append_layers = Sequential(
                         nn.Conv2d(
@@ -225,7 +263,7 @@ class Model(nn.Module):
                             bias=removed_layer.bias is not None,
                             padding_mode=removed_layer.padding_mode,
                         ),
-                        *append_layers,
+                        append_layers,
                     )
                 else:
                     raise NotImplementedError("Only Linear and Conv2d layers are supported")

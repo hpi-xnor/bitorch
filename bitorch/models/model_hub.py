@@ -8,12 +8,21 @@ import warnings
 import torch
 import base64
 import hashlib
-from torch.nn import Module, Sequential, Identity
+from torch.nn import Module, Identity
 from torchvision.datasets.utils import download_url
 
 
 def get_children(model: torch.nn.Module, name=[]):
-    # get children form model!
+    """
+    gets all children of a model recursively.
+
+    Args:
+        model (torch.nn.Module): the model to get the children from
+        name (list, optional): the name of the current module inside the model. Defaults to [].
+
+    Returns:
+        list: list of all children of the model as tuples in the form of (name, layer)
+    """
     children = list(model.named_children())
     flatt_children = []
     if children == []:
@@ -115,8 +124,10 @@ def get_output_size(model: Module) -> int:
         int: the output size
     """
     for _, layer in reversed(get_children(model)):  # type: ignore
+        # linear layer
         if hasattr(layer, "out_features"):
             return layer.out_features, type(layer)
+        # conv layer
         if hasattr(layer, "out_channels"):
             return layer.out_channels, type(layer)
     return -1, None
@@ -132,8 +143,10 @@ def get_input_size(model: Module) -> int:
         int: the input size
     """
     for _, layer in get_children(model):  # type: ignore
+        # linear layer
         if hasattr(layer, "in_features"):
             return layer.in_features, type(layer)
+        # conv layer
         if hasattr(layer, "in_channels"):
             return layer.in_channels, type(layer)
     return -1, None
