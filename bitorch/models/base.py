@@ -4,7 +4,6 @@ from typing import Optional, List, Any, Tuple
 
 import torch
 from torch import nn
-from torch.nn import Sequential
 
 from bitorch import RuntimeMode
 from bitorch.layers import convert
@@ -13,122 +12,13 @@ from bitorch.layers.qconv2d import QConv2dBase, QConv2d_NoAct
 from bitorch.layers.qconv3d import QConv3dBase, QConv3d_NoAct
 from bitorch.models.model_hub import (
     load_from_hub,
-    pop_first_layers,
     pop_last_layers,
     get_input_size,
-    get_output_size,
-    set_layer_in_model,
+    apply_input_size,
+    apply_output_size,
+    append_layers_to_model,
+    prepend_layers_to_model,
 )
-
-
-def apply_input_size(model, input_size):
-    first_layer_name, model_output_size, removed_layer = pop_first_layers(model._model)
-    if len(input_size) == 1:
-        set_layer_in_model(model._model, first_layer_name, nn.Linear(input_size[0], model_output_size))
-    elif len(input_size) == 3:
-        set_layer_in_model(
-            model._model,
-            first_layer_name,
-            nn.Conv2d(  # type: ignore
-                input_size[0],
-                model_output_size,
-                kernel_size=removed_layer.kernel_size,  # type: ignore
-                stride=removed_layer.stride,  # type: ignore
-                padding=removed_layer.padding,  # type: ignore
-                dilation=removed_layer.dilation,  # type: ignore
-                groups=removed_layer.groups,  # type: ignore
-                bias=removed_layer.bias is not None,  # type: ignore
-                padding_mode=removed_layer.padding_mode,  # type: ignore
-            ),
-        )
-    else:
-        raise NotImplementedError("Only 2D and 3D inputs are supported")
-    return model
-
-
-def prepend_layers_to_model(model, prepend_layers):
-    prepend_layers = Sequential(prepend_layers)
-    first_layer_name, model_input_size, removed_layer = pop_first_layers(model._model)
-    prepend_output_size, prepend_output_type = get_output_size(prepend_layers)
-    if prepend_output_size != model_input_size:
-        logging.info("Changing output size of prepend_layers to match model")
-        if prepend_output_type is None:
-            prepend_layers.add_module("convert", removed_layer)
-        elif issubclass(prepend_output_type, nn.Linear):
-            prepend_layers.add_module("convert", nn.Linear(prepend_output_size, model_input_size))
-        elif issubclass(prepend_output_type, nn.Conv2d):
-            prepend_layers.add_module("convert",
-                nn.Conv2d(  # type: ignore
-                    prepend_output_size,
-                    model_input_size,
-                    kernel_size=removed_layer.kernel_size,  # type: ignore
-                    stride=removed_layer.stride,  # type: ignore
-                    padding=removed_layer.padding,  # type: ignore
-                    dilation=removed_layer.dilation,  # type: ignore
-                    groups=removed_layer.groups,  # type: ignore
-                    bias=removed_layer.bias is not None,  # type: ignore
-                    padding_mode=removed_layer.padding_mode,  # type: ignore
-                )
-            )
-        else:
-            raise NotImplementedError("Only 2D and 3D inputs are supported")
-    set_layer_in_model(model._model, first_layer_name, prepend_layers)
-    return model
-
-
-def apply_output_size(model, output_size):
-    last_layer_name, model_output_size, removed_layer = pop_last_layers(model._model)
-    if len(output_size) == 1:
-        set_layer_in_model(model._model, last_layer_name, nn.Linear(model_output_size, output_size[0]))
-    elif len(output_size) == 3:
-        set_layer_in_model(
-            model._model,
-            last_layer_name,
-            nn.Conv2d(  # type: ignore
-                model_output_size,
-                output_size[0],
-                kernel_size=removed_layer.kernel_size,  # type: ignore
-                stride=removed_layer.stride,  # type: ignore
-                padding=removed_layer.padding,  # type: ignore
-                dilation=removed_layer.dilation,  # type: ignore
-                groups=removed_layer.groups,  # type: ignore
-                bias=removed_layer.bias is not None,  # type: ignore
-                padding_mode=removed_layer.padding_mode,  # type: ignore
-            ),
-        )
-    else:
-        raise NotImplementedError("Only 2D and 3D inputs are supported")
-    return model
-
-
-def append_layers_to_model(model, append_layers):
-    last_layer_name, model_output_size, removed_layer = pop_last_layers(model._model)
-    append_input_size, append_input_type = get_input_size(append_layers)
-    if append_input_size != model_output_size:
-        logging.info("changing input size of append_layers to match model")
-        if append_input_type is None:
-            append_layers = Sequential(removed_layer, append_layers)
-        elif issubclass(append_input_type, nn.Linear):
-            append_layers = Sequential(nn.Linear(model_output_size, append_input_size), append_layers)
-        elif issubclass(append_input_type, nn.Conv2d):
-            append_layers = Sequential(
-                nn.Conv2d(  # type: ignore
-                    model_output_size,
-                    append_input_size,
-                    kernel_size=removed_layer.kernel_size,  # type: ignore
-                    stride=removed_layer.stride,  # type: ignore
-                    padding=removed_layer.padding,  # type: ignore
-                    dilation=removed_layer.dilation,  # type: ignore
-                    groups=removed_layer.groups,  # type: ignore
-                    bias=removed_layer.bias is not None,  # type: ignore
-                    padding_mode=removed_layer.padding_mode,  # type: ignore
-                ),
-                append_layers,
-            )
-        else:
-            raise NotImplementedError("Only Linear and Conv2d layers are supported")
-    set_layer_in_model(model._model, last_layer_name, append_layers)
-    return model
 
 
 class Model(nn.Module):
@@ -268,7 +158,6 @@ class Model(nn.Module):
         Raises:
             ValueError: thrown if both input_size and prepend_layers are specified
             ValueError: thrown if both output_size and append_layers are specified
-            NotImplementedError: thrown if the connecting layers are something other than nn.Linear or nn.Conv2d
             RuntimeError: thrown if the model is not compatible with the specified input_size
 
         Returns:
@@ -281,22 +170,32 @@ class Model(nn.Module):
         model = cls._load_default_model()
 
         if input_size is not None:
-            model = apply_input_size(model, input_size)
+            model._model = apply_input_size(model._model, input_size)
         elif prepend_layers is not None:
-            model = prepend_layers_to_model(model, prepend_layers)
+            model._model = prepend_layers_to_model(model._model, prepend_layers)
 
         if output_size is not None:
-            model = apply_output_size(model, output_size)
+            model._model = apply_output_size(model._model, output_size)
         elif append_layers is not None:
-            model = append_layers_to_model(model, append_layers)
+            model._model = append_layers_to_model(model._model, append_layers)
         elif as_feature_extractor:
             pop_last_layers(model._model)
 
         if sanity_check:
             logging.info("running sanity check...")
-            model_input_size, _ = get_input_size(model._model)
-            # todo: check if input_size is given
-            rand_input = torch.rand((2, model_input_size, 224, 224))
+            model_input_size, model_input_type = get_input_size(model._model)
+
+            if model_input_type is None:
+                logging.warning("Could not determine input type of model. Skipping sanity check.")
+                return model
+            if issubclass(model_input_type, nn.Linear):
+                rand_input = torch.rand((2, model_input_size, 224))
+            elif issubclass(model_input_type, nn.Conv2d):
+                rand_input = torch.rand((2, model_input_size, 224, 224))
+            else:
+                logging.warning("Input layer is neither Linear nor Conv2d. Skipping sanity check.")
+                return model
+
             try:
                 model(rand_input)
             except Exception as e:

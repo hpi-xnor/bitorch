@@ -8,16 +8,16 @@ import warnings
 import torch
 import base64
 import hashlib
-from torch.nn import Module, Identity
+from torch.nn import Module, Identity, Sequential, Linear, Conv2d
 from torchvision.datasets.utils import download_url
 
 
-def get_children(model: torch.nn.Module, name: list = []) -> list:
+def get_children(model: Module, name: list = []) -> list:
     """
     gets all children of a model recursively.
 
     Args:
-        model (torch.nn.Module): the model to get the children from
+        model (Module): the model to get the children from
         name (list, optional): the name of the current module inside the model. Defaults to [].
 
     Returns:
@@ -56,7 +56,7 @@ def set_layer_in_model(model: Module, layer_names: list = [], layer: Optional[Mo
     set_layer_in_model(model._modules[layer_names[0]], layer_names[1:], layer)  # type: ignore
 
 
-def pop_first_layers(model: Module, num_layers: int = 1) -> Tuple[List[Any], int, torch.nn.Module]:
+def pop_first_layers(model: Module, num_layers: int = 1) -> Tuple[List[Any], int, Module]:
     """pops the first num_layers layers from the model.
 
     Args:
@@ -85,7 +85,7 @@ def pop_first_layers(model: Module, num_layers: int = 1) -> Tuple[List[Any], int
     return last_name, last_output_size, last_layer  # type: ignore
 
 
-def pop_last_layers(model: Module, num_layers: int = 1) -> Tuple[List[Any], int, torch.nn.Module]:
+def pop_last_layers(model: Module, num_layers: int = 1) -> Tuple[List[Any], int, Module]:
     """pops the last num_layers layers which transform the input/output size from the model.
 
     Args:
@@ -305,3 +305,162 @@ def download_version_table(model_table_path: str, no_exception: bool = False) ->
             return pandas.DataFrame()
         raise Exception(e)
     return version_table
+
+
+def apply_input_size(model: Module, input_size: Tuple[int]) -> Module:
+    """sets the first layers of the model to Identity() and adds a new first layer with the given input size.
+
+    Args:
+        model (Module): the model to apply the input size to
+        input_size (Tuple[int]): the input size to apply to the model
+
+    Raises:
+        NotImplementedError: thrown if the first layer of the model is not a Linear or Conv2d layer
+
+    Returns:
+        Module: the model with the new input size
+    """
+    first_layer_name, model_output_size, removed_layer = pop_first_layers(model)
+    if len(input_size) == 1:
+        set_layer_in_model(model, first_layer_name, Linear(input_size[0], model_output_size))
+    elif len(input_size) == 3:
+        set_layer_in_model(
+            model,
+            first_layer_name,
+            Conv2d(  # type: ignore
+                input_size[0],
+                model_output_size,
+                kernel_size=removed_layer.kernel_size,  # type: ignore
+                stride=removed_layer.stride,  # type: ignore
+                padding=removed_layer.padding,  # type: ignore
+                dilation=removed_layer.dilation,  # type: ignore
+                groups=removed_layer.groups,  # type: ignore
+                bias=removed_layer.bias is not None,  # type: ignore
+                padding_mode=removed_layer.padding_mode,  # type: ignore
+            ),
+        )
+    else:
+        raise NotImplementedError("Only 2D and 3D inputs are supported")
+    return model
+
+
+def prepend_layers_to_model(model: Module, prepend_layers: Module) -> Module:
+    """prepends the given layers to the model. Also adds a layer to convert the output of the prepend layers to the input of the model.
+
+    Args:
+        model (Module): the model to prepend the layers to
+        prepend_layers (Module): the layers to prepend to the model
+
+    Raises:
+        NotImplementedError: thrown if the first layer of the model is not a Linear or Conv2d layer
+
+    Returns:
+        Module: the model with the prepended layers
+    """
+    prepend_layers = Sequential(prepend_layers)
+    first_layer_name, model_input_size, removed_layer = pop_first_layers(model)
+    prepend_output_size, prepend_output_type = get_output_size(prepend_layers)
+    if prepend_output_size != model_input_size:
+        logging.info("Changing output size of prepend_layers to match model")
+        if prepend_output_type is None:
+            prepend_layers.add_module("convert", removed_layer)
+        elif issubclass(prepend_output_type, Linear):
+            prepend_layers.add_module("convert", Linear(prepend_output_size, model_input_size))
+        elif issubclass(prepend_output_type, Conv2d):
+            prepend_layers.add_module(
+                "convert",
+                Conv2d(  # type: ignore
+                    prepend_output_size,
+                    model_input_size,
+                    kernel_size=removed_layer.kernel_size,  # type: ignore
+                    stride=removed_layer.stride,  # type: ignore
+                    padding=removed_layer.padding,  # type: ignore
+                    dilation=removed_layer.dilation,  # type: ignore
+                    groups=removed_layer.groups,  # type: ignore
+                    bias=removed_layer.bias is not None,  # type: ignore
+                    padding_mode=removed_layer.padding_mode,  # type: ignore
+                ),
+            )
+        else:
+            raise NotImplementedError("Only 2D and 3D inputs are supported")
+    set_layer_in_model(model, first_layer_name, prepend_layers)
+    return model
+
+
+def apply_output_size(model: Module, output_size: Tuple[int]) -> Module:
+    """sets the last layers of the model to Identity() and adds a new last layer with the given output size.
+
+    Args:
+        model (Module): the model to apply the output size to
+        output_size (Tuple[int]): the output size to apply to the model
+
+    Raises:
+        NotImplementedError: thrown if the last layer of the model is not a Linear or Conv2d layer
+
+    Returns:
+        Module: the model with the new output size
+    """
+    last_layer_name, model_output_size, removed_layer = pop_last_layers(model)
+    if len(output_size) == 1:
+        set_layer_in_model(model, last_layer_name, Linear(model_output_size, output_size[0]))
+    elif len(output_size) == 3:
+        set_layer_in_model(
+            model,
+            last_layer_name,
+            Conv2d(  # type: ignore
+                model_output_size,
+                output_size[0],
+                kernel_size=removed_layer.kernel_size,  # type: ignore
+                stride=removed_layer.stride,  # type: ignore
+                padding=removed_layer.padding,  # type: ignore
+                dilation=removed_layer.dilation,  # type: ignore
+                groups=removed_layer.groups,  # type: ignore
+                bias=removed_layer.bias is not None,  # type: ignore
+                padding_mode=removed_layer.padding_mode,  # type: ignore
+            ),
+        )
+    else:
+        raise NotImplementedError("Only 2D and 3D inputs are supported")
+    return model
+
+
+def append_layers_to_model(model: Module, append_layers: Module) -> Module:
+    """appends the given layers to the model. Also adds a layer to convert the output of the model to the input of the append layers.
+
+    Args:
+        model (Module): the model to append the layers to
+        append_layers (Module): the layers to append to the model
+
+    Raises:
+        NotImplementedError: thrown if the last layer of the model is not a Linear or Conv2d layer
+
+    Returns:
+        Module: the model with the appended layers
+    """
+    last_layer_name, model_output_size, removed_layer = pop_last_layers(model)
+    append_input_size, append_input_type = get_input_size(append_layers)
+    if append_input_size != model_output_size:
+        logging.info("changing input size of append_layers to match model")
+        if append_input_type is None:
+            append_layers = Sequential(removed_layer, append_layers)
+        elif issubclass(append_input_type, Linear):
+            append_layers = Sequential(Linear(model_output_size, append_input_size), append_layers)
+        elif issubclass(append_input_type, Conv2d):
+            append_layers = Sequential(
+                Conv2d(  # type: ignore
+                    model_output_size,
+                    append_input_size,
+                    kernel_size=removed_layer.kernel_size,  # type: ignore
+                    stride=removed_layer.stride,  # type: ignore
+                    padding=removed_layer.padding,  # type: ignore
+                    dilation=removed_layer.dilation,  # type: ignore
+                    groups=removed_layer.groups,  # type: ignore
+                    bias=removed_layer.bias is not None,  # type: ignore
+                    padding_mode=removed_layer.padding_mode,  # type: ignore
+                ),
+                append_layers,
+            )
+        else:
+            raise NotImplementedError("Only Linear and Conv2d layers are supported")
+    set_layer_in_model(model, last_layer_name, append_layers)
+    return model
