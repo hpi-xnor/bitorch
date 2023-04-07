@@ -40,8 +40,8 @@ class ModelWrapper(LightningModule):
             self.f1 = F1Score(num_classes=num_classes)
             self.prec = Precision(num_classes=num_classes)
             self.recall = Recall(num_classes=num_classes)
-    
-    def forward(self, *args, **kwargs):
+
+    def forward(self, *args: torch.Tensor, **kwargs: torch.Tensor) -> torch.Tensor:
         return self.model(*args, **kwargs)
 
     def training_step(self, batch: torch.Tensor) -> torch.Tensor:  # type: ignore

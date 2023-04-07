@@ -219,9 +219,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 "size in MB": total_size / 1e6 / 8.0,
             }
         )
-    
-    
-    # check if at least torch 2.0 is used using importutils
+
     if not args.no_compile:
         if not _TORCH_GREATER_EQUAL_2_0:
             logging.info("torch.compile not supported in torch < 2.0, skipping compilation")

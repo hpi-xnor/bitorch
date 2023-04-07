@@ -223,8 +223,19 @@ def add_training_args(parser: ArgumentParser) -> None:
         help="name of the teacher model, the student is going to be trained with KD if not empty",
     )
     train.add_argument(
-        "--strategy", type=str, default="auto", choices=StrategyRegistry.available_strategies(), help="name of the training strategy to use. default is auto, which will use the default strategy for the given model")
-    train.add_argument("--accelerator", type=str, default="auto", choices=["cpu", "gpu", "tpu", "ipu", "hpu", "mps", "auto"], help="name of the accelerator to use. default is auto, which will use the default accelerator for the given model")
+        "--strategy",
+        type=str,
+        default="auto",
+        choices=StrategyRegistry.available_strategies(),
+        help="name of the training strategy to use. default is auto, which will use the default strategy for the given model",
+    )
+    train.add_argument(
+        "--accelerator",
+        type=str,
+        default="auto",
+        choices=["cpu", "gpu", "tpu", "ipu", "hpu", "mps", "auto"],
+        help="name of the accelerator to use. default is auto, which will use the default accelerator for the given model",
+    )
     train.add_argument(
         "--cpu",
         action="store_true",
@@ -233,16 +244,17 @@ def add_training_args(parser: ArgumentParser) -> None:
     train.add_argument(
         "--devices", type=int, default=1, help="number of devices (gpus or cpu cores) to use for training"
     )
-    train.add_argument(
-        "--max_steps", type=int, default=-1, help="number of training steps to perform"
-    )
-    train.add_argument(
-        "--max_epochs", type=int, default=None, help="number of training epochs to perform"
-    )
+    train.add_argument("--max_steps", type=int, default=-1, help="number of training steps to perform")
+    train.add_argument("--max_epochs", type=int, default=None, help="number of training epochs to perform")
     train.add_argument("--no-compile", action="store_true", help="disable compilation of the model")
-    train.add_argument("--compile-mode", type=str, default="default", choices=["default", "reduce-overhead", "max-autotune"], help="compilation mode to use for the model")
-    import torch
-    torch.compile()
+    train.add_argument(
+        "--compile-mode",
+        type=str,
+        default="default",
+        choices=["default", "reduce-overhead", "max-autotune"],
+        help="compilation mode to use for the model",
+    )
+
 
 def add_dataset_args(parser: ArgumentParser) -> None:
     """adds cli parameters for dataset configuration

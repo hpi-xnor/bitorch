@@ -109,8 +109,8 @@ class BEmbedding(nn.Module):
                 self.optimizer_dict = {"params": [weights]}
                 self.optimizer.add_param_group(self.optimizer_dict)
             elif self.optimizer_dict:
-                self.optimizer.state[weights] = self.optimizer.state[self.optimizer_dict["params"][0]]
-                del self.optimizer.state[self.optimizer_dict["params"][0]]
+                self.optimizer.state[weights] = self.optimizer.state[self.optimizer_dict["params"][0]]  # type: ignore
+                del self.optimizer.state[self.optimizer_dict["params"][0]]  # type: ignore
             self.optimizer_dict["params"] = [weights]
 
     def forward(self, input: Tensor) -> Tensor:
