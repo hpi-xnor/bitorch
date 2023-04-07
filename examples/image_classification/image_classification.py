@@ -14,6 +14,7 @@ import argparse
 import logging
 from pathlib import Path
 from typing import List, Any, Type
+import copy
 
 import fvbitcore.nn as fv_nn
 import torch
@@ -23,6 +24,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor, Callback
 from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, Logger
 from pytorch_lightning.utilities.types import STEP_OUTPUT
+from lightning_fabric.utilities.imports import _TORCH_GREATER_EQUAL_2_0
 from torch.utils.data import DataLoader
 
 import bitorch
@@ -217,6 +219,25 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 "size in MB": total_size / 1e6 / 8.0,
             }
         )
+    
+    
+    # check if at least torch 2.0 is used using importutils
+    if not args.no_compile:
+        if not _TORCH_GREATER_EQUAL_2_0:
+            logging.info("torch.compile not supported in torch < 2.0, skipping compilation")
+        else:
+            logging.info("compiling model with torch.compile...")
+            model_before_compile = copy.deepcopy(model_wrapped)
+            try:
+                if args.accelerator in ["gpu", "auto"] and torch.cuda.is_available():
+                    print("converting...")
+                    model_wrapped = model_wrapped.cuda()
+                model_wrapped = torch.compile(model_wrapped, mode=args.compile_mode)
+                model_wrapped(data_point.to(model_wrapped.device))
+                logging.info("model compiled successfully")
+            except RuntimeError as e:
+                logging.warning(f"model compilation failed: {e} - skipping compilation")
+                model_wrapped = model_before_compile
 
     trainer.fit(
         model_wrapped,

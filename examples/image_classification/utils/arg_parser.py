@@ -239,6 +239,10 @@ def add_training_args(parser: ArgumentParser) -> None:
     train.add_argument(
         "--max_epochs", type=int, default=None, help="number of training epochs to perform"
     )
+    train.add_argument("--no-compile", action="store_true", help="disable compilation of the model")
+    train.add_argument("--compile-mode", type=str, default="default", choices=["default", "reduce-overhead", "max-autotune"], help="compilation mode to use for the model")
+    import torch
+    torch.compile()
 
 def add_dataset_args(parser: ArgumentParser) -> None:
     """adds cli parameters for dataset configuration
