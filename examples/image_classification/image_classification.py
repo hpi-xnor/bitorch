@@ -161,7 +161,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     trainer = Trainer(
         strategy=args.strategy,
         accelerator="cpu" if args.cpu else args.accelerator,
-        gpus=0 if args.cpu else args.gpus,
+        devices=args.devices,
         max_epochs=args.max_epochs,
         max_steps=args.max_steps,
         logger=loggers if len(loggers) > 0 else None,  # type: ignore

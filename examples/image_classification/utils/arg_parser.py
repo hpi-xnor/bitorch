@@ -3,7 +3,7 @@ import sys
 from argparse import ArgumentParser
 from typing import Tuple, List, Type, Any, Optional, Sequence
 
-from pytorch_lightning import Trainer
+from pytorch_lightning.strategies import StrategyRegistry
 
 import bitorch
 from bitorch.models import model_from_name, model_names, Model
@@ -222,7 +222,23 @@ def add_training_args(parser: ArgumentParser) -> None:
         choices=available_teachers(),
         help="name of the teacher model, the student is going to be trained with KD if not empty",
     )
-
+    train.add_argument(
+        "--strategy", type=str, default="auto", choices=StrategyRegistry.available_strategies(), help="name of the training strategy to use. default is auto, which will use the default strategy for the given model")
+    train.add_argument("--accelerator", type=str, default="auto", choices=["cpu", "gpu", "tpu", "ipu", "hpu", "mps", "auto"], help="name of the accelerator to use. default is auto, which will use the default accelerator for the given model")
+    train.add_argument(
+        "--cpu",
+        action="store_true",
+        help="explicitly use the cpu. overwrites gpu settings",
+    )
+    train.add_argument(
+        "--devices", type=int, default=1, help="number of devices (gpus or cpu cores) to use for training"
+    )
+    train.add_argument(
+        "--max_steps", type=int, default=-1, help="number of training steps to perform"
+    )
+    train.add_argument(
+        "--max_epochs", type=int, default=None, help="number of training epochs to perform"
+    )
 
 def add_dataset_args(parser: ArgumentParser) -> None:
     """adds cli parameters for dataset configuration
@@ -328,7 +344,6 @@ def add_regular_args(parser: ArgumentParser) -> None:
     Args:
         parser (ArgumentParser): parser to add the regular arguments to
     """
-    Trainer.add_argparse_args(parser)
     add_logging_args(parser)
     add_dataset_args(parser)
     add_optimizer_args(parser)
@@ -343,11 +358,6 @@ def add_regular_args(parser: ArgumentParser) -> None:
         choices=model_names(),
         required=True,
         help="name of the model to be trained",
-    )
-    parser.add_argument(
-        "--cpu",
-        action="store_true",
-        help="explicitly use the cpu. overwrites gpu settings",
     )
     parser.add_argument(
         "--dev-run",
