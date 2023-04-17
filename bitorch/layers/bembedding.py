@@ -203,7 +203,7 @@ class BEmbeddingBag(BEmbedding):
             input=inverse_indices,
             weight=unqiue_embedding_vectors,
             offsets=offsets,
-            mode=self.mode
+            mode=self.mode,
         )
 
     def forward(self, indices: Tensor, offsets: Tensor) -> Tensor:  # type: ignore
