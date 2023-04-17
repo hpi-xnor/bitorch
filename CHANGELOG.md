@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - temporarily set PyTorch to 1.x
 
-### Added
+### Fixed
+
+- BEmbedding bag
 
 ## [0.3.0] - 2023/01/13
 
