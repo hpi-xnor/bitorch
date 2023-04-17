@@ -215,7 +215,6 @@ ResNet-e specifications
 
 
 class ResnetE(Model):
-
     name = "ResnetE"
 
     resnet_spec = {

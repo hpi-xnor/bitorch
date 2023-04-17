@@ -511,7 +511,6 @@ Resnet specifications
 
 
 class Resnet(Model):
-
     name = "Resnet"
 
     resnet_spec = {

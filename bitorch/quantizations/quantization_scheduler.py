@@ -113,7 +113,6 @@ class StepScheduling(ScheduledQuantizer):
 
 
 class Quantization_Scheduler(Module):
-
     procedure_classes = {"mix_linear": MixLinearScheduling, "step": StepScheduling}
 
     def __init__(

@@ -161,3 +161,6 @@ docs/source/_autosummary
 
 # wandb output files
 wandb
+
+# downloaded pretrained models
+bitorch_models

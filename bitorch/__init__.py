@@ -21,7 +21,6 @@ files_to_iterate = list(current_dir.iterdir())
 # grep all python files recursively (bfs method)
 for file in files_to_iterate:
     if file.suffix == ".py" and file.stem != "__init__":
-
         rel_path = Path(os.path.relpath(file, current_dir))
         path_parts = list(rel_path.parent.parts) + [rel_path.stem]
         import_path = f"{__name__}.{'.'.join(path_parts)}"

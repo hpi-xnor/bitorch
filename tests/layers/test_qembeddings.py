@@ -74,7 +74,6 @@ def test_qembedding(vocab_size, embedding_size, quantization_function):
 @pytest.mark.parametrize("vocab_size, embedding_size", TEST_INPUT_DATA)
 @pytest.mark.parametrize("quantization_function", TEST_QUANTIZATION_FUNCTIONS)
 def test_qembeddingbag(vocab_size, embedding_size, quantization_function):
-
     qembeddingbag = QEmbeddingBag(
         num_embeddings=vocab_size,
         embedding_dim=embedding_size,
