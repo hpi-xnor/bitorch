@@ -140,7 +140,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             quantizations=[quantization_from_name(name)() for name in args.scheduled_quantizations],
             scheduling_procedure=args.quantization_scheduling_procedure,
             schedule_all_quantizations=args.schedule_all_quantizations,
-            steps=args.max_epochs,
+            steps=args.max_epochs if args.max_epochs is not None else int(args.max_steps),
         )
     else:
         quantization_scheduler = None
@@ -231,6 +231,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                     print("converting...")
                     model_wrapped = model_wrapped.cuda()
                 model_wrapped = torch.compile(model_wrapped, mode=args.compile_mode)
+                # execute compilation of model to check for errors
                 model_wrapped(data_point.to(model_wrapped.device))
                 logging.info("model compiled successfully")
             except RuntimeError as e:
