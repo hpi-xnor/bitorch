@@ -44,7 +44,7 @@ class ModelWrapper(LightningModule):
     def forward(self, *args: torch.Tensor, **kwargs: torch.Tensor) -> torch.Tensor:
         return self.model(*args, **kwargs)
 
-    def training_step(self, batch: torch.Tensor) -> torch.Tensor:  # type: ignore
+    def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:  # type: ignore
         x_train, y_train = batch
 
         y_hat = self(x_train)

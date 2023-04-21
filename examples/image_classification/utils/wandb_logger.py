@@ -34,7 +34,7 @@ class CustomWandbLogger(WandbLogger):
     def log_metrics(self, metrics: Mapping[str, float], step: Optional[int] = None) -> None:
         if self.last_step >= 0 and self.last_step < step:
             metrics["Trainer/steps_per_second"] = (step - self.last_step) / (time.time() - self.last_time)
-            metrics["Trainer/samples_per_second"] = ((step - self.last_step) / self.batch_size) / (time.time() - self.last_time)
+            metrics["Trainer/samples_per_second"] = ((step - self.last_step) * self.batch_size) / (time.time() - self.last_time)
             self.last_time = time.time()
         if self.last_step < 0:
             self.last_time = time.time()
