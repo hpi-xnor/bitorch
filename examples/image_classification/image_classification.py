@@ -42,14 +42,6 @@ from utils.utils import configure_logging
 
 logger = logging.getLogger()
 
-def mute_compile_logging():
-    loggerLightning = logging.getLogger("lightning.pytorch")
-    loggerLightning.disabled = True
-
-    loggerCompile = logging.getLogger("torch._dynamo")
-    loggerCompile.disabled = True
-    ...
-
 
 class ModelCallback(Callback):
     def on_train_batch_end(
@@ -71,8 +63,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
         args (argparse.Namespace): cli arguments
         model_args (argparse.Namespace): model specific cli arguments
     """
-    print("setting log level:", args.log_level)
-    mute_compile_logging()
     configure_logging(logger, args.log_file, args.log_level, args.log_stdout)
 
     # switch to RAW bitorch mode for distributed data parallel training
@@ -229,7 +219,6 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 "size in MB": total_size / 1e6 / 8.0,
             }
         )
-    mute_compile_logging()
     if not args.no_compile:
         if not _TORCH_GREATER_EQUAL_2_0:
             logging.info("torch.compile not supported in torch < 2.0, skipping compilation")
@@ -239,10 +228,8 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             try:
                 if args.accelerator in ["gpu", "auto"] and torch.cuda.is_available():
                     model_wrapped = model_wrapped.cuda()
-                
+
                 model_wrapped.model = torch.compile(model_wrapped.model, mode=args.compile_mode)
-                # execute compilation of model to check for errors
-                # model_wrapped(data_point.to(model_wrapped.device))
                 logging.info("model compiled successfully")
             except RuntimeError as e:
                 logging.warning(f"model compilation failed: {e} - skipping compilation")

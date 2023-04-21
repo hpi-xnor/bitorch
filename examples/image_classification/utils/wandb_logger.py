@@ -1,5 +1,5 @@
 from argparse import Namespace
-from typing import Any, Mapping, Optional
+from typing import Any, Dict
 import time
 
 from pytorch_lightning.loggers import WandbLogger
@@ -26,15 +26,17 @@ class CustomWandbLogger(WandbLogger):
         else:
             kwargs["tags"] = wandb_tags
         self.last_step = -1
-        self.last_time = -1
+        self.last_time = -1.0
         self.batch_size = script_args.batch_size
         super().__init__(*args, **kwargs)
-    
+
     @rank_zero_only
-    def log_metrics(self, metrics: Mapping[str, float], step: Optional[int] = None) -> None:
+    def log_metrics(self, metrics: Dict[str, Any], step: int = 0) -> None:
         if self.last_step >= 0 and self.last_step < step:
             metrics["Trainer/steps_per_second"] = (step - self.last_step) / (time.time() - self.last_time)
-            metrics["Trainer/samples_per_second"] = ((step - self.last_step) * self.batch_size) / (time.time() - self.last_time)
+            metrics["Trainer/samples_per_second"] = ((step - self.last_step) * self.batch_size) / (
+                time.time() - self.last_time
+            )
             self.last_time = time.time()
         if self.last_step < 0:
             self.last_time = time.time()

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from torch.optim import Adam, SGD, RAdam
 from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR
-from typing import Union, Optional, Any
+from typing import Optional, Any
 from torch.nn import Module
 from torch.optim.optimizer import Optimizer
 
