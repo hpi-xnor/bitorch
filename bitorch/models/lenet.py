@@ -92,6 +92,10 @@ class LeNet(Model):
                 nn.Linear(self.num_fc, self.num_output),
             )
 
+    @classmethod
+    def _load_default_model(cls) -> Model:
+        return cls.from_pretrained(input_shape=(1, 1, 28, 28), num_classes=10)
+
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         parser.add_argument("--version", type=int, default=0, help="choose a version of lenet")

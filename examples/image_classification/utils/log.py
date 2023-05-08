@@ -5,7 +5,7 @@ from typing import Optional, Any, Dict, List, Union
 
 import math
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ProgressBarBase
+from pytorch_lightning.callbacks import ProgressBar
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 
 
@@ -32,7 +32,7 @@ def _display_time(seconds: float, granularity: int = 2) -> str:
     return ":".join(result[:granularity])
 
 
-class CommandLineLogger(ProgressBarBase):
+class CommandLineLogger(ProgressBar):
     """
     This module provides a replacement for the default tqdm-based progress bar, that is more suitable for logging
     progress in a non-interactive way, e.g. to a file.
@@ -76,7 +76,7 @@ class CommandLineLogger(ProgressBarBase):
         self.log_debug("Logging enabled...")
 
     def _should_update(self, current: int, total: Union[int, float]) -> bool:
-        return self._is_enabled and (current % self.refresh_rate == 0 or current == int(total))
+        return self._is_enabled and current > 0 and (current % self.refresh_rate == 0 or current == int(total))
 
     def on_train_start(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
         self.log_info("Starting training...")
@@ -93,13 +93,14 @@ class CommandLineLogger(ProgressBarBase):
         batch_idx: int,
         unused: int = 0,
     ) -> None:
-        if not self._should_update(self.train_batch_idx, self.total_train_batches):
+        super().on_train_batch_end(trainer, pl_module, outputs, batch, batch_idx)
+        if not self._should_update(batch_idx, self.total_train_batches):
             return
 
-        percent = (self.train_batch_idx / self.total_train_batches) * 100
+        percent = (batch_idx / self.total_train_batches) * 100
 
         time_in_this_epoch = time.time() - self._epoch_start_time
-        epoch_total_est = int(round((time_in_this_epoch * self.total_train_batches) / self.train_batch_idx))
+        epoch_total_est = int(round((time_in_this_epoch * self.total_train_batches) / batch_idx))
         eta_epoch = _display_time(epoch_total_est - time_in_this_epoch)
         full_epochs_left = trainer.max_epochs - trainer.current_epoch
         if full_epochs_left < 0:
@@ -109,7 +110,7 @@ class CommandLineLogger(ProgressBarBase):
         eta_train = _display_time(epoch_total_est - time_in_this_epoch + full_epochs_left * epoch_total_est)
 
         epoch_info = f"Epoch {trainer.current_epoch:3d}"
-        batch_info = f"{self.train_batch_idx:4d}/{self.total_train_batches:4d} ({percent:5.1f}%)"
+        batch_info = f"{batch_idx:4d}/{self.total_train_batches:4d} ({percent:5.1f}%)"
         metrics = self._format_metric_string(self.get_metrics(trainer, pl_module))
         eta_info = f"ETA: {eta_epoch} & {eta_train}"
         self.log_batch(f"{epoch_info} - {batch_info} - {metrics} - {eta_info}")

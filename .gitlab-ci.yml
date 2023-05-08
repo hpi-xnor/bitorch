@@ -1,4 +1,4 @@
-image: python:3.7
+image: python:3.10
 
 before_script:
   - python --version
@@ -53,6 +53,7 @@ test:3.10:
     - python -m pytest .
 
 test:torch_backwards_compatibility:
+  image: python:3.7
   script:
     - pip install torch==1.9.0 torchvision==0.10.0
     - python -m pytest .
