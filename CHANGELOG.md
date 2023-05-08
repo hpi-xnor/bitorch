@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - ability to load models pretrained on ImageNet
 - Jupyter notebooks for demonstration purposes
-- support for PyTorch version 2.0
+- support for PyTorch version 2.0, Python 3.10
 
 ### Fixed
 

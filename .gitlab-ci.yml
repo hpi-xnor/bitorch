@@ -25,11 +25,11 @@ codestyle:
   extends:
     - .codestyle
 
-codestyle:3.10:
+codestyle:python_compatibility:
   extends:
     - .codestyle
     - .scheduled_only
-  image: python:3.10
+  image: python:3.8
 
 # Running tests
 
@@ -45,10 +45,10 @@ test_and_coverage:
         coverage_format: cobertura
         path: coverage.xml
 
-test:3.10:
+test:python_compatibility:
   extends:
     - .scheduled_only
-  image: python:3.10
+  image: python:3.8
   script:
     - python -m pytest .
 
