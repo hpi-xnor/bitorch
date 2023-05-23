@@ -10,6 +10,8 @@ from .densenet import BaseNetDense, DOWNSAMPLE_STRUCT, basedensenet_constructor
 from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d
 
+from bitorch.models.common_layers import IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
+
 
 # Blocks
 class ImprovementBlock(Module):
@@ -101,6 +103,10 @@ class MeliusNet(Model):
             self._input_shape[1],
         )
         logging.info(f"building MeliusNet with {str(num_layers)} layers...")
+
+    @classmethod
+    def _load_default_model(cls) -> Model:
+        return cls.from_pretrained(input_shape=IMAGENET_INPUT_SHAPE, num_classes=IMAGENET_CLASSES)
 
     @staticmethod
     def add_argparse_arguments(parser: argparse.ArgumentParser) -> None:

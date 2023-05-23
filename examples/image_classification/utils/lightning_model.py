@@ -27,12 +27,13 @@ class ModelWrapper(LightningModule):
         self.save_hyperparameters(clean_hyperparameters(script_args))
         self.loss_function = CrossEntropyLoss()
         self.model = model
-        self.batch_accuracy_top1 = Accuracy(num_classes=num_classes)
-        self.batch_accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
-        self.train_accuracy_top1 = Accuracy(num_classes=num_classes)
-        self.train_accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
-        self.accuracy_top1 = Accuracy(num_classes=num_classes)
-        self.accuracy_top5 = Accuracy(top_k=5, num_classes=num_classes)
+        task = "binary" if num_classes == 2 else "multiclass"
+        self.batch_accuracy_top1 = Accuracy(task=task, num_classes=num_classes)
+        self.batch_accuracy_top5 = Accuracy(task=task, top_k=5, num_classes=num_classes)
+        self.train_accuracy_top1 = Accuracy(task=task, num_classes=num_classes)
+        self.train_accuracy_top5 = Accuracy(task=task, top_k=5, num_classes=num_classes)
+        self.accuracy_top1 = Accuracy(task=task, num_classes=num_classes)
+        self.accuracy_top5 = Accuracy(task=task, top_k=5, num_classes=num_classes)
         self.add_f1_prec_recall = add_f1_prec_recall
         self.quantization_scheduler = quantization_scheduler
         if add_f1_prec_recall:
@@ -40,10 +41,13 @@ class ModelWrapper(LightningModule):
             self.prec = Precision(num_classes=num_classes)
             self.recall = Recall(num_classes=num_classes)
 
-    def training_step(self, batch: torch.Tensor) -> torch.Tensor:  # type: ignore
+    def forward(self, *args: torch.Tensor, **kwargs: torch.Tensor) -> torch.Tensor:
+        return self.model(*args, **kwargs)
+
+    def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:  # type: ignore
         x_train, y_train = batch
 
-        y_hat = self.model(x_train)
+        y_hat = self(x_train)
         loss = self.calculate_loss(x_train, y_train, y_hat)
 
         self.batch_accuracy_top1(y_hat, y_train)

@@ -6,9 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-### Changed
+### Added
 
-- temporarily set PyTorch to 1.x
+- ability to load models pretrained on ImageNet
+- Jupyter notebooks for demonstration purposes
+- support for PyTorch version 2.0, Python 3.10
 
 ### Fixed
 

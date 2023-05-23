@@ -1,4 +1,4 @@
-image: python:3.7
+image: python:3.10
 
 before_script:
   - python --version
@@ -25,11 +25,11 @@ codestyle:
   extends:
     - .codestyle
 
-codestyle:3.10:
+codestyle:python_compatibility:
   extends:
     - .codestyle
     - .scheduled_only
-  image: python:3.10
+  image: python:3.8
 
 # Running tests
 
@@ -45,14 +45,15 @@ test_and_coverage:
         coverage_format: cobertura
         path: coverage.xml
 
-test:3.10:
+test:python_compatibility:
   extends:
     - .scheduled_only
-  image: python:3.10
+  image: python:3.8
   script:
     - python -m pytest .
 
 test:torch_backwards_compatibility:
+  image: python:3.7
   script:
     - pip install torch==1.9.0 torchvision==0.10.0
     - python -m pytest .

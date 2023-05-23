@@ -2,8 +2,8 @@ import logging
 from pathlib import Path
 
 from torch.optim import Adam, SGD, RAdam
-from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR, _LRScheduler
-from typing import Union, Optional, Any
+from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, CosineAnnealingLR
+from typing import Optional, Any
 from torch.nn import Module
 from torch.optim.optimizer import Optimizer
 
@@ -74,7 +74,7 @@ def create_scheduler(
     lr_factor: float,
     lr_steps: Optional[list],
     epochs: int,
-) -> Union[_LRScheduler, None]:
+) -> Any:
     """creates a learning rate scheduler with the given parameters
 
     Args:
@@ -89,7 +89,7 @@ def create_scheduler(
         ValueError: thrown if scheduler name not known and not None
 
     Returns:
-        Union[_LRScheduler, None]: either the learning rate scheduler object or None if scheduler_name was None
+        Union[LRScheduler, None]: either the learning rate scheduler object or None if scheduler_name was None
     """
     if scheduler_name == "step":
         if not lr_steps:

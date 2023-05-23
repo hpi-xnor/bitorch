@@ -14,6 +14,7 @@ import argparse
 import logging
 from pathlib import Path
 from typing import List, Any, Type
+import copy
 
 import fvbitcore.nn as fv_nn
 import torch
@@ -21,8 +22,9 @@ import wandb
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor, Callback
-from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, LightningLoggerBase
+from pytorch_lightning.loggers import CSVLogger, TensorBoardLogger, Logger
 from pytorch_lightning.utilities.types import STEP_OUTPUT
+from lightning_fabric.utilities.imports import _TORCH_GREATER_EQUAL_2_0
 from torch.utils.data import DataLoader
 
 import bitorch
@@ -71,7 +73,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     output_dir = Path(args.result_directory)
     output_dir.mkdir(exist_ok=True)
 
-    loggers: List[LightningLoggerBase] = []
+    loggers: List[Logger] = []
     if args.tensorboard_log:
         loggers.append(TensorBoardLogger(str(output_dir), name="tensorboard"))  # type: ignore
     if args.csv_log:
@@ -138,7 +140,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
             quantizations=[quantization_from_name(name)() for name in args.scheduled_quantizations],
             scheduling_procedure=args.quantization_scheduling_procedure,
             schedule_all_quantizations=args.schedule_all_quantizations,
-            steps=args.max_epochs,
+            steps=args.max_epochs if args.max_epochs is not None else int(args.max_steps),
         )
     else:
         quantization_scheduler = None
@@ -161,7 +163,7 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
     trainer = Trainer(
         strategy=args.strategy,
         accelerator="cpu" if args.cpu else args.accelerator,
-        gpus=0 if args.cpu else args.gpus,
+        devices=args.devices,
         max_epochs=args.max_epochs,
         max_steps=args.max_steps,
         logger=loggers if len(loggers) > 0 else None,  # type: ignore
@@ -217,6 +219,21 @@ def main(args: argparse.Namespace, model_args: argparse.Namespace) -> None:
                 "size in MB": total_size / 1e6 / 8.0,
             }
         )
+    if not args.no_compile:
+        if not _TORCH_GREATER_EQUAL_2_0:
+            logging.info("torch.compile not supported in torch < 2.0, skipping compilation")
+        else:
+            logging.info("compiling model with torch.compile...")
+            model_before_compile = copy.deepcopy(model_wrapped.model)
+            try:
+                if args.accelerator in ["gpu", "auto"] and torch.cuda.is_available():
+                    model_wrapped = model_wrapped.cuda()
+
+                model_wrapped.model = torch.compile(model_wrapped.model, mode=args.compile_mode)
+                logging.info("model compiled successfully")
+            except RuntimeError as e:
+                logging.warning(f"model compilation failed: {e} - skipping compilation")
+                model_wrapped.model = model_before_compile
 
     trainer.fit(
         model_wrapped,
