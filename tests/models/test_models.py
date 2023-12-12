@@ -28,6 +28,7 @@ from bitorch.models import (
     QuickNetSmall,
     QuickNetLarge,
 )
+from bitorch.models.resnet_e import _ResnetE, BasicBlock
 import torch
 import numpy as np
 import pytest
@@ -119,3 +120,40 @@ def test_models(model_class, model_kwargs, datasets_to_test, dataset) -> None:
                 torch.as_tensor(output.shape),
                 torch.Tensor([batch_size, dataset[1]]).long(),
             )
+@pytest.mark.parametrize("amount_layers", [2, 3])
+@pytest.mark.parametrize("layer_depth", [2, 3])
+@pytest.mark.parametrize("first_channel_width", [32, 64])
+@pytest.mark.parametrize("first_in_out_channels_different", [True, False])
+def test_resnete_stride(amount_layers, layer_depth, first_channel_width, first_in_out_channels_different):
+    input_shape = (1, 3, 32, 32)
+    x = torch.randn(input_shape)
+    
+    layers = [layer_depth] * amount_layers
+    if first_in_out_channels_different:
+        channels = [first_channel_width * 2 ** i for i in range(amount_layers + 1)]
+    else:
+        channels = [first_channel_width] * 2 + [first_channel_width * 2 ** i for i in range(1, amount_layers)]
+    assert len(layers) + 1 == len(channels)
+    
+    net = _ResnetE(layers, channels, classes=3, image_resolution=input_shape)
+    net(x)
+    
+    # check if first Sequential has stride 2 in downsampler if first_in_out_channels_different   
+    first_downsample_found = False
+    for module in net.features:
+        if isinstance(module, torch.nn.Sequential):
+            for sub_module in module:
+                if isinstance(sub_module, BasicBlock) and hasattr(sub_module, 'downsample'):
+                    downsample = sub_module.downsample
+                    if isinstance(downsample, torch.nn.Sequential) and hasattr(downsample[0], 'stride'):
+                        stride = downsample[0].stride
+                        if first_in_out_channels_different:
+                            assert stride == 2
+                        else:
+                            assert stride == 1
+                        first_downsample_found = True
+                        break
+            break # only check first Sequential
+        
+    if first_in_out_channels_different:
+        assert first_downsample_found           
