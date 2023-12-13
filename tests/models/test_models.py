@@ -28,7 +28,8 @@ from bitorch.models import (
     QuickNetSmall,
     QuickNetLarge,
 )
-from bitorch.models.resnet_e import _ResnetE, BasicBlock
+from bitorch.models.resnet_e import BasicBlock, _ResnetE
+from bitorch.models.resnet import ResNetV1, ResNetV2, BasicBlockV1, BasicBlockV2
 import torch
 import numpy as np
 import pytest
@@ -120,40 +121,45 @@ def test_models(model_class, model_kwargs, datasets_to_test, dataset) -> None:
                 torch.as_tensor(output.shape),
                 torch.Tensor([batch_size, dataset[1]]).long(),
             )
+
+
+MODEL_AND_BASIC_BLOCK = [
+    (_ResnetE, BasicBlock),
+    (ResNetV1, BasicBlockV1),
+    (ResNetV2, BasicBlockV2),
+]  
+    
+@pytest.mark.parametrize("Model, Block", MODEL_AND_BASIC_BLOCK)
 @pytest.mark.parametrize("amount_layers", [2, 3])
 @pytest.mark.parametrize("layer_depth", [2, 3])
 @pytest.mark.parametrize("first_channel_width", [32, 64])
 @pytest.mark.parametrize("first_in_out_channels_different", [True, False])
-def test_resnete_stride(amount_layers, layer_depth, first_channel_width, first_in_out_channels_different):
+def test_resnet_stride(Model, Block, amount_layers, layer_depth, first_channel_width, first_in_out_channels_different):
     input_shape = (1, 3, 32, 32)
     x = torch.randn(input_shape)
     
     layers = [layer_depth] * amount_layers
     if first_in_out_channels_different:
+        # creates a list in the form [x, 2x, 4x, 8x, ...]
         channels = [first_channel_width * 2 ** i for i in range(amount_layers + 1)]
     else:
+        # creates a list in the form [x, x, 2x, 4x, ...]
         channels = [first_channel_width] * 2 + [first_channel_width * 2 ** i for i in range(1, amount_layers)]
     assert len(layers) + 1 == len(channels)
     
-    net = _ResnetE(layers, channels, classes=3, image_resolution=input_shape)
+    net = Model(Block, layers, channels, classes=3, image_resolution=input_shape)
     net(x)
     
-    # check if first Sequential has stride 2 in downsampler if first_in_out_channels_different   
-    first_downsample_found = False
+    # check that first BasicBlock has stride 2 if first_in_out_channels_different   
+    first_basic_block_found = False
     for module in net.features:
         if isinstance(module, torch.nn.Sequential):
             for sub_module in module:
-                if isinstance(sub_module, BasicBlock) and hasattr(sub_module, 'downsample'):
-                    downsample = sub_module.downsample
-                    if isinstance(downsample, torch.nn.Sequential) and hasattr(downsample[0], 'stride'):
-                        stride = downsample[0].stride
-                        if first_in_out_channels_different:
-                            assert stride == 2
-                        else:
-                            assert stride == 1
-                        first_downsample_found = True
-                        break
-            break # only check first Sequential
+                if isinstance(sub_module, Block):
+                    stride = sub_module.stride
+                    assert stride == 2 if first_in_out_channels_different else stride == 1 
+                    first_basic_block_found = True
+                    break
+            break
         
-    if first_in_out_channels_different:
-        assert first_downsample_found           
+    assert first_basic_block_found           
