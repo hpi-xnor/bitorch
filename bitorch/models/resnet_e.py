@@ -3,7 +3,7 @@ Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs fr
 <https://arxiv.org/abs/1906.08637>`_ paper.
 """
 from .base import Model, NoArgparseArgsMixin
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Type
 import torch
 import argparse
 from torch import nn
@@ -33,7 +33,7 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
-        
+
         in_out_channels_different = self.in_channels != self.out_channels
         if stride == -1:
             self.stride = 2 if in_out_channels_different else 1
@@ -114,7 +114,9 @@ class SpecificResnetE(nn.Module):
         self.features = nn.Sequential()
         self.output_layer = nn.Linear(channels[-1], classes)
 
-    def make_layer(self, block: Module, layers: int, in_channels: int, out_channels: int, stride: int = -1) -> nn.Sequential:
+    def make_layer(
+        self, block: Type[Module], layers: int, in_channels: int, out_channels: int, stride: int = -1
+    ) -> nn.Sequential:
         """builds a layer by stacking blocks in a sequential models.
 
         Args:
@@ -137,7 +139,9 @@ class SpecificResnetE(nn.Module):
             layer_list.append(block(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, block: Module, layers: list, channels: list, stride: int = -1) -> List[nn.Module]:
+    def make_feature_layers(
+        self, block: Type[Module], layers: list, channels: list, stride: int = -1
+    ) -> List[nn.Module]:
         """builds the given layers with the specified block.
 
         Args:
@@ -175,7 +179,7 @@ class _ResnetE(SpecificResnetE):
 
     def __init__(
         self,
-        block: Module,
+        block: Type[Module],
         layers: list,
         channels: list,
         classes: int,

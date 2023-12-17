@@ -1,5 +1,5 @@
 from .base import Model, NoArgparseArgsMixin
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Type
 from bitorch.layers import QConv2d_NoAct
 import torch
 import argparse
@@ -17,7 +17,7 @@ class BasicBlock(Module, ABC):
         super(BasicBlock, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
-        
+
         in_out_channels_different = self.in_channels != self.out_channels
         if stride == -1:
             self.stride = 2 if in_out_channels_different else 1
@@ -29,7 +29,7 @@ class BasicBlock(Module, ABC):
         self.body = self._build_body()
 
     @abstractmethod
-    def _build_downsampling(self) -> nn.Sequential:
+    def _build_downsampling(self) -> nn.Module:
         pass
 
     @abstractmethod
@@ -348,7 +348,7 @@ class SpecificResnet(Module):
 
     def make_layer(
         self,
-        block: Module,
+        block: Type[Module],
         layers: int,
         in_channels: int,
         out_channels: int,
@@ -372,7 +372,9 @@ class SpecificResnet(Module):
             layer_list.append(block(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, block: Module, layers: list, channels: list, stride: int = -1) -> List[nn.Module]:
+    def make_feature_layers(
+        self, block: Type[Module], layers: list, channels: list, stride: int = -1
+    ) -> List[nn.Module]:
         """builds the given layers with the specified block.
 
         Args:
@@ -410,7 +412,7 @@ class ResNetV1(SpecificResnet):
 
     def __init__(
         self,
-        block: Module,
+        block: Type[Module],
         layers: list,
         channels: list,
         classes: int,
@@ -460,7 +462,7 @@ class ResNetV2(SpecificResnet):
 
     def __init__(
         self,
-        block: Module,
+        block: Type[Module],
         layers: list,
         channels: list,
         classes: int = 1000,

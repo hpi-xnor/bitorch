@@ -29,7 +29,7 @@ for file in files_to_iterate:
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
             # if attribute is an object of a subclass of config, store it in configs_by_name dict
-            if not isinstance(attr, type) and issubclass(type(attr), Config) and type(attr) != Config:
+            if not isinstance(attr, type) and issubclass(type(attr), Config) and type(attr) is not Config:
                 if attr_name in configs_by_name:
                     raise ImportError("Two configs found in config package with same name!")
                 configs_by_name[attr.name] = attr
