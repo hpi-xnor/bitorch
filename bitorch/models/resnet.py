@@ -1,5 +1,5 @@
 from .base import Model, NoArgparseArgsMixin
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Type
 from bitorch.layers import QConv2d_NoAct
 import torch
 import argparse
@@ -9,9 +9,39 @@ from torch.nn import Module
 
 from bitorch.layers import QConv2d
 from bitorch.models.common_layers import get_initial_layers, IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
+from abc import ABC, abstractmethod
 
 
-class BasicBlockV1(Module):
+class BasicBlock(Module, ABC):
+    def __init__(self, in_channels: int, out_channels: int, stride: int) -> None:
+        super(BasicBlock, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+
+        in_out_channels_different = self.in_channels != self.out_channels
+        if stride == -1:
+            self.stride = 2 if in_out_channels_different else 1
+        elif stride > 0:
+            self.stride = stride
+        self.shall_downsample = in_out_channels_different
+
+        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
+        self.body = self._build_body()
+
+    @abstractmethod
+    def _build_downsampling(self) -> nn.Module:
+        pass
+
+    @abstractmethod
+    def _build_body(self) -> nn.Sequential:
+        pass
+
+    @abstractmethod
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        pass
+
+
+class BasicBlockV1(BasicBlock):
     """BasicBlock V1 from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     This is used for ResNet V1 for 18, 34 layers.
@@ -25,15 +55,7 @@ class BasicBlockV1(Module):
             out_channels (int): output channels for building block
             stride (int): stride to use in convolutions
         """
-        super(BasicBlockV1, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.stride = stride
-
-        self.shall_downsample = self.in_channels != self.out_channels
-
-        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
-        self.body = self._build_body()
+        super(BasicBlockV1, self).__init__(in_channels, out_channels, stride)
         self.activation = nn.ReLU()
 
     def _build_downsampling(self) -> nn.Sequential:
@@ -90,7 +112,7 @@ class BasicBlockV1(Module):
         return x + residual
 
 
-class BottleneckV1(Module):
+class BottleneckV1(BasicBlock):
     """Bottleneck V1 from `"Deep Residual Learning for Image Recognition"
     <http://arxiv.org/abs/1512.03385>`_ paper.
     This is used for ResNet V1 for 50, 101, 152 layers.
@@ -104,15 +126,7 @@ class BottleneckV1(Module):
             out_channels (int): output channels for building block
             stride (int): stride to use in convolutions
         """
-        super(BottleneckV1, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.stride = stride
-
-        self.shall_downsample = self.in_channels != self.out_channels
-
-        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
-        self.body = self._build_body()
+        super(BottleneckV1, self).__init__(in_channels, out_channels, stride)
         self.activation = nn.ReLU()
 
     def _build_downsampling(self) -> nn.Sequential:
@@ -178,7 +192,7 @@ class BottleneckV1(Module):
         return x
 
 
-class BasicBlockV2(Module):
+class BasicBlockV2(BasicBlock):
     """BasicBlock V2 from
     `"Identity Mappings in Deep Residual Networks"
     <https://arxiv.org/abs/1603.05027>`_ paper.
@@ -193,15 +207,7 @@ class BasicBlockV2(Module):
             out_channels (int): output channels for building block
             stride (int): stride to use in convolutions
         """
-        super(BasicBlockV2, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.stride = stride
-
-        self.shall_downsample = self.in_channels != self.out_channels
-
-        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
-        self.body = self._build_body()
+        super(BasicBlockV2, self).__init__(in_channels, out_channels, stride)
         self.bn = nn.BatchNorm2d(self.in_channels)
 
     def _build_downsampling(self) -> nn.Module:
@@ -254,7 +260,7 @@ class BasicBlockV2(Module):
         return x + residual
 
 
-class BottleneckV2(Module):
+class BottleneckV2(BasicBlock):
     def __init__(self, in_channels: int, out_channels: int, stride: int) -> None:
         """builds body and downsampling layers
 
@@ -263,15 +269,7 @@ class BottleneckV2(Module):
             out_channels (int): output channels for building block
             stride (int): stride to use in convolutions
         """
-        super(BottleneckV2, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.stride = stride
-
-        self.shall_downsample = self.in_channels != self.out_channels
-
-        self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
-        self.body = self._build_body()
+        super(BottleneckV2, self).__init__(in_channels, out_channels, stride)
         self.bn = nn.BatchNorm2d(self.in_channels)
         self.activation = nn.ReLU()
 
@@ -350,11 +348,11 @@ class SpecificResnet(Module):
 
     def make_layer(
         self,
-        block: Module,
+        block: Type[Module],
         layers: int,
         in_channels: int,
         out_channels: int,
-        stride: int,
+        stride: int = -1,
     ) -> nn.Sequential:
         """builds a layer by stacking blocks in a sequential models.
 
@@ -374,7 +372,9 @@ class SpecificResnet(Module):
             layer_list.append(block(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, block: Module, layers: list, channels: list) -> List[nn.Module]:
+    def make_feature_layers(
+        self, block: Type[Module], layers: list, channels: list, stride: int = -1
+    ) -> List[nn.Module]:
         """builds the given layers with the specified block.
 
         Args:
@@ -387,7 +387,6 @@ class SpecificResnet(Module):
         """
         feature_layers: List[nn.Module] = []
         for idx, num_layer in enumerate(layers):
-            stride = 1 if idx == 0 else 2
             feature_layers.append(self.make_layer(block, num_layer, channels[idx], channels[idx + 1], stride))
         return feature_layers
 
@@ -413,7 +412,7 @@ class ResNetV1(SpecificResnet):
 
     def __init__(
         self,
-        block: Module,
+        block: Type[Module],
         layers: list,
         channels: list,
         classes: int,
@@ -463,7 +462,7 @@ class ResNetV2(SpecificResnet):
 
     def __init__(
         self,
-        block: Module,
+        block: Type[Module],
         layers: list,
         channels: list,
         classes: int = 1000,

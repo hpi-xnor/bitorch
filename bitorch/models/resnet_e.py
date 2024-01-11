@@ -3,10 +3,11 @@ Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs fr
 <https://arxiv.org/abs/1906.08637>`_ paper.
 """
 from .base import Model, NoArgparseArgsMixin
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Type
 import torch
 import argparse
 from torch import nn
+from torch.nn import Module
 import logging
 
 from bitorch.layers import QConv2d
@@ -21,7 +22,7 @@ class BasicBlock(nn.Module):
     This is used for ResNetE layers.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, stride: int) -> None:
+    def __init__(self, in_channels: int, out_channels: int, stride: int = -1) -> None:
         """builds body and downsampling layers
 
         Args:
@@ -32,9 +33,13 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.stride = stride
 
-        self.shall_downsample = self.in_channels != self.out_channels
+        in_out_channels_different = self.in_channels != self.out_channels
+        if stride == -1:
+            self.stride = 2 if in_out_channels_different else 1
+        elif stride > 0:
+            self.stride = stride
+        self.shall_downsample = in_out_channels_different
 
         self.downsample = self._build_downsampling() if self.shall_downsample else nn.Module()
         self.body = self._build_body()
@@ -109,10 +114,13 @@ class SpecificResnetE(nn.Module):
         self.features = nn.Sequential()
         self.output_layer = nn.Linear(channels[-1], classes)
 
-    def make_layer(self, layers: int, in_channels: int, out_channels: int, stride: int) -> nn.Sequential:
+    def make_layer(
+        self, block: Type[Module], layers: int, in_channels: int, out_channels: int, stride: int = -1
+    ) -> nn.Sequential:
         """builds a layer by stacking blocks in a sequential models.
 
         Args:
+            block (Module): the block of which the layer shall consist
             layers (int): the number of blocks to stack
             in_channels (int): the input channels of this layer
             out_channels (int): the output channels of this layer
@@ -126,15 +134,18 @@ class SpecificResnetE(nn.Module):
         layers = layers * 2
 
         layer_list: List[nn.Module] = []
-        layer_list.append(BasicBlock(in_channels, out_channels, stride))
+        layer_list.append(block(in_channels, out_channels, stride))
         for _ in range(layers - 1):
-            layer_list.append(BasicBlock(out_channels, out_channels, 1))
+            layer_list.append(block(out_channels, out_channels, 1))
         return nn.Sequential(*layer_list)
 
-    def make_feature_layers(self, layers: list, channels: list) -> List[nn.Module]:
+    def make_feature_layers(
+        self, block: Type[Module], layers: list, channels: list, stride: int = -1
+    ) -> List[nn.Module]:
         """builds the given layers with the specified block.
 
         Args:
+            block (Module): the block of which the layer shall consist
             layers (list): the number of blocks each layer shall consist of
             channels (list): the channels
 
@@ -143,8 +154,7 @@ class SpecificResnetE(nn.Module):
         """
         feature_layers: List[nn.Module] = []
         for idx, num_layer in enumerate(layers):
-            stride = 1 if idx == 0 else 2
-            feature_layers.append(self.make_layer(num_layer, channels[idx], channels[idx + 1], stride))
+            feature_layers.append(self.make_layer(block, num_layer, channels[idx], channels[idx + 1], stride))
         return feature_layers
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -169,6 +179,7 @@ class _ResnetE(SpecificResnetE):
 
     def __init__(
         self,
+        block: Type[Module],
         layers: list,
         channels: list,
         classes: int,
@@ -178,6 +189,7 @@ class _ResnetE(SpecificResnetE):
         """Creates ResNetE model.
 
         Args:
+            block (Module): Block to be used for building the layers.
             layers (list): layer sizes
             channels (list): channel num used for input/output channel size of layers. there must always be one more
                 channels than there are layers.
@@ -200,7 +212,7 @@ class _ResnetE(SpecificResnetE):
         feature_layers.extend(get_initial_layers(image_resolution, image_channels, channels[0]))
         feature_layers.append(nn.BatchNorm2d(channels[0], momentum=0.9))
 
-        feature_layers.extend(self.make_feature_layers(layers, channels))
+        feature_layers.extend(self.make_feature_layers(block, layers, channels))
 
         feature_layers.append(nn.ReLU())
         feature_layers.append(nn.AdaptiveAvgPool2d(1))
@@ -246,7 +258,7 @@ class ResnetE(Model):
         image_channels = self._input_shape[1]
         image_resolution = self._input_shape[-2:]
 
-        return _ResnetE(layers, channels, self._num_classes, image_resolution, image_channels)
+        return _ResnetE(BasicBlock, layers, channels, self._num_classes, image_resolution, image_channels)
 
     @classmethod
     def _load_default_model(cls) -> Model:
