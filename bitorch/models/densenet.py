@@ -4,15 +4,15 @@ from typing import Any, List, Optional, Type, Union
 
 import torch
 from torch import nn
-from torch.nn import Module, ChannelShuffle
-
+from torch import Tensor
+from torch.nn import Module, ChannelShuffle, ModuleDict
 from .base import Model, NoArgparseArgsMixin
 from bitorch.layers import QConv2d
 from bitorch.models.common_layers import get_initial_layers, IMAGENET_INPUT_SHAPE, IMAGENET_CLASSES
 
 
 class DenseLayer(Module):
-    def __init__(self, num_features: int, growth_rate: int, bn_size: int, dilation: int, dropout: float):
+    def __init__(self, num_features: int, growth_rate: int, bn_size: int, dropout: float, dilation: int):
         super(DenseLayer, self).__init__()
         self.dropout = dropout
         self.num_features = num_features
@@ -34,10 +34,38 @@ class DenseLayer(Module):
             self.feature_list.append(nn.Dropout(self.dropout))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        ident = x
         x = self.features(x)
-        x = torch.cat([ident, x], dim=1)
         return x
+
+
+class DenseBlock(ModuleDict):
+    def __init__(
+        self,
+        num_layers: int,
+        num_input_features: int,
+        bn_size: int,
+        growth_rate: int,
+        dropout: float,
+        dilation: int,
+    ) -> None:
+        super().__init__()
+        for i in range(num_layers):
+            layer = DenseLayer(
+                num_input_features + i * growth_rate,
+                growth_rate=growth_rate,
+                bn_size=bn_size,
+                dropout=dropout,
+                dilation=dilation,
+            )
+            self.add_module("DenseLayer_%d" % (i + 1), layer)
+
+    def forward(self, init_features: Tensor) -> Tensor:
+        features = [init_features]
+        for _, layer in self.items():
+            concated_features = torch.cat(features, 1)
+            new_features = layer(concated_features)
+            features.append(new_features)
+        return torch.cat(features, 1)
 
 
 class BaseNetDense(Module):
@@ -71,10 +99,13 @@ class BaseNetDense(Module):
 
         self.features = nn.Sequential(*get_initial_layers(image_resolution, image_channels, self.num_features))
         # Add dense blocks
-        for i, repeat_num in enumerate(block_config):
-            self._make_repeated_base_blocks(repeat_num, i)
-            if i != len(block_config) - 1:
-                self._make_transition(i)
+        for stage_index, num_layers in enumerate(block_config):
+            self._make_base_block(num_layers, self.num_features, bn_size, growth_rate, dropout, stage_index)
+            self.num_features = self.num_features + num_layers * growth_rate
+
+            if stage_index != len(block_config) - 1:
+                self._make_transition(stage_index)
+
         self.finalize = nn.Sequential(
             nn.BatchNorm2d(self.num_features), nn.ReLU(), nn.AdaptiveAvgPool2d(1), nn.Flatten()
         )
@@ -89,17 +120,19 @@ class BaseNetDense(Module):
     def _add_base_block_structure(self, layer_num: int, dilation: int) -> None:
         raise NotImplementedError()
 
-    def _make_repeated_base_blocks(self, num_base_blocks: int, stage_index: int) -> None:
+    def _make_base_block(
+        self, num_layers: int, num_input_features: int, bn_size: int, growth_rate: int, dropout: float, stage_index: int
+    ) -> None:
         dilation = self.dilation[stage_index]
-        self.current_dense_block = nn.Sequential()
-        for i in range(num_base_blocks):
-            self._add_base_block_structure(i, dilation)
-        self.features.add_module("DenseBlock_%d" % (stage_index + 1), self.current_dense_block)
-
-    def _add_dense_layer(self, layer_num: int, dilation: int) -> None:
-        dense_layer = DenseLayer(self.num_features, self.growth_rate, self.bn_size, dilation, self.dropout)
-        self.num_features += self.growth_rate
-        self.current_dense_block.add_module("DenseLayer_%d" % (layer_num + 1), dense_layer)
+        block = DenseBlock(
+            num_layers=num_layers,
+            num_input_features=num_input_features,
+            bn_size=bn_size,
+            growth_rate=growth_rate,
+            dropout=dropout,
+            dilation=dilation,
+        )
+        self.features.add_module("DenseBlock_%d" % (stage_index + 1), block)
 
     def _make_transition(self, transition_num: int) -> None:
         dilation = self.dilation[transition_num + 1]
@@ -136,11 +169,6 @@ class BaseNetDense(Module):
 
         self.features.add_module("Transition_%d" % (transition_num + 1), transition)
         self.num_features = num_out_features
-
-
-class _DenseNet(BaseNetDense):
-    def _add_base_block_structure(self, layer_num: int, dilation: int) -> None:
-        self._add_dense_layer(layer_num, dilation)
 
 
 def basedensenet_constructor(
@@ -242,7 +270,7 @@ class DenseNet(Model):
         super(DenseNet, self).__init__(input_shape, num_classes)
         self._model = basedensenet_constructor(
             self.densenet_spec,
-            _DenseNet,
+            BaseNetDense,
             num_layers,
             num_init_features,
             growth_rate,

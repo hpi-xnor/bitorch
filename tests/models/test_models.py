@@ -30,6 +30,7 @@ from bitorch.models import (
 )
 from bitorch.models.resnet_e import BasicBlock, _ResnetE
 from bitorch.models.resnet import ResNetV1, ResNetV2, BasicBlockV1, BasicBlockV2
+from bitorch.models.densenet import DenseBlock
 import torch
 import numpy as np
 import pytest
@@ -167,3 +168,22 @@ def test_resnet_stride(
             break
 
     assert first_basic_block_found
+
+
+@pytest.mark.parametrize(
+    "DenseNet, args",
+    [(DenseNet28, {}), (DenseNet37, {}), (DenseNet45, {}), (DenseNetFlex, {"flex_block_config": [6, 6, 6, 5]})],
+)
+@pytest.mark.parametrize("num_classes", [3, 10, 100])
+def test_denseblock_moduledict(DenseNet, args, num_classes):
+    input_shape = (1, 3, 32, 32)
+    model = DenseNet(input_shape=input_shape, num_classes=num_classes, **args)
+
+    for module in model._model.features:
+        if isinstance(module, DenseBlock):
+            assert isinstance(module, torch.nn.ModuleDict)
+
+            # Check that DenseLayers are accessible by name
+            for i in range(len(module)):
+                layer_name = f"DenseLayer_{i+1}"
+                assert layer_name in module
