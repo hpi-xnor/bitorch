@@ -9,7 +9,13 @@ import torch
 import base64
 import hashlib
 from torch.nn import Module, Identity, Sequential, Linear, Conv2d
-from torchvision.datasets.utils import download_url
+
+TORCHVISION_MISSING_MESSAGE = "Torchvision not installed, bitorch model_hub can not download pre-trained models."
+download_url = None
+try:
+    from torchvision.datasets.utils import download_url
+except ModuleNotFoundError:
+    warnings.warn(TORCHVISION_MISSING_MESSAGE)
 
 
 def get_children(model: Module, name: list = []) -> list:
@@ -248,6 +254,8 @@ def load_from_hub(
     model_local_path = Path(f"{download_path}/{model_checksum}")
 
     if not model_local_path.exists() or _digest_file(str(model_local_path)) != model_digest:
+        if download_url is None:
+            raise RuntimeError(TORCHVISION_MISSING_MESSAGE)
         logging.info("downloading model...")
         download_url(model_path, model_local_path.parent, model_local_path.name, model_checksum)
         logging.info("Model downloaded!")
@@ -294,6 +302,8 @@ def download_version_table(model_table_path: str, no_exception: bool = False) ->
     Returns:
         pandas.DataFrame: model version table
     """
+    if download_url is None:
+        raise RuntimeError(TORCHVISION_MISSING_MESSAGE)
     logging.info("downloading model version table from hub...")
     try:
         download_url(model_table_path, "/tmp", "bitorch_model_version_table.csv")
