@@ -1,4 +1,5 @@
 """Sign Function Implementation"""
+
 import torch
 from torch.autograd.function import Function
 import typing

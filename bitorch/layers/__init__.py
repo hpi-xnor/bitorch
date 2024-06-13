@@ -3,6 +3,7 @@ This submodule contains adapted pytorch layers that use quantization functions o
 and activations before forwarding them. These layers use the quantization functions specified in the
 quantization submodule.
 """
+
 from typing import Optional, TypeVar
 
 import torch

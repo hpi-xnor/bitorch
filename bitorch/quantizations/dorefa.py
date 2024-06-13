@@ -1,4 +1,5 @@
 """Dorefa Function Implementation"""
+
 import torch
 import typing
 from typing import Any, Tuple, Union

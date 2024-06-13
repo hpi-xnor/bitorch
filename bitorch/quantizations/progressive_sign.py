@@ -1,4 +1,5 @@
 """Progressive Sign Function"""
+
 import typing
 from typing import Any, Callable, Optional, Union
 
