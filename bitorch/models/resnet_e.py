@@ -2,6 +2,7 @@
 Resnet_E implementation from `"Back to Simplicity: How to Train Accurate BNNs from Scratch?"
 <https://arxiv.org/abs/1906.08637>`_ paper.
 """
+
 from .base import Model, NoArgparseArgsMixin
 from typing import Optional, List, Any, Type
 import torch

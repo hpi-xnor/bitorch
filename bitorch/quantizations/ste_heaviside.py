@@ -1,4 +1,5 @@
 """Sign Function Implementation"""
+
 import torch
 import typing
 from typing import Any

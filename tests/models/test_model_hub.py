@@ -4,6 +4,13 @@ from torch.nn import Linear, Conv2d, ReLU
 import pytest
 import time
 
+try:
+    import torchvision
+
+    torchvision_installed = True
+except ModuleNotFoundError:
+    torchvision_installed = False
+
 TEST_DATA = [
     (ResnetE18, {"input_shape": (1, 3, 32, 32), "num_classes": 10}),
     (ResnetE18, {"input_shape": (1, 3, 224, 224), "num_classes": 1000}),
@@ -15,6 +22,7 @@ TEST_CUSTOM_DATA = [
 ]
 
 
+@pytest.mark.skipif(not torchvision_installed, reason="torchvision is not installed")
 @pytest.mark.parametrize("model, kwargs", TEST_DATA)
 def test_from_pretrained(model, kwargs):
     m = model.from_pretrained(**kwargs)
@@ -24,12 +32,14 @@ def test_from_pretrained(model, kwargs):
     assert result.shape == torch.Size([kwargs["input_shape"][0], kwargs["num_classes"]])
 
 
+@pytest.mark.skipif(not torchvision_installed, reason="torchvision is not installed")
 @pytest.mark.parametrize("model, kwargs", TEST_CUSTOM_DATA)
 def test_from_pretrained_custom_shape(model, kwargs):
     with pytest.raises(RuntimeError):
         m = model.from_pretrained(**kwargs)
 
 
+@pytest.mark.skipif(not torchvision_installed, reason="torchvision is not installed")
 @pytest.mark.parametrize("model, kwargs", TEST_CUSTOM_DATA)
 def test_adding_layers(model, kwargs):
     m1 = torch.nn.Sequential(
@@ -51,6 +61,7 @@ def test_adding_layers(model, kwargs):
     assert result.shape == torch.Size([kwargs["input_shape"][0], kwargs["num_classes"]])
 
 
+@pytest.mark.skipif(not torchvision_installed, reason="torchvision is not installed")
 @pytest.mark.parametrize("model, kwargs", TEST_CUSTOM_DATA)
 def test_changing_sizes(model, kwargs):
     m = model.as_backbone(input_size=kwargs["input_shape"][1:], output_size=[kwargs["num_classes"]], sanity_check=True)

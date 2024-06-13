@@ -2,6 +2,7 @@
 BITorch is a library currently under development to simplify building quantized and binary neural networks with PyTorch.
 It contains implementation of the required layers, different quantization functions and examples.
 """
+
 import os
 from argparse import ArgumentParser, Namespace
 from importlib import import_module

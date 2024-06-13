@@ -1,4 +1,5 @@
 """Args from PyTorch Lightning's Trainer that are currently unused and a function to deal with them."""
+
 from argparse import Namespace
 from typing import List
 
