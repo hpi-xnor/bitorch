@@ -52,8 +52,8 @@ class ImprovementBlock(Module):
 
 class _MeliusNet(BaseNetDense):
     def _add_base_block_structure(self, layer_num: int, dilation: int) -> None:
-        self._add_dense_layer(layer_num, dilation)
-        self.current_dense_block.add_module(
+        self._add_dense_layer(layer_num, dilation)  # type: ignore
+        self.current_dense_block.add_module(  # type: ignore
             "ImprovementBlock%d" % (layer_num + 1),
             ImprovementBlock(self.growth_rate, self.num_features, dilation=dilation),
         )

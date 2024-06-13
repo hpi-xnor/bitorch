@@ -13,7 +13,7 @@ from torch.nn import Module, Identity, Sequential, Linear, Conv2d
 TORCHVISION_MISSING_MESSAGE = "Torchvision not installed, bitorch model_hub can not download pre-trained models."
 download_url = None
 try:
-    from torchvision.datasets.utils import download_url
+    from torchvision.datasets.utils import download_url  # type: ignore
 except ModuleNotFoundError:
     warnings.warn(TORCHVISION_MISSING_MESSAGE)
 
